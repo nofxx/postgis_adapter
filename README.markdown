@@ -1,18 +1,21 @@
 Postgis Adapter for ActiveRecord
 ================================
 
-Adaptation of:
-  This is the Spatial Adapter for Rails 0.1.1. It is a plugin for Rails which manages the MySql Spatial and PostGIS geometric columns in a transparent way (that is like the other base data type columns). It also provides a way to manage these columns in migrations. It replaces both the "PostGIS Adapter for Rails" and "MySql Spatial Adapter for Rails" plugins.
+A plugin for ActiveRecord which manages the PostGIS geometric columns
+in a transparent way (that is like the other base data type columns).
+It also provides a way to manage these columns in migrations.
 
-Add PostGIS only fucntions.
+Adaptation of: Spatial Adapter plugin for Rails.
 
-PostGIS only.
-Rails 2+ only.
+
+*PostGIS only*.
+*Rails 2+ only*.
 
 Dependencies
 ------------
-  GeoRuby >= 0.1.1 of the GeoRuby gem (http://rubyforge.org/projects/georuby/) :
-	gem install georuby
+
+- georuby
+- postgis
 
 
 Installation
@@ -24,46 +27,59 @@ Installation
 Operations
 ----------
 
-Geometric columns in your ActiveRecord models now appear just like any other column of other basic data types. They can also be dumped in ruby schema mode and loaded in migrations the same way as columns of basic types.
+Geometric columns in your ActiveRecord models now appear just like
+any other column of other basic data types. They can also be dumped
+in ruby schema mode and loaded in migrations the same way as columns
+of basic types.
 
 
 Migrations
 ----------
 
-Here is an example of code for the creation of a table with a geometric column in PostGIS, along with the addition of a spatial index on the column :
-	ActiveRecord::Schema.define do
-	  create_table "table_points", :force => true do |t|
-    	    t.column "data", :string
-    	    t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
-  	  end
+Here is an example of code for the creation of a table with a
+geometric column in PostGIS, along with the addition of a spatial
+index on the column :
 
-	  add_index "table_points", "geom", :spatial=>true
-    	end
+>  ActiveRecord::Schema.define do
+>	   create_table "table_points", :force => true do |t|
+>      t.column "data", :string
+>    	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
+>  	 end
+>	 add_index "table_points", "geom", :spatial=>true
+>  end
 
 
 Model
 -----
 
-  class TablePoint < ActiveRecord::Base
-	end
+>  class TablePoint < ActiveRecord::Base
+>	 end
 
 That was easy! As you see, there is no need to declare a column as geometric. The plugin will get this information by itself.
 
 Access
 ------
 
-Here is an example of PostGIS row creation and access, using the model and the table defined above :
-	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
-	pt.save
-	pt = TablePoint.find_first
-	puts pt.geom.x #access the geom column like any other
+Here is an example of PostGIS row creation and access, using the
+model and the table defined above :
+
+>	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
+>	pt.save
+>	pt = TablePoint.find_first
+>	puts pt.geom.x #access the geom column like any other
 
 
 Fixtures
 --------
 
+If you use fixtures for your unit tests, at some point,
+you will want to input a geometry. You could transform your
+geometries to a form suitable for YAML yourself everytime but
+the spatial adapter provides a method to do it for you: +to_yaml+.
+It works for both MySQL and PostGIS (although the string returned
+is different for each database). You would use it like this, if
+the geometric column is a point:
 
-If you use fixtures for your unit tests, at some point, you will want to input a geometry. You could transform your geometries to a form suitable for YAML yourself everytime but the spatial adapter provides a method to do it for you: +to_yaml+. It works for both MySQL and PostGIS (although the string returned is different for each database). You would use it like this, if the geometric column is a point:
 	fixture:
 	 id: 1
 	 data: HELLO
@@ -100,7 +116,7 @@ Warning
        place.the_geom = the_geom
 
 
-Changes since last version
+### Changes since last version
 
 - The PostGIS adapter and the MySql Spatial adapter have been merged into one plugin. The correct files to load is determined using the type of connection defined in the environment.
 - Geometric columns can now be dumped just like other base data types. This means you can use the ruby schema mode, even if you use the plugin.
@@ -109,8 +125,7 @@ Changes since last version
 - Addition of a find_by methods with a special behaviour for geometries
 - Addition of a to_yaml method to use inside a YAML fixture
 
-TODO
-----
+### TODO
 
 - Support of other geometric datatype libraries in addition to GeoRuby
 - Tutorials
