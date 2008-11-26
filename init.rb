@@ -6,4 +6,4 @@ unless ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
     new("Only PostgreSQL with PostGIS is supported by the postgis adapter plugin.")
 end
 
-require 'post_gis_adapter'
+require 'postgis_adapter'

@@ -1,0 +1,28 @@
+# #
+# nofxx  - 2008
+#
+# http://wiki.nofxx.com/rspec
+#
+# FAIL IMAGE => http://wiki.nofxx.com/_media/fail.png
+# PASS IMAGE => http://wiki.nofxx.com/_media/pass.png
+# 
+# Display styles growl
+# Fail => "Media Audio"
+# Pass => "Smoke"
+# 
+#require 'autotest/growl'
+#require 'autotest/html_report'
+# require 'autotest/kdenotify'
+require 'autotest/menu'
+#require 'autotest/pretty'
+require 'autotest/redgreen'
+# require 'autotest/snarl'
+require 'autotest/timestamp'
+
+
+module Autotest::Growl
+  Autotest.add_hook :initialize do |at|
+    # growl "autotest", "Rodando..", "Started autotest", ''
+    %w{.hg .git .DS_store}.each {|exception|at.add_exception(exception)}
+  end
+end
