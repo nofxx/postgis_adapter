@@ -169,7 +169,6 @@ describe "PostgisAdapter" do
       pts[1].data.should match /Point/
     end
 
-
   end
-  #.find(:first)
+
 end
