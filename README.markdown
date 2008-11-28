@@ -40,20 +40,20 @@ Here is an example of code for the creation of a table with a
 geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
->  ActiveRecord::Schema.define do
->	   create_table "table_points", :force => true do |t|
->      t.column "data", :string
->    	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
->  	 end
->	 add_index "table_points", "geom", :spatial=>true
->  end
+  ActiveRecord::Schema.define do
+	   create_table "table_points", :force => true do |t|
+      t.column "data", :string
+    	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
+  	 end
+	 add_index "table_points", "geom", :spatial=>true
+  end
 
 
 Model
 -----
 
->  class TablePoint < ActiveRecord::Base
->	 end
+  class TablePoint < ActiveRecord::Base
+  end
 
 That was easy! As you see, there is no need to declare a column as geometric. The plugin will get this information by itself.
 
@@ -63,10 +63,10 @@ Access
 Here is an example of PostGIS row creation and access, using the
 model and the table defined above :
 
->	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
->	pt.save
->	pt = TablePoint.find_first
->	puts pt.geom.x #access the geom column like any other
+	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
+	pt.save
+	pt = TablePoint.find_first
+	puts pt.geom.x #access the geom column like any other
 
 
 Fixtures
@@ -80,10 +80,10 @@ It works for both MySQL and PostGIS (although the string returned
 is different for each database). You would use it like this, if
 the geometric column is a point:
 
-	fixture:
-	 id: 1
-	 data: HELLO
-	 geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
+  fixture:
+	  id: 1
+	  data: HELLO
+	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 Find_by
 -------

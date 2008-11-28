@@ -188,7 +188,7 @@ describe "CommonSpatialAdapter" do
 
     after(:all) do
       ActiveRecord::Base.connection.execute('DROP VIEW viewparks')
-    end  end
+    end  end
 
 
   describe "Dump" do

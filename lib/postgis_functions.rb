@@ -22,12 +22,16 @@ end
 
 class GeoRuby::SimpleFeatures::Point
 
-  def distance(other)
-  "SELECT Distance(geom, GeomFromText('POINT(#{other.x} #{other.y})')" #SRID?
+  def closest(klass, column_name="geom",srid=4326)
+    klass.to_s.constantize.classify.first(:order => "Distance(#{column_name}, GeomFromText('POINT(#{x} #{y})', #{srid}))")
+  end
+
+  def distance(klass, column_name="geom",srid=4326)
+    klass.count_by_sql("SELECT Distance(#{column_name}, GeomFromText('POINT(#{other.x} #{other.y})')") #SRID?
   end
 
   def inside?(polygon)
-  "geom WITHIN(polygon)"
+    "geom WITHIN(polygon)"
   end
 
   def outside?

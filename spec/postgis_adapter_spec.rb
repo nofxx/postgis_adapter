@@ -33,7 +33,7 @@ describe "PostgisAdapter" do
       pt.geom.should == Point.from_x_y_m(-1.6,2.8,-3.4)
       pt.geom.m.should eql(-3.4)
     end
-    it "should est_4d_points" do
+    it "should est_4d_points" do
       pt = Table4dPoint.create!(:geom => Point.from_x_y_z_m(-1.6,2.8,-3.4,15))
       pt = Table4dPoint.find(:first)
       pt.geom.should be_instance_of(Point)

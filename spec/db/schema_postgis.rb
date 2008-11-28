@@ -62,4 +62,25 @@ ActiveRecord::Schema.define() do
     t.polygon "geom", :with_m => true, :with_z => true, :srid => 123
   end
 
+        create_table :areas do |t|
+          t.string :data, :limit => 100
+          t.integer :value
+          t.polygon  :geom,:null=>false,:srid=>123
+        end
+
+        create_table :positions do |t|
+          t.string :data, :limit => 100
+          t.integer :value
+          t.point  :geom,:null=>false,:srid=>123
+        end
+
+        create_table :routes do |t|
+          t.string :data, :limit => 100
+          t.integer :value
+          t.line_string  :geom,:null=>false,:srid=>123
+        end
+
+
+
+
 end

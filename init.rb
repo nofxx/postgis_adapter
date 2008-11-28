@@ -7,3 +7,4 @@ unless ActiveRecord::Base.connection.adapter_name == 'PostgreSQL'
 end
 
 require 'postgis_adapter'
+require 'postgis_functions'
