@@ -1,11 +1,3 @@
-# #
-# PostGis Adapter   2008
-#
-# creation
-# add column
-# remove column
-# add index
-# remove index
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe "CommonSpatialAdapter" do

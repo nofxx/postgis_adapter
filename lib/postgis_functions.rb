@@ -1,11 +1,14 @@
 # #
-# COMMON STUFF
+# PostGIS Adapter
 #
+#
+# http://github.com/nofxx/postgis_adapter
+#
+# Thanks to the great Spatial Adapter by Guilhem Vellut
 #
 module PostgisFunctions
 
   # Postgis Functions:
-  #
   #
   # ST_Contains  ST_Covers   ST_Within   ST_CoveredBy  ST_DWithin
   # ST_Overlaps  ST_Relate   ST_Disjoint

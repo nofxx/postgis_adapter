@@ -1,4 +1,10 @@
-require 'active_record'
+# #
+# PostGIS Adapter
+#
+# Spatial Adapter PostGIS Adapter for ActiveRecord
+#
+#
+#require 'active_record'
 require 'geo_ruby'
 require 'common_spatial_adapter'
 

@@ -1,23 +1,22 @@
-Postgis Adapter for ActiveRecord
-================================
+Postgis Adapter
+===============
 
+*Spatial Adapter by Guilhem Vellut*:
 A plugin for ActiveRecord which manages the PostGIS geometric columns
 in a transparent way (that is like the other base data type columns).
 It also provides a way to manage these columns in migrations.
 
-This = Spatial Adapter plugin for Rails + PostGIS Functions - MySQL
+*this* = Spatial Adapter *+* PostGIS Functions *-* MySQL
 
 *PostGIS and Rails 2+ only*.
 
-Dependencies
-------------
+### Dependencies
 
 - georuby
 - postgres
 
 
-Installation
-------------
+### Installation
 
 On Rails:
 
@@ -130,7 +129,7 @@ Other:
 
 ### Find_by
 
-find_by_[column] has been redefined when column is of a geometric type.
+find_by_*column* has been redefined when column is of a geometric type.
 Instead of using the Rails default '=' operator, for which I can't see
 a definition for MySql spatial datatypes and which performs a bounding
 box equality test in PostGIS, it uses a bounding box intersection:
@@ -140,7 +139,7 @@ You could use this query, for example, if you need to display data
 from the database: You would want only the geometries which are in
 the screen rectangle and you could use a bounding box query for that.
 Since this is a common case, it is the default. You have 2 ways to use
-the find_by_[geom_column]: Either by passing a geometric object directly,
+the find_by_*geom_column*: Either by passing a geometric object directly,
 or passing an array with the 2 opposite corners of a bounding box
 (with 2 or 3 coordinates depending of the dimension of the data).
 
@@ -159,7 +158,11 @@ Geometric data types
 --------------------
 
 Ruby geometric datatypes are currently made available only through
-the GeoRuby library (http://thepochisuperstarmegashow.com/ProjectsDoc/georuby-doc/index.html): This is where the <tt>Point.from_x_y</tt> in the example above comes from. It is a goal of a future release of the Spatial Adapter to support additional geometric datatype libraries, such as Ruby/GEOS, as long as they can support reading and writing of EWKB.
+the GeoRuby library (http://georuby.rubyforge.org): This is where the
+*Point.from_x_y* in the example above comes from. It is a goal
+of a future release of the Spatial Adapter to support additional
+geometric datatype libraries, such as Ruby/GEOS, as long as they
+can support reading and writing of EWKB.
 
 
 Warning
@@ -205,10 +208,20 @@ Project
 License
 -------
 
-PostGIS Adaptaer for ActiveRecord is released under the MIT license.
+Spatial Adapter for Rails is released under the MIT license.
+PostGis Adapter is released under the MIT license.
+
 
 Support
 -------
 
 Any questions, enhancement proposals, bug notifications or
-corrections can be sent to mail x at nofxx.com.
+corrections can be sent to:
+
+### PostGis Adapter
+
+http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
+
+### SpatialAdapter
+
+guilhem.vellut+georuby@gmail.com.

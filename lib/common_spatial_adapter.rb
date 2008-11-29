@@ -1,4 +1,9 @@
-
+# #
+# PostGIS Adapter
+#
+# Common Spatial Adapter for ActiveRecord
+#
+#
 #Addition of a flag indicating if the index is spatial
 ActiveRecord::ConnectionAdapters::IndexDefinition.class_eval do
   attr_accessor :spatial
