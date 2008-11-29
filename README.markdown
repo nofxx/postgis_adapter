@@ -22,6 +22,7 @@ On Rails:
 
     script/plugin install git://github.com/nofxx/postgis_adapter.git
 
+If you are using Spatial Adapter, remove it first.
 
 ActiveRecord
 ------------
@@ -95,9 +96,11 @@ To be documented, here are the cool stuff postgis only let you do:
     @park   =   Park.new(   :geom =>  **Polygon**     )
     @street =   Street.new( :geom => **LineString**   )
 
-You can do:
+### Instance methods:
 
     @point.inside?(@park)
+    => true
+    @point.in_bounds?(@park, 0.5) # margin
     => true
 
 And back:
@@ -117,14 +120,23 @@ And LineStrings:
 
     @street_east.intersects?(@street_west)
     => false
+    @street_central.length
+    => 45.53636
 
-Other:
+
+### Class Methods
 
     City.close_to(@point)
-
-    Poi.close_to(@park)
+    => [Array of cities in order by distance...
 
     Street.close_to(@point)
+    => [Array streets in order by distance...
+
+    Country.contain(@point)
+    => The Conutry that contains the point
+
+    Areas.contains(@point)
+    => [Array of areas contains the point...
 
 
 ### Find_by

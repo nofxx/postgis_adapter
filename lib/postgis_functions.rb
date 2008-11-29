@@ -9,6 +9,12 @@
 module PostgisFunctions
 
   # #
+  # PostGis Manual:
+  # #
+  #http://postgis.refractions.net/documentation/manual-1.3/ch06.html
+  #
+  #
+  # #
   # Measurement:
   #
   # ST_length(geometry)
@@ -16,8 +22,12 @@ module PostgisFunctions
   # length3d_spheroid
   #
   # ST_Area(geometry)
-  # ST_Perimeter
-  # ST_Azimuth
+  #
+  # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
+  # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
+  # ST_perimeter3d(geometry)
+  #
+  # ST_azimuth(geometry, geometry)
   #
   # ST_Centroid(geometry)
   #
@@ -30,19 +40,22 @@ module PostgisFunctions
   # ST_Distance(geometry, geometry) - Cartesian
   # ST_distance_sphere
   # ST_distance_spheroid
-  # ST_max_distance
+  # ST_max_distance Returns the largest distance between two line strings.
   #
   # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
   #
   # ST_Intersects(geometry, geometry) -  Do not call with a GeometryCollection as an argument
-  # ST_Touches(geometry, geometry) -  ST_Crosses  - Same?
+  # ST_Touches
+  # ST_Crosses
   #
   # ST_Within(geometry, geometry) -  - A has to be completely inside B.
-  # ST_Contains ST_Overlaps
-  # ST_Covers(geometry, geometry)  #  ST_CoveredBy - Returns 1 if no point in Geometry B is outside Geometry A
+  # ST_Contains
+  #x ST_Overlaps
+  # ST_Covers(geometry, geometry)
+  # ST_CoveredBy - Returns 1 if no point in Geometry B is outside Geometry A
   #
-  # ST_Relate(geometry, geometry, intersectionPatternMatrix)
-  # ST_Disjoint(geometry, geometry)
+  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
+  #x ST_Disjoint(geometry, geometry)
   #
   # Returns 1 (TRUE)
   def construct_geometric_sql(type,geoms,options)
@@ -52,16 +65,19 @@ module PostgisFunctions
       :uid =>  unique_identifier,
       :id => t[:id] }
     end
+
     fields = tables.map { |f| f[:uid] + ".geom" }       # W1.geom
     fields << options if options
+
     froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}  # streets W1
     wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
+
     operation = type.to_s
-    operation.capitalize! unless operation =~ /spher|max/
+   # operation.capitalize! unless operation =~ /spher|max/
     operation = "ST_#{operation}" unless operation =~ /th3d/
     join_method = " AND "
-    sql =   "SELECT #{operation}(#{fields.join(",")}) "+
-           "FROM #{froms.join(",")} "
+
+    sql =   "SELECT #{operation}(#{fields.join(",")}) FROM #{froms.join(",")} "
     sql <<  "WHERE #{wheres.join(join_method)}" if wheres
     p sql
     sql
@@ -70,7 +86,7 @@ module PostgisFunctions
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
     if value =~ /^\D/
-      to_bool(value)
+      {"f" => false, "t" => true}[value]
     elsif value =~ /\./
       value.to_f
     else
@@ -83,24 +99,19 @@ module PostgisFunctions
     return execute_geometrical_calculation(operation, subject, options)
   end
 
-   def to_bool val
-     {"f" => false, "t" => true}[val]
-   end
+  def unique_identifier
+    @u_id ||= "W1"
+    @u_id = @u_id.succ
+  end
 
-   def unique_identifier
-     @u_id ||= "W1"
-     @u_id = @u_id.succ
-   end
-
-   def spatially_equal?(other)
-     calculate(:equals, [self, other])
-   end
+  def spatially_equal?(other)
+    calculate(:equals, [self, other])
+  end
 end
 
+####
 ###
 ##
-#
-#
 #
 # POINT
 #
@@ -125,8 +136,12 @@ module PointFunctions
         has_geom_options = {:column => column}
       end
 
-      def close_to(other, srid=4326)
-        find(:first, :order => "Distance(geom, GeomFromText('POINT(#{other.geom.x} #{other.geom.y})', #{srid}))" )
+      def close_to(p, srid=4326)
+        find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+      end
+
+      def closest_to(p, srid=4326)
+        find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
       end
 
     end
@@ -143,7 +158,7 @@ module PointFunctions
       end
 
       def inside? other
-        calculate(:contains, [other, self])
+        calculate(:coveredby, [self, other])
       end
 
       def outside? other
@@ -153,17 +168,23 @@ module PointFunctions
       def in_bounds?(other,margin=0.5)
         calculate(:dwithin, [self, other], margin)
       end
+
+      def envelope
+        calculate(:envelope, self)
+      end
+
+      def centroid
+        calculate(:centroid, self)
+      end
     end
   end
 end
 
+####
 ###
 ##
 #
-#
-#
 # LINESTRING
-#
 #
 #
 # Linear Referencing
@@ -216,8 +237,16 @@ module LineStringFunctions
         calculate(:crosses, [self, other])
       end
 
+      def touches? other
+        calculate(:touches, [self, other])
+      end
+
       def envelope
         calculate(:envelope, self)
+      end
+
+      def centroid
+        calculate(:centroid, self)
       end
     end
   end
@@ -240,7 +269,7 @@ module PolygonFunctions
     end
 
     module ClassMethods
-      def has_area column="geom"
+      def has_polygon column="geom"
         include InstanceMethods
       end
 
@@ -248,7 +277,15 @@ module PolygonFunctions
         find(:all, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
       end
 
+      def contain(p, srid=4326)
+        find(:first, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
+      end
+
       def close_to(p, srid=4326)
+        find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+      end
+
+      def closest_to(p, srid=4326)
         find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
       end
 
@@ -260,7 +297,6 @@ module PolygonFunctions
         find(:all, :order => "Perimeter(geom) #{sort}" )
       end
 
-
     end
 
     module InstanceMethods
@@ -270,10 +306,19 @@ module PolygonFunctions
         calculate(:area, self)
       end
 
+      def within? other
+        calculate(:within, [self, other])
+      end
+
+      def overlaps? other
+        calculate(:overlaps, [self, other])
+      end
+
       def contains? other
         calculate(:contains, [self, other])
       end
       alias_method "within?", "contains?"
+
 
       def intersects? other
         calculate(:intesects, [self, other])
@@ -285,6 +330,18 @@ module PolygonFunctions
 
       def touches? other
         calculate(:touches, [self, other])
+      end
+
+      def disjoint? other
+        calculate(:disjoint, [self, other])
+      end
+
+      def envelope
+        calculate(:envelope, self)
+      end
+
+      def centroid
+        calculate(:centroid, self)
       end
     end
   end
