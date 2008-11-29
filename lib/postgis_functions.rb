@@ -104,6 +104,10 @@ module PostgisFunctions
   # #
   #
   # COMMON GEOMETRICAL FUNCTIONS
+  #
+  def distance_convert(value, unit)
+
+  end
 
   def spatially_equal?(other)
     calculate(:equals, [self, other])
@@ -117,8 +121,9 @@ module PostgisFunctions
     calculate(:centroid, self)
   end
 
-  def distance_to other
-    calculate(:distance, [self, other])
+  def distance_to(other, unit=nil)
+    return dis = calculate(:distance, [self, other]) unless unit
+    unit == :km ? dis/1000 : dis/500
   end
 
   def spherical_distance other
