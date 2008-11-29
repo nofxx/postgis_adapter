@@ -40,11 +40,11 @@ ActiveRecord::Base.class_eval do
       end.join(' AND ')
     end
 
-      #For Rails >= 2
-      def self.sanitize_sql_hash_for_conditions(attrs)
-        conditions = get_conditions(attrs)
-        replace_bind_variables(conditions, expand_range_bind_variables(attrs.values))
-      end
+    #For Rails >= 2
+    def self.sanitize_sql_hash_for_conditions(attrs)
+      conditions = get_conditions(attrs)
+      replace_bind_variables(conditions, expand_range_bind_variables(attrs.values))
+    end
 
 
 end
@@ -182,17 +182,13 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     column_definitions(table_name).collect do |name, type, default, notnull|
       if type =~ /geometry/i
         raw_geom_info = raw_geom_infos[name]
-
-          if raw_geom_info.nil?
-             ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.create_simplified(name,default,notnull == "f")
-          else
-            ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.new(name, default,raw_geom_info.type, notnull == "f", raw_geom_info.srid, raw_geom_info.with_z, raw_geom_info.with_m)
-          end
-
+        if raw_geom_info.nil?
+          ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.create_simplified(name,default,notnull == "f")
+        else
+          ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.new(name, default,raw_geom_info.type, notnull == "f", raw_geom_info.srid, raw_geom_info.with_z, raw_geom_info.with_m)
+        end
       else
-
-          ActiveRecord::ConnectionAdapters::Column.new(name, ActiveRecord::ConnectionAdapters::PostgreSQLColumn.extract_value_from_default( default), type,notnull == "f")
-
+        ActiveRecord::ConnectionAdapters::Column.new(name, ActiveRecord::ConnectionAdapters::PostgreSQLColumn.extract_value_from_default( default), type,notnull == "f")
       end
     end
   end
@@ -347,7 +343,9 @@ module ActiveRecord
   end
 end
 
-#Would prefer creation of a PostgreSQLColumn type instead but I would need to reimplement methods where Column objects are instantiated so I leave it like this
+#Would prefer creation of a PostgreSQLColumn type instead but I would
+# need to reimplement methods where Column objects are instantiated so
+# I leave it like this
 module ActiveRecord
   module ConnectionAdapters
     class SpatialPostgreSQLColumn < Column

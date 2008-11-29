@@ -5,27 +5,27 @@ A plugin for ActiveRecord which manages the PostGIS geometric columns
 in a transparent way (that is like the other base data type columns).
 It also provides a way to manage these columns in migrations.
 
-Adaptation of: Spatial Adapter plugin for Rails.
+This = Spatial Adapter plugin for Rails + PostGIS Functions - MySQL
 
-
-*PostGIS only*.
-*Rails 2+ only*.
+*PostGIS and Rails 2+ only*.
 
 Dependencies
 ------------
 
 - georuby
-- postgis
+- postgres
 
 
 Installation
 ------------
 
+On Rails:
+
   script/plugin install git://github.com/nofxx/postgis_adapter.git
 
 
-Operations
-----------
+ActiveRecord
+------------
 
 Geometric columns in your ActiveRecord models now appear just like
 any other column of other basic data types. They can also be dumped
@@ -33,8 +33,8 @@ in ruby schema mode and loaded in migrations the same way as columns
 of basic types.
 
 
-Migrations
-----------
+### Migrations
+
 
 Here is an example of code for the creation of a table with a
 geometric column in PostGIS, along with the addition of a spatial
@@ -49,16 +49,16 @@ index on the column :
   end
 
 
-Model
------
+### Model
 
   class TablePoint < ActiveRecord::Base
   end
 
-That was easy! As you see, there is no need to declare a column as geometric. The plugin will get this information by itself.
+That was easy! As you see, there is no need to declare a column
+as geometric. The plugin will get this information by itself.
 
-Access
-------
+
+### Access
 
 Here is an example of PostGIS row creation and access, using the
 model and the table defined above :
@@ -69,8 +69,7 @@ model and the table defined above :
 	puts pt.geom.x #access the geom column like any other
 
 
-Fixtures
---------
+### Fixtures
 
 If you use fixtures for your unit tests, at some point,
 you will want to input a geometry. You could transform your
@@ -85,15 +84,33 @@ the geometric column is a point:
 	  data: HELLO
 	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
-Find_by
--------
 
-find_by_[column] has been redefined when column is of a geometric type. Instead of using the Rails default '=' operator, for which I can't see a definition for MySql spatial datatypes and which performs a bounding box equality test in PostGIS, it uses a bounding box intersection: && in PostGIS and MBRIntersects in MySQL, which can both make use of a spatial index if one is present to speed up the queries. You could use this query, for example, if you need to display data from the database: You would want only the geometries which are in the screen rectangle and you could use a bounding box query for that. Since this is a common case, it is the default. You have 2 ways to use the find_by_[geom_column]: Either by passing a geometric object directly, or passing an array with the 2 opposite corners of a bounding box (with 2 or 3 coordinates depending of the dimension of the data).
+### Find_by
+
+find_by_[column] has been redefined when column is of a geometric type.
+Instead of using the Rails default '=' operator, for which I can't see
+a definition for MySql spatial datatypes and which performs a bounding
+box equality test in PostGIS, it uses a bounding box intersection:
+&& in PostGIS and MBRIntersects in MySQL, which can both make use
+of a spatial index if one is present to speed up the queries.
+You could use this query, for example, if you need to display data
+from the database: You would want only the geometries which are in
+the screen rectangle and you could use a bounding box query for that.
+Since this is a common case, it is the default. You have 2 ways to use
+the find_by_[geom_column]: Either by passing a geometric object directly,
+or passing an array with the 2 opposite corners of a bounding box
+(with 2 or 3 coordinates depending of the dimension of the data).
+
 	Park.find_by_geom(LineString.from_coordinates([[1.4,5.6],[2.7,8.9],[1.6,5.6]]))
+
 or
+
 	Park.find_by_geom([[3,5.6],[19.98,5.9]])
+
 In PostGIS, since you can only use operations with geometries with the same SRID, you can add a third element representing the SRID of the bounding box to the array. It is by default set to -1:
+
 	Park.find_by_geom([[3,5.6],[19.98,5.9],123])
+
 
 Geometric data types
 --------------------
@@ -105,16 +122,28 @@ the GeoRuby library (http://thepochisuperstarmegashow.com/ProjectsDoc/georuby-do
 Warning
 -------
 
-- Since ActiveRecord seems to keep only the string values directly returned from the database, it translates from these to the correct types everytime an attribute is read, which is probably ok for simple types, but might be less than efficient for geometries, since the EWKB string has to be parsed everytime. Also it means you cannot modify the geometry object returned from an attribute directly :
+- Since ActiveRecord seems to keep only the string values directly
+returned from the database, it translates from these to the correct
+types everytime an attribute is read, which is probably ok for simple
+types, but might be less than efficient for geometries, since the EWKB
+string has to be parsed everytime. Also it means you cannot modify the
+geometry object returned from an attribute directly :
+
        place = Place.find_first
        place.the_geom.y=123456.7
 
-- Since the translation to a geometry is performed everytime the_geom is read, the change to y will not be saved! You would have to do something like this :
+- Since the translation to a geometry is performed everytime the_geom
+is read, the change to y will not be saved! You would have to do
+something like this :
+
        place = Place.find_first
        the_geom = place.the_geom
        the_geom.y=123456.7
        place.the_geom = the_geom
 
+
+Project
+-------
 
 ### Changes since last version
 
