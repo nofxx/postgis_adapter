@@ -19,7 +19,7 @@ end
 
 desc "Generate the documentation"
 Rake::RDocTask::new do |rdoc|
-  rdoc.rdoc_dir = 'doc/'
+  rdoc.rdoc_dir = 'rdoc/'
   rdoc.title    = "PostGIS Adapater for Rails Documentation"
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README.markdown')
