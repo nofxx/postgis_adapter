@@ -21,7 +21,7 @@ Installation
 
 On Rails:
 
-  script/plugin install git://github.com/nofxx/postgis_adapter.git
+    script/plugin install git://github.com/nofxx/postgis_adapter.git
 
 
 ActiveRecord
@@ -40,19 +40,19 @@ Here is an example of code for the creation of a table with a
 geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
-  ActiveRecord::Schema.define do
-	   create_table "table_points", :force => true do |t|
-      t.column "data", :string
-    	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
-  	 end
-	 add_index "table_points", "geom", :spatial=>true
-  end
+    ActiveRecord::Schema.define do
+  	   create_table "table_points", :force => true do |t|
+        t.column "data", :string
+      	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
+    	 end
+  	 add_index "table_points", "geom", :spatial=>true
+    end
 
 
 ### Model
 
-  class TablePoint < ActiveRecord::Base
-  end
+    class TablePoint < ActiveRecord::Base
+    end
 
 That was easy! As you see, there is no need to declare a column
 as geometric. The plugin will get this information by itself.
@@ -63,10 +63,10 @@ as geometric. The plugin will get this information by itself.
 Here is an example of PostGIS row creation and access, using the
 model and the table defined above :
 
-	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
-	pt.save
-	pt = TablePoint.find_first
-	puts pt.geom.x #access the geom column like any other
+  	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
+  	pt.save
+  	pt = TablePoint.find_first
+  	puts pt.geom.x #access the geom column like any other
 
 
 ### Fixtures
@@ -79,10 +79,10 @@ It works for both MySQL and PostGIS (although the string returned
 is different for each database). You would use it like this, if
 the geometric column is a point:
 
-  fixture:
-	  id: 1
-	  data: HELLO
-	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
+    fixture:
+  	  id: 1
+  	  data: HELLO
+  	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 
 PostGIS Functions
@@ -92,40 +92,40 @@ PostGIS Functions
 
 To be documented, here are the cool stuff postgis only let you do:
 
-  @point  =   Poi.new(    :geom =>   **Point**      )
-  @park   =   Park.new(   :geom =>  **Polygon**     )
-  @street =   Street.new( :geom => **LineString**   )
+    @point  =   Poi.new(    :geom =>   **Point**      )
+    @park   =   Park.new(   :geom =>  **Polygon**     )
+    @street =   Street.new( :geom => **LineString**   )
 
 You can do:
 
-  @point.inside?(@park)
-  => true
+    @point.inside?(@park)
+    => true
 
 And back:
 
-  @point.outside?(@park)
-  => false
+    @point.outside?(@park)
+    => false
 
 Play with polygons:
 
-  @park.area
-  => 1345
+    @park.area
+    => 1345
 
-  @park.contains?(@point)
-  => true
+    @park.contains?(@point)
+    => true
 
 And LineStrings:
 
-  @street_east.intersects?(@street_west)
-  => false
+    @street_east.intersects?(@street_west)
+    => false
 
 Other:
 
-  City.close_to(@point)
+    City.close_to(@point)
 
-  Poi.close_to(@park)
+    Poi.close_to(@park)
 
-  Street.close_to(@point)
+    Street.close_to(@point)
 
 
 ### Find_by
@@ -144,15 +144,15 @@ the find_by_[geom_column]: Either by passing a geometric object directly,
 or passing an array with the 2 opposite corners of a bounding box
 (with 2 or 3 coordinates depending of the dimension of the data).
 
-	Park.find_by_geom(LineString.from_coordinates([[1.4,5.6],[2.7,8.9],[1.6,5.6]]))
+  	Park.find_by_geom(LineString.from_coordinates([[1.4,5.6],[2.7,8.9],[1.6,5.6]]))
 
-or
+  or
 
-	Park.find_by_geom([[3,5.6],[19.98,5.9]])
+  	Park.find_by_geom([[3,5.6],[19.98,5.9]])
 
 In PostGIS, since you can only use operations with geometries with the same SRID, you can add a third element representing the SRID of the bounding box to the array. It is by default set to -1:
 
-	Park.find_by_geom([[3,5.6],[19.98,5.9],123])
+  	Park.find_by_geom([[3,5.6],[19.98,5.9],123])
 
 
 Geometric data types
