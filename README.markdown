@@ -10,6 +10,8 @@ It also provides a way to manage these columns in migrations.
 
 *PostGIS and Rails 2+ only*.
 
+
+
 ### Dependencies
 
 - georuby
@@ -226,6 +228,8 @@ PostGis Adapter is released under the MIT license.
 
 Support
 -------
+
+Tested with postgresql 8.3.5 / postgis 1.3.3
 
 Any questions, enhancement proposals, bug notifications or
 corrections can be sent to:

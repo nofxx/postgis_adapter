@@ -85,6 +85,15 @@ describe "PostgisFunctions" do
       @p3.in_bounds?(@s1, 1).should be_false
     end
 
+    it "calculate another point azimuth??" do
+      @p1.azimuth(@p2).should be_close(0.785398163397448,0.000001)
+    end
+
+    it "calculate linestring azimuth??" do
+    pending
+      lambda{ @p1.azimuth(@s2) }.should_raise "Err"
+    end
+
   end
 
   describe "LineString" do
@@ -139,6 +148,24 @@ describe "PostgisFunctions" do
       @s1.centroid.srid.should eql(123)
     end
 
+    it "distance to a point" do
+      @s1.distance_to(@p3).should be_close(8.48528137423857,0.0001)
+    end
+
+    it "number of points" do
+      @s3.num_points.should eql(2)
+    end
+
+    it "startpoint" do
+      @s3.start_point.should be_instance_of(Point)
+      @s3.start_point.x.should be_close(8.0, 0.1)
+    end
+
+    it "endpoint" do
+      @s2.end_point.should be_instance_of(Point)
+      @s2.end_point.x.should be_close(7.0, 0.1)
+    end
+
   end
 
 
@@ -154,6 +181,14 @@ describe "PostgisFunctions" do
 
     it "total area 2" do
       @c2.area.should be_close(1159.5, 0.1)
+    end
+
+    it "perimter 2d" do
+      @c2.perimeter.should be_close(219.770013855493, 0.1)
+    end
+
+    it "perimter 3d" do
+      @c2.perimeter3d.should be_close(219.770013855493, 0.1)
     end
 
     it "contains points?" do
@@ -213,6 +248,14 @@ describe "PostgisFunctions" do
 
     it "should get the center with the correct srid" do
       @c1.centroid.srid.should eql(123)
+    end
+
+    it "distance from another" do
+      @c1.distance_to(@c3).should eql(0.0)
+    end
+
+    it "distance to a linestring" do
+      @c1.distance_to(@s1).should be_close(1.8,0.001)
     end
 
   end

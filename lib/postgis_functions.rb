@@ -22,13 +22,11 @@ module PostgisFunctions
   # length3d_spheroid
   #
   # ST_Area(geometry)
-  #
   # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
   # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
   # ST_perimeter3d(geometry)
   #
   # ST_azimuth(geometry, geometry)
-  #
   # ST_Centroid(geometry)
   #
   #
@@ -42,20 +40,19 @@ module PostgisFunctions
   # ST_distance_spheroid
   # ST_max_distance Returns the largest distance between two line strings.
   #
-  # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
-  #
-  # ST_Intersects(geometry, geometry) -  Do not call with a GeometryCollection as an argument
-  # ST_Touches
-  # ST_Crosses
-  #
-  # ST_Within(geometry, geometry) -  - A has to be completely inside B.
-  # ST_Contains
-  #x ST_Overlaps
+  # ST_Intersects(geometry, geometry) - Do not call with a GeometryCollection as an argument
+  # ST_Touches(geometry, geometry)
+  # ST_Crosses(geometry, geometry)
+  # ST_Within(geometry, geometry) - A has to be completely inside B.
+  # ST_Contains(geometry, geometry)
   # ST_Covers(geometry, geometry)
-  # ST_CoveredBy - Returns 1 if no point in Geometry B is outside Geometry A
-  #
+  # ST_CoveredBy(geometry, geometry)- true if no point in Geometry B is outside Geometry A
+  # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
+
   #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
   #x ST_Disjoint(geometry, geometry)
+  #x ST_Overlaps
+
   #
   # Returns 1 (TRUE)
   def construct_geometric_sql(type,geoms,options)
@@ -73,7 +70,7 @@ module PostgisFunctions
     wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
 
     operation = type.to_s
-   # operation.capitalize! unless operation =~ /spher|max/
+    operation = operation.camelize unless operation =~ /spher|max|npoints/
     operation = "ST_#{operation}" unless operation =~ /th3d/
     join_method = " AND "
 
@@ -90,7 +87,7 @@ module PostgisFunctions
     elsif value =~ /\./
       value.to_f
     else
-      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue nil
+      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value.to_f
     end
   end
 
@@ -104,8 +101,44 @@ module PostgisFunctions
     @u_id = @u_id.succ
   end
 
+  # #
+  #
+  # COMMON GEOMETRICAL FUNCTIONS
+
   def spatially_equal?(other)
     calculate(:equals, [self, other])
+  end
+
+  def envelope
+    calculate(:envelope, self)
+  end
+
+  def centroid
+    calculate(:centroid, self)
+  end
+
+  def distance_to other
+    calculate(:distance, [self, other])
+  end
+
+  def spherical_distance other
+    calculate(:distance_sphere, [self, other])
+  end
+
+  def within? other
+    calculate(:within, [self, other])
+  end
+
+  def contains? other
+    calculate(:contains, [self, other])
+  end
+
+  def inside? other
+    calculate(:covered_by, [self, other])
+  end
+
+  def outside? other
+    !inside? other
   end
 end
 
@@ -149,32 +182,13 @@ module PointFunctions
     module InstanceMethods
       include PostgisFunctions
 
-      def distance_to other
-        calculate(:distance, [self, other])
-      end
-
-      def spherical_distance other
-        calculate(:distance_sphere, [self, other])
-      end
-
-      def inside? other
-        calculate(:coveredby, [self, other])
-      end
-
-      def outside? other
-        !inside? other
-      end
-
       def in_bounds?(other,margin=0.5)
         calculate(:dwithin, [self, other], margin)
       end
 
-      def envelope
-        calculate(:envelope, self)
-      end
-
-      def centroid
-        calculate(:centroid, self)
+      def azimuth other
+        #TODO: return if not point/point
+        calculate(:azimuth, [self, other])
       end
     end
   end
@@ -229,6 +243,20 @@ module LineStringFunctions
         calculate(:length, self)
       end
 
+      def num_points
+        calculate(:npoints, self).to_i
+      end# ST_NumPoints
+
+      def start_point
+        calculate(:start_point, self)
+      end
+      #ST_StartPoint
+
+      def end_point
+        calculate(:end_point, self)
+      end
+      #ST_EndPoint
+
       def intersects? other
         calculate(:intersects, [self, other])
       end
@@ -241,13 +269,6 @@ module LineStringFunctions
         calculate(:touches, [self, other])
       end
 
-      def envelope
-        calculate(:envelope, self)
-      end
-
-      def centroid
-        calculate(:centroid, self)
-      end
     end
   end
 end
@@ -306,22 +327,16 @@ module PolygonFunctions
         calculate(:area, self)
       end
 
-      def within? other
-        calculate(:within, [self, other])
+      def perimeter
+        calculate(:perimeter, self)
+      end
+
+      def perimeter3d
+        calculate(:perimeter3d, self)
       end
 
       def overlaps? other
         calculate(:overlaps, [self, other])
-      end
-
-      def contains? other
-        calculate(:contains, [self, other])
-      end
-      alias_method "within?", "contains?"
-
-
-      def intersects? other
-        calculate(:intesects, [self, other])
       end
 
       def covers? other
@@ -334,14 +349,6 @@ module PolygonFunctions
 
       def disjoint? other
         calculate(:disjoint, [self, other])
-      end
-
-      def envelope
-        calculate(:envelope, self)
-      end
-
-      def centroid
-        calculate(:centroid, self)
       end
     end
   end
