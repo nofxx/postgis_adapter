@@ -37,15 +37,15 @@ describe "PostgisFunctions" do
     end
 
     it "distance to a linestring" do
-      @p1.distance(@r2).should be_close(4.24264068711928, 0.0001)
+      @p1.distance_to(@r2).should be_close(4.24264068711928, 0.0001)
     end
 
     it "distance to another point" do
-      @p1.distance(@p2).should be_close(5.65685424949238, 0.0001)
+      @p1.distance_to(@p2).should be_close(5.65685424949238, 0.0001)
     end
 
     it "distance to a polygon" do
-      @p1.distance(@a2).should be_close(21.0237960416286, 0.0001)
+      @p1.distance_to(@a2).should be_close(21.0237960416286, 0.0001)
     end
 
     it "should select the spherical distance" do
@@ -96,11 +96,11 @@ describe "PostgisFunctions" do
     end
 
     it "should get a polygon for envelope" do
-      @r1.envelope.should be_instance_of(Polygon)#eql(1)
+      @r1.envelope.should be_instance_of(Polygon)
     end
 
     it "should get a polygon for envelope" do
-      @r1.envelope[1].should be_instance_of(Polygon)#eql(1)
+      @r1.envelope.rings[0].points[0].should be_instance_of(Point)
     end
 
   end
@@ -110,7 +110,6 @@ describe "PostgisFunctions" do
 
     it "sort by area size" do
       Area.by_size.first.data.should == "Area1" #[@a1, @a2, @a3]
-     # Area.by_size.last.data.should == "Area1"
     end
 
     it "total area" do

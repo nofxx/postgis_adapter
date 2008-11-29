@@ -112,12 +112,17 @@ module PointFunctions
 
     def included base #:nodoc:
       base.extend ClassMethods
+
+      class << base
+        attr_accessor :has_geom_options
+      end
     end
 
     module ClassMethods
 
       def has_point column="geom"
         include InstanceMethods
+        has_geom_options = {:column => column}
       end
 
       def close_to(other, srid=4326)
@@ -129,7 +134,7 @@ module PointFunctions
     module InstanceMethods
       include PostgisFunctions
 
-      def distance other
+      def distance_to other
         calculate(:distance, [self, other])
       end
 
@@ -145,7 +150,7 @@ module PointFunctions
         !inside? other
       end
 
-      def in_bounds?(other,margin=500)
+      def in_bounds?(other,margin=0.5)
         calculate(:dwithin, [self, other], margin)
       end
     end
