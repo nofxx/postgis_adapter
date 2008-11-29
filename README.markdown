@@ -85,6 +85,49 @@ the geometric column is a point:
 	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 
+PostGIS Functions
+-----------------
+
+### Additions
+
+To be documented, here are the cool stuff postgis only let you do:
+
+  @point  =   Poi.new(    :geom =>   **Point**      )
+  @park   =   Park.new(   :geom =>  **Polygon**     )
+  @street =   Street.new( :geom => **LineString**   )
+
+You can do:
+
+  @point.inside?(@park)
+  => true
+
+And back:
+
+  @point.outside?(@park)
+  => false
+
+Play with polygons:
+
+  @park.area
+  => 1345
+
+  @park.contains?(@point)
+  => true
+
+And LineStrings:
+
+  @street_east.intersects?(@street_west)
+  => false
+
+Other:
+
+  City.close_to(@point)
+
+  Poi.close_to(@park)
+
+  Street.close_to(@point)
+
+
 ### Find_by
 
 find_by_[column] has been redefined when column is of a geometric type.
