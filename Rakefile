@@ -5,6 +5,15 @@ require 'spec/rake/spectask'
 require 'rake/rdoctask'
 
 
+desc 'Default: run specs.'
+task :default => :spec
+
+#desc 'Run the specs'
+#Spec::Rake::SpecTask.new(:spec) do |t|
+#  t.spec_opts = ['--colour --format progress --loadby mtime --reverse']
+#  t.spec_files = FileList['spec/**/*_spec.rb']
+#end
+
 desc "Run all specs"
 Spec::Rake::SpecTask.new do |t|
   t.spec_files = FileList['spec/*_spec.rb']
@@ -30,7 +39,7 @@ end
 desc "Generate the documentation"
 Rake::RDocTask::new do |rdoc|
   rdoc.rdoc_dir = 'rdoc/'
-  rdoc.title    = "PostGIS Adapater for Rails Documentation"
+  rdoc.title    = "PostGIS Adapter for Rails Documentation"
   rdoc.options << '--line-numbers' << '--inline-source'
   rdoc.rdoc_files.include('README.markdown')
   rdoc.rdoc_files.include('lib/**/*.rb')
@@ -53,7 +62,7 @@ def egrep(pattern)
 end
 
 desc "verify_committed, verify_rcov, post_news, release"
-task :complete_release => [:verify_committed, :verify_rcov, :post_news, :release]
+task :complete_release => [:verify_committed, :post_news, :release]
 
 desc "Verifies that there is no uncommitted code"
 task :verify_committed do

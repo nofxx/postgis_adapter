@@ -115,6 +115,16 @@ And LineStrings:
     Areas.contains(@point)
     => [Array of areas contains the point...
 
+### BBox Support
+
+    @area.strictly_left_of? @point
+
+Same as:
+
+    @area.bbox "<<", @point
+
+
+### Wiki
 
 Check out the wiki pages:
 http://github.com/nofxx/postgis_adapter/wikis

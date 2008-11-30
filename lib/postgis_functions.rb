@@ -11,9 +11,13 @@
 #
 
 module PostgisFunctions
+
+  # Defaul Earth Spheroid
+  #
   #EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
   EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
 
+  # Construct the postgis sql query
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {
@@ -22,26 +26,37 @@ module PostgisFunctions
       :id => t[:id] }
     end
 
-    fields = tables.map { |f| f[:uid] + ".geom" }       # W1.geom
-    fields << options if options
-
-    froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}  # streets W1
+    fields = tables.map { |f| f[:uid] + ".geom" }          # W1.geom
+    froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}    # streets W1
     wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
-
-    operation = type.to_s
-    #use all commands in lowcase form
-    #operation = operation.camelize unless operation =~ /spher|max|npoints/
-    operation = "ST_#{operation}" unless operation =~ /th3d|pesinter/
-    join_method = " AND "
-
-    sql =   "SELECT #{operation}(#{fields.join(",")}) FROM #{froms.join(",")} "
-    sql <<  "WHERE #{wheres.join(join_method)}" if wheres
+    
+    # BBox =>  SELECT (A <> B)
+    # Data =>  SELECT Fun(A,B)
+    unless type == :bbox
+      opcode = type.to_s
+      #use all commands in lowcase form
+      #opcode = opcode.camelize unless opcode =~ /spher|max|npoints/
+      opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
+      s_join = ","
+      fields << options if options
+    else
+      opcode = nil
+      s_join = " #{options} "
+    end
+ 
+    sql =   "SELECT #{opcode}(#{fields.join(s_join)}) FROM #{froms.join(",")} "
+    sql <<  "WHERE #{wheres.join(" AND ")}" if wheres
     #p sql; sql
   end
 
+  # Execute the query, we may receive:
+  #
+  # "t" or "f" for boolean queries
+  # BIGHASH    for geometries
+  # Rescue     a float
+  #
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
-    p value
     if value =~ /^\D/
       {"f" => false, "t" => true}[value]
     elsif value =~ /\./
@@ -56,6 +71,7 @@ module PostgisFunctions
     return execute_geometrical_calculation(operation, subject, options)
   end
 
+  # Get a unique ID for tables
   def unique_identifier
     @u_id ||= "W1"
     @u_id = @u_id.succ
@@ -65,6 +81,9 @@ module PostgisFunctions
   #
   # COMMON GEOMETRICAL FUNCTIONS
   #
+  # Convert between distances.
+  # Lengths return result in km.
+  # Other operations return in meters
   def distance_convert(value, unit, from = nil)
     factor = case unit
     when :cm, :cent     then  100.0
@@ -99,6 +118,8 @@ module PostgisFunctions
   end
   alias_method :distance_spherical_to, :distance_sphere_to
 
+  # Distance to using a spheroid
+  # Slower then sphere or length, but more precise.
   def distance_spheroid_to(other, unit=nil, spheroid = EARTH_SPHEROID)
     dis = calculate(:distance_spheroid, [self, other], spheroid)
     return dis unless unit
@@ -142,6 +163,87 @@ module PostgisFunctions
     #TODO: return if not point/point
     calculate(:azimuth, [self, other])
   end
+  
+  ###
+  ##
+  #
+  # BBox
+  #
+  # These operators utilize indexes. They compare
+  # bounding boxes of 2 geometries
+  #
+  #
+  #  A.bbox(">>", B)
+  #
+  #   A &< B (A overlaps or is to the left of B)
+  #   A &> B (A overlaps or is to the right of B)
+  #   A << B (A is strictly to the left of B)
+  #   A >> B (A is strictly to the right of B)
+  #   A &<| B (A overlaps B or is below B)
+  #   A |&> B (A overlaps or is above B)
+  #   A <<| B (A strictly below B)
+  #   A |>> B (A strictly above B)
+  #   A = B (A bbox same as B bbox)
+  #   A @ B (A completely contained by B)
+  #   A ~ B (A completely contains B)
+  #   A && B (A and B bboxes interact)
+  #   A ~= B - true if A and B geometries are binary equal?
+  #
+  def bbox(operator, other)
+    calculate(:bbox, [self, other], operator)
+  end
+
+  def completely_contained_by? other
+    bbox("@", other)
+  end
+
+  def completely_contains? other
+    bbox("~", other)
+  end
+  
+  def overlaps_or_above_of? other
+    bbox("|&>", other)
+  end
+  
+  def overlaps_or_below_of? other
+    bbox("&<|", other)
+  end
+  
+  def overlaps_or_left_of? other
+    bbox("&<", other)
+  end
+  
+  def overlaps_or_right_of? other
+    bbox("&>", other)
+  end
+
+  def strictly_above_of? other
+    bbox("|>>", other)
+  end
+
+  def strictly_below_of? other
+    bbox("<<|", other)
+  end
+
+  def strictly_left_of? other
+    bbox("<<", other)
+  end
+
+  def strictly_right_of? other
+    bbox(">>", other)
+  end
+
+  def interacts_with? other
+    bbox("&&", other)
+  end
+
+  def binary_equal? other
+    bbox("~=", other)
+  end
+
+  def same_as? other
+    bbox("=", other)
+  end
 
   ####
   ###
@@ -156,6 +258,7 @@ module PostgisFunctions
     end
     alias_method "in_bounds?", "d_within?"
 
+    # Return a float from 0.0 to 1.0
     def where_on_line line
       calculate(:line_locate_point, [line, self])
     end
@@ -171,6 +274,7 @@ module PostgisFunctions
   #
   module LineStringFunctions
 
+    # Returns length using cartesian formula.
     def length(unit=nil)
       dis = calculate(:length, self)
       return dis unless unit
@@ -183,15 +287,19 @@ module PostgisFunctions
       distance_convert(dis, unit)
     end
 
+    # Returns length using spheroid formula.
+    # Arguments are (unit, spheroid)
     def length_spheroid(unit=nil, spheroid = EARTH_SPHEROID)
       dis = calculate(:length_spheroid, self, spheroid)
       return dis unless unit
       distance_convert(dis, unit)
     end
 
-    # ST_NumPoints does not work
+    # Return the number of points of the geometry.
+    # PostGis ST_NumPoints does not work as nov/08
     def num_points;     calculate(:npoints, self).to_i;    end
 
+    # Return the first and last points.
     def start_point;    calculate(:startpoint, self);    end
     def end_point;      calculate(:endpoint, self);    end
 
@@ -212,6 +320,11 @@ module PostgisFunctions
       calculate(:line_locate_point, [self, point])
     end
 
+    #Not implemented in postgis
+    # ST_max_distance Returns the largest distance between two line strings.
+    #def max_distance other
+    #  calculate(:max_distance, [self, other])
+    #end
   end
 
   ###
@@ -311,8 +424,6 @@ module PostgisFunctions
 end
 
 
-
-  # ST_max_distance Returns the largest distance between two line strings.
   #
   #x SE_LocateAlong
   #x SE_LocateBetween
@@ -339,23 +450,6 @@ end
 # MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ..)
 # GEOMETRYCOLLECTION(POINT(2 3),LINESTRING((2 3,3 4)))
 
-#BBOX OPERATORS
-# These operators utilize indexes. They compare
-# bounding boxes of 2 geometries
-#
-#   A &< B (A overlaps or is to the left of B)
-#   A &> B (A overlaps or is to the right of B)
-#   A << B (A is strictly to the left of B)
-#   A >> B (A is strictly to the right of B)
-#   A &<| B (A overlaps B or is below B)
-#   A |&> B (A overlaps or is above B)
-#   A <<| B (A strictly below B)
-#   A |>> B (A strictly above B)
-#   A = B (A bbox same as B bbox)
-#   A @ B (A completely contained by B)
-#   A ~ B (A completely contains B)
-#   A && B (A and B bboxes interact)
-#   A ~= B - true if A and B geometries are binary equal?
 #
 #Accessors
 #ST_Dimension

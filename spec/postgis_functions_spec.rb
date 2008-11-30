@@ -365,4 +365,67 @@ describe "PostgisFunctions" do
 
   end
 
+  describe "BBox operations" do
+    
+    it "should check stricly left" do
+      @p1.bbox("<<", @c1).should be_true
+    end  
+
+    it "should check stricly right" do
+      @p1.bbox(">>", @c1).should be_false
+    end  
+
+    it  do
+      @p1.strictly_left_of?(@c1).should be_true
+    end  
+    
+    it  do
+      @p1.strictly_right_of?(@c1).should be_false
+    end 
+
+    it do
+      @p1.overlaps_or_right_of?(@c1).should be_false
+    end 
+
+    it do
+      @p1.overlaps_or_left_of?(@c1).should be_true
+    end 
+
+    it do
+      @p1.completely_contained_by?(@c1).should be_false
+    end
+    
+    it  do
+      @c2.completely_contains?(@p1).should be_false
+    end 
+
+    it  do
+      @p1.overlaps_or_above_of?(@c1).should be_true
+    end
+
+    it  do
+      @p1.overlaps_or_below_of?(@c1).should be_true
+    end 
+
+    it do
+      @p1.strictly_above_of?(@c1).should be_false
+    end
+    
+    it do
+      @p1.strictly_below_of?(@c1).should be_false
+    end  
+    
+    it do
+      @p1.interacts_with?(@c1).should be_false
+    end  
+    
+    it do
+      @p1.binary_equal?(@c1).should be_false
+    end 
+    
+    it do
+      @p1.same_as?(@c1).should be_false
+    end  
+  end
+
 end

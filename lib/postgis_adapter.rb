@@ -13,6 +13,10 @@ require 'acts_as_geom'
 include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
+module PostgisAdapter
+  VERSION = '0.0.6'
+end
+
 #tables to ignore in migration : relative to PostGIS management of geometric columns
 ActiveRecord::SchemaDumper.ignore_tables << "spatial_ref_sys" << "geometry_columns"
 
@@ -54,13 +58,11 @@ ActiveRecord::Base.class_eval do
       replace_bind_variables(conditions, expand_range_bind_variables(attrs.values))
     end
 
-
 end
 
 ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
 
   include SpatialAdapter
- # include PostGisFunctions
 
   alias :original_native_database_types :native_database_types
   def native_database_types
@@ -136,8 +138,10 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     end
   end
 
-
-  #Adds a GIST spatial index to a column. Its name will be <table_name>_<column_name>_spatial_index unless the key :name is present in the options hash, in which case its value is taken as the name of the index.
+  # Adds a GIST spatial index to a column. Its name will be
+  # <table_name>_<column_name>_spatial_index unless
+  # the key :name is present in the options hash, in which case its
+  # value is taken as the name of the index.
   def add_index(table_name,column_name,options = {})
     index_name = options[:name] || index_name(table_name,:column => Array(column_name))
     if options[:spatial]
@@ -148,7 +152,6 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
       execute "CREATE #{index_type} INDEX #{index_name} ON #{table_name} (#{Array(column_name).join(", ")})"
     end
   end
-
 
   def indexes(table_name, name = nil) #:nodoc:
     result = query(<<-SQL, name)
@@ -177,10 +180,8 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
         indexes << ActiveRecord::ConnectionAdapters::IndexDefinition.new(table_name, row[0], row[1] == "t", row[3] == "gist" ,[]) #index type gist indicates a spatial index (probably not totally true but let's simplify!)
         current_index = row[0]
       end
-
       indexes.last.columns << row[2]
     end
-
     indexes
   end
 
@@ -201,18 +202,18 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     end
   end
 
-  # For version of Rails where exists disable_referential_integrity
-  if self.instance_methods.include? "disable_referential_integrity"
-    #Pete Deffendol's patch
-    alias :original_disable_referential_integrity :disable_referential_integrity
-    def disable_referential_integrity(&block) #:nodoc:
-      ignore_tables = %w{ geometry_columns spatial_ref_sys }
-      execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
-      yield
-    ensure
-      execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
-    end
-  end
+#  # For version of Rails where exists disable_referential_integrity
+#  if self.instance_methods.include? "disable_referential_integrity"
+#    #Pete Deffendol's patch
+#    alias :original_disable_referential_integrity :disable_referential_integrity
+#    def disable_referential_integrity(&block) #:nodoc:
+#      ignore_tables = %w{ geometry_columns spatial_ref_sys }
+#      execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+#      yield
+#    ensure
+#      execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+#    end
+#  end
 
   private
 
