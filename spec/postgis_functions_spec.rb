@@ -5,15 +5,15 @@ describe "PostgisFunctions" do
     #load_schema
 
     class City < ActiveRecord::Base
-      acts_as_geom [:geom => :polygon]
+      acts_as_geom :geom
     end
 
     class Position < ActiveRecord::Base
-      acts_as_geom [:geom => :point]
+      acts_as_geom :geom
     end
 
     class Street < ActiveRecord::Base
-      acts_as_geom [:geom => :linestring]
+      acts_as_geom :geom
     end
 
     class CommonGeo < ActiveRecord::Base

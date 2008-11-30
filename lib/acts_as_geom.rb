@@ -14,25 +14,27 @@ module PostgisFunctions
     # acts_as_geom :geom
     #
     #
-    def acts_as_geom(geoms, options = {})
+    def acts_as_geom(*columns)
       cattr_accessor :postgis_geoms
-      self.postgis_geoms = {:geoms => geoms, :opts => options}
-      p geoms
-      geoms.each do |g|
-        case g.values.first
+
+      geoms = columns.map do |g|
+        geom_type = get_geom_type(g)
+        case geom_type
         when :point
           send :include, PointFunctions
         when :polygon
           send :include, PolygonFunctions
-        when :line_string, :linestring
+        when :line_string
           send :include, LineStringFunctions
         end
+        {g => geom_type}
       end
+      self.postgis_geoms = {:geoms => geoms}#, :opts => options}
     end
 
     def get_geom_type(column)
-      p column
-
+      p  x= self.columns.select { |c| c.name == column.to_s}.first.geometry_type
+    x
     end
   end
 end

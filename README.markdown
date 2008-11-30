@@ -24,7 +24,7 @@ On Rails:
 
     script/plugin install git://github.com/nofxx/postgis_adapter.git
 
-If you are using Spatial Adapter, remove it first.
+If you are using Spatial Adapter, *remove it first*.
 
 ActiveRecord
 ------------
@@ -33,22 +33,6 @@ Geometric columns in your ActiveRecord models now appear just like
 any other column of other basic data types. They can also be dumped
 in ruby schema mode and loaded in migrations the same way as columns
 of basic types.
-
-
-### Migrations
-
-
-Here is an example of code for the creation of a table with a
-geometric column in PostGIS, along with the addition of a spatial
-index on the column :
-
-    ActiveRecord::Schema.define do
-  	   create_table "table_points", :force => true do |t|
-        t.column "data", :string
-      	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
-    	 end
-  	 add_index "table_points", "geom", :spatial=>true
-    end
 
 
 ### Model
@@ -71,34 +55,26 @@ model and the table defined above :
   	puts pt.geom.x #access the geom column like any other
 
 
-### Fixtures
-
-If you use fixtures for your unit tests, at some point,
-you will want to input a geometry. You could transform your
-geometries to a form suitable for YAML yourself everytime but
-the spatial adapter provides a method to do it for you: +to_yaml+.
-It works for both MySQL and PostGIS (although the string returned
-is different for each database). You would use it like this, if
-the geometric column is a point:
-
-    fixture:
-  	  id: 1
-  	  data: HELLO
-  	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
-
-
-PostGIS Functions
------------------
-
-### Additions
+PostGIS Extra Functions
+-----------------------
 
 To be documented, here are the cool stuff postgis only let you do:
+
+### How to Use
+
+    class Park < ActiveRecord::Base
+      acts_as_geom :area
+    end
+
+    ...
+
 
     @point  =   Poi.new(    :geom =>   **Point**      )
     @park   =   Park.new(   :geom =>  **Polygon**     )
     @street =   Street.new( :geom => **LineString**   )
 
-### Instance methods:
+
+### And your objects can do:
 
     @point.inside?(@park)
     => true
@@ -126,7 +102,7 @@ And LineStrings:
     => 45.53636
 
 
-### Class Methods
+### And for classes:
 
     City.close_to(@point)
     => [Array of cities in order by distance...
@@ -166,6 +142,41 @@ or passing an array with the 2 opposite corners of a bounding box
 In PostGIS, since you can only use operations with geometries with the same SRID, you can add a third element representing the SRID of the bounding box to the array. It is by default set to -1:
 
   	Park.find_by_geom([[3,5.6],[19.98,5.9],123])
+
+
+Database Tools
+--------------
+
+### Migrations
+
+
+Here is an example of code for the creation of a table with a
+geometric column in PostGIS, along with the addition of a spatial
+index on the column :
+
+    ActiveRecord::Schema.define do
+  	   create_table "table_points", :force => true do |t|
+        t.column "data", :string
+      	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
+    	 end
+  	 add_index "table_points", "geom", :spatial=>true
+    end
+
+
+### Fixtures
+
+If you use fixtures for your unit tests, at some point,
+you will want to input a geometry. You could transform your
+geometries to a form suitable for YAML yourself everytime but
+the spatial adapter provides a method to do it for you: +to_yaml+.
+It works for both MySQL and PostGIS (although the string returned
+is different for each database). You would use it like this, if
+the geometric column is a point:
+
+    fixture:
+  	  id: 1
+  	  data: HELLO
+  	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 
 Geometric data types
