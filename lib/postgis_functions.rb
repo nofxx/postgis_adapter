@@ -4,15 +4,13 @@
 #
 # http://github.com/nofxx/postgis_adapter
 #
-# Thanks to the great Spatial Adapter by Guilhem Vellut
-#
 require 'acts_as_geom'
 
 module PostgisFunctions
 
   # #
   # PostGis Manual:
-  # #
+  #
   #http://postgis.refractions.net/documentation/manual-1.3/ch06.html
   #
   #
@@ -143,24 +141,22 @@ module PostgisFunctions
   #
   module LineStringFunctions
 
-
     def length
       calculate(:length, self)
     end
 
+    # ST_NumPoints does not work
     def num_points
       calculate(:npoints, self).to_i
-    end# ST_NumPoints
+    end
 
     def start_point
       calculate(:start_point, self)
     end
-    #ST_StartPoint
 
     def end_point
       calculate(:end_point, self)
     end
-    #ST_EndPoint
 
     def intersects? other
       calculate(:intersects, [self, other])
@@ -210,6 +206,59 @@ module PostgisFunctions
 
     def disjoint? other
       calculate(:disjoint, [self, other])
+    end
+  end
+
+  ###
+  ##
+  #
+  # Class Methods
+  #
+  #
+  module ClassMethods
+
+    def close_to(p, srid=4326)
+      find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+    end
+
+    def closest_to(p, srid=4326)
+      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+    end
+
+    def close_to(p, srid=4326)
+      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+    end
+
+    def by_size sort='asc'
+      find(:all, :order => "length(geom) #{sort}" )
+    end
+
+    def longest
+      find(:first, :order => "length(geom) DESC")
+    end
+
+    def contains(p, srid=4326)
+      find(:all, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
+    end
+
+    def contain(p, srid=4326)
+      find(:first, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
+    end
+
+    def close_to(p, srid=4326)
+      find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+    end
+
+    def closest_to(p, srid=4326)
+      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+    end
+
+    def by_size sort='asc'
+      find(:all, :order => "Area(geom) #{sort}" )
+    end
+
+    def by_perimeter sort='asc'
+      find(:all, :order => "Perimeter(geom) #{sort}" )
     end
   end
 end

@@ -2,6 +2,7 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe "PostgisFunctions" do
   before(:all) do
+    #load_schema
 
     class City < ActiveRecord::Base
       acts_as_geom [:geom => :polygon]
