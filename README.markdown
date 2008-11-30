@@ -11,7 +11,6 @@ It also provides a way to manage these columns in migrations.
 *PostGIS and Rails 2+ only*.
 
 
-
 ### Dependencies
 
 - georuby
@@ -155,11 +154,11 @@ geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
     ActiveRecord::Schema.define do
-  	   create_table "table_points", :force => true do |t|
-        t.column "data", :string
-      	 t.column "geom", :point, :null=>false, :srid => 123, :with_z => true
-    	 end
-  	 add_index "table_points", "geom", :spatial=>true
+  	  create_table "table_points", :force => true do |t|
+        t.string :name
+      	t.point  :geom, :srid => 123, :with_z => true, :null => false
+    	end
+  	  add_index :table_points, :geom, :spatial=>true
     end
 
 
@@ -200,14 +199,14 @@ types, but might be less than efficient for geometries, since the EWKB
 string has to be parsed everytime. Also it means you cannot modify the
 geometry object returned from an attribute directly :
 
-       place = Place.find_first
+       place = Place.first
        place.the_geom.y=123456.7
 
 - Since the translation to a geometry is performed everytime the_geom
 is read, the change to y will not be saved! You would have to do
 something like this :
 
-       place = Place.find_first
+       place = Place.first
        the_geom = place.the_geom
        the_geom.y=123456.7
        place.the_geom = the_geom
@@ -216,14 +215,7 @@ something like this :
 Project
 -------
 
-### Changes since last version
-
-- The PostGIS adapter and the MySql Spatial adapter have been merged into one plugin. The correct files to load is determined using the type of connection defined in the environment.
-- Geometric columns can now be dumped just like other base data types. This means you can use the ruby schema mode, even if you use the plugin.
-- Support of M dimensions in migrations. The <tt>:dimension</tt> key in the column definition has disappeared and has been replaced by <tt>:with_z</tt> and <tt>:with_m</tt>.
-- Addition of unit tests. At the plugin root, Run <tt>rake test:mysql</tt> to run the mysql tests and <tt>rake test:postgis</tt> for the postgis ones. You will need to configure your connection in <tt>test/db/database_mysql.yml</tt> and <tt>test/db/database_postgis.yml</tt>. If you get errors on your platform, please report to mailto:guilhem.vellut+georuby@gmail.com.
-- Addition of a find_by methods with a special behaviour for geometries
-- Addition of a to_yaml method to use inside a YAML fixture
+http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
 
 ### TODO
 
