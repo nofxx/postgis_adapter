@@ -116,6 +116,10 @@ And LineStrings:
     => [Array of areas contains the point...
 
 
+Check out the wiki pages:
+http://github.com/nofxx/postgis_adapter/wikis
+For all functions.
+
 ### Find_by
 
 find_by_*column* has been redefined when column is of a geometric type.
@@ -148,15 +152,15 @@ Database Tools
 
 ### Migrations
 
-
 Here is an example of code for the creation of a table with a
 geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
     ActiveRecord::Schema.define do
-  	  create_table "table_points", :force => true do |t|
+  	  create_table :places do |t|
         t.string :name
       	t.point  :geom, :srid => 123, :with_z => true, :null => false
+    	  t.timestamps
     	end
   	  add_index :table_points, :geom, :spatial=>true
     end
@@ -232,7 +236,7 @@ PostGis Adapter is released under the MIT license.
 Support
 -------
 
-Tested with postgresql 8.3.5 / postgis 1.3.3
+rspec`d on postgresql 8.3.5 / postgis 1.3.3
 
 Any questions, enhancement proposals, bug notifications or
 corrections can be sent to:

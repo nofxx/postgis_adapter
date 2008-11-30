@@ -80,13 +80,9 @@ module PostgisFunctions
     calculate(:equals, [self, other])
   end
 
-  def envelope
-    calculate(:envelope, self)
-  end
-
-  def centroid
-    calculate(:centroid, self)
-  end
+  def envelope;    calculate(:envelope, self);  end
+  def centroid;    calculate(:centroid, self);  end
+  def boundary;    calculate(:boundary, self);  end
 
   # Distance to using cartesian formula
   def distance_to(other, unit=nil)
@@ -120,10 +116,7 @@ module PostgisFunctions
   def inside? other
     calculate(:coveredby, [self, other])
   end
-
-  def outside? other
-    !inside? other
-  end
+  def outside? other;    !inside? other;  end
 
   def dimension
     calculate(:dimension, self).to_i
@@ -139,10 +132,6 @@ module PostgisFunctions
 
   def envelopes_intersect? other
      calculate(:se_envelopesintersect, [self, other])
-  end
-
-  def boundary
-    calculate(:boundary, self)
   end
 
   def intersection other
@@ -179,13 +168,6 @@ module PostgisFunctions
   # LINESTRING
   #
   #
-  # Linear Referencing
-  #
-  # ST_line_interpolate_point
-  # ST_line_substring
-  # ST_line_locate_point
-  # ST_locate_along_measure
-  # ST_locate_between_measures
   #
   module LineStringFunctions
 
@@ -208,17 +190,10 @@ module PostgisFunctions
     end
 
     # ST_NumPoints does not work
-    def num_points
-      calculate(:npoints, self).to_i
-    end
+    def num_points;     calculate(:npoints, self).to_i;    end
 
-    def start_point
-      calculate(:startpoint, self)
-    end
-
-    def end_point
-      calculate(:endpoint, self)
-    end
+    def start_point;    calculate(:startpoint, self);    end
+    def end_point;      calculate(:endpoint, self);    end
 
     def intersects? other
       calculate(:intersects, [self, other])
@@ -232,6 +207,7 @@ module PostgisFunctions
       calculate(:touches, [self, other])
     end
 
+    # Locate a point on the line, return a float from 0 to 1
     def locate_point point
       calculate(:line_locate_point, [self, point])
     end
@@ -334,40 +310,10 @@ module PostgisFunctions
   end
 end
 
-# #
-  # Measurement:
-  #
-  # ST_length(geometry)
-  # ST_length_spheroid
-  # length3d_spheroid
-  #
-  #x ST_Dimension Return the dimension of the ST_Geometry value.
-  #x ST_Boundary(geometry) Returns the closure of the combinatorial boundary of this Geometry. The combinatorial boundary is defined as described in section 3.12.3.2 of the OGC SPEC. Because the result of this function is a closure, and hence topologically closed, the resulting boundary can be represented using representational geometry primitives as discussed in the OGC SPEC, section 3.12.2.
 
-  # ST_Area(geometry)
-  # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
-  # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
-  # ST_perimeter3d(geometry)
-  #
-  # ST_azimuth(geometry, geometry)
-  # ST_Centroid(geometry)
-  #
-  #
-  # #
-  # Relationship:
-  #
-  # ST_Equals(geometry, geometry)   - Spatially equal
-  #
-  # ST_Distance(geometry, geometry) - Cartesian
-  # ST_distance_sphere
-  # ST_distance_spheroid
+
   # ST_max_distance Returns the largest distance between two line strings.
   #
-  #x ST_Simplify(geometry, tolerance)
-  #x ST_SimplifyPreserveTopology(geometry, tolerance)    Returns a "simplified" version of the given geometry using the Douglas-Peuker algorithm. Will avoid creating derived geometries (polygons in particular) that are invalid.
-  #x ST_IsClosed(geometry)
-  #x ST_Intersection
-  #x SE_EnvelopesIntersect
   #x SE_LocateAlong
   #x SE_LocateBetween
   #x ST_line_interpolate_point(linestring, location)
@@ -379,48 +325,38 @@ end
   #x ST_Polygonize(geometry set)
   #x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
   # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
-  #
-  # ST_Intersects(geometry, geometry) - Do not call with a GeometryCollection as an argument
-  # ST_Touches(geometry, geometry)
-  # ST_Crosses(geometry, geometry)
-  # ST_Within(geometry, geometry) - A has to be completely inside B.
-  # ST_Contains(geometry, geometry)
-  # ST_Covers(geometry, geometry)
-  # ST_CoveredBy(geometry, geometry)- true if no point in Geometry B is outside Geometry A
-  # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
 
   #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
   #x ST_Disjoint(geometry, geometry)
   #x ST_Overlaps
 
-  #
-# # Returns 1 (TRUE)
 
-
-#POINT(0 0)
-#LINESTRING(0 0,1 1,1 2)
-#POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))
-#MULTIPOINT(0 0,1 2)
-#MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))
-#MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ..)
-#GEOMETRYCOLLECTION(POINT(2 3),LINESTRING((2 3,3 4)))
+# POINT(0 0)
+# LINESTRING(0 0,1 1,1 2)
+# POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))
+# MULTIPOINT(0 0,1 2)
+# MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))
+# MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ..)
+# GEOMETRYCOLLECTION(POINT(2 3),LINESTRING((2 3,3 4)))
 
 #BBOX OPERATORS
-#These operators utilize indexes. They compare bounding boxes of 2 geometries
-#A &< B (A overlaps or is to the left of B)
-#A &> B (A overlaps or is to the right of B)
-#A << B (A is strictly to the left of B)
-#A >> B (A is strictly to the right of B)
-#A &<| B (A overlaps B or is below B)
-#A |&> B (A overlaps or is above B)
-#A <<| B (A strictly below B)
-#A |>> B (A strictly above B)
-#A = B (A bbox same as B bbox)
-#A @ B (A completely contained by B)
-#A ~ B (A completely contains B)
-#A && B (A and B bboxes interact)
-#A ~= B - true if A and B geometries are binary equal?
-
+# These operators utilize indexes. They compare
+# bounding boxes of 2 geometries
+#
+#   A &< B (A overlaps or is to the left of B)
+#   A &> B (A overlaps or is to the right of B)
+#   A << B (A is strictly to the left of B)
+#   A >> B (A is strictly to the right of B)
+#   A &<| B (A overlaps B or is below B)
+#   A |&> B (A overlaps or is above B)
+#   A <<| B (A strictly below B)
+#   A |>> B (A strictly above B)
+#   A = B (A bbox same as B bbox)
+#   A @ B (A completely contained by B)
+#   A ~ B (A completely contains B)
+#   A && B (A and B bboxes interact)
+#   A ~= B - true if A and B geometries are binary equal?
+#
 #Accessors
 #ST_Dimension
 #ST_Dump
@@ -462,21 +398,3 @@ end
 #ST_AsGML
 #ST_AsKML
 #ST_AsSVG
-
-#if Object.const_defined?("ActiveRecord")
-# ActiveRecord::Base.send(:include, PostgisFunctions)
-#end
-#      def has_point(p)
-#        p = [p] unless p.respond_to?(:each)
-#        p.each { |p| geo_columns_add({:point => p}) }
-#      end
-#      def has_polygon(p)
-#        geo_columns_add({:polygon => p})
-#      end
-#      def has_line_string(ln)
-#      end
-#class GeoRuby::SimpleFeatures::Point
-#class GeoRuby::SimpleFeatures::LineString
-#class GeoRuby::SimpleFeatures::Polygon
-#class GeoRuby::SimpleFeatures::Geometry
-#class GeoRuby::SimpleFeatures::MultiPoint

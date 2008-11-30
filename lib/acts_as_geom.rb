@@ -12,8 +12,6 @@ module PostgisFunctions
   module ClassMethods
 
     # acts_as_geom :geom
-    #
-    #
     def acts_as_geom(*columns)
       cattr_accessor :postgis_geoms
 
@@ -33,8 +31,7 @@ module PostgisFunctions
     end
 
     def get_geom_type(column)
-      p  x= self.columns.select { |c| c.name == column.to_s}.first.geometry_type
-    x
+      self.columns.select { |c| c.name == column.to_s}.first.geometry_type
     end
   end
 end
