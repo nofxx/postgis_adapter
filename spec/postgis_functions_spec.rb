@@ -24,7 +24,7 @@ describe "PostgisFunctions" do
     @c3 ||= City.create!(:data => "City3", :geom => Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],123))
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[1,1],[2,2]],123))
     @s2 ||= Street.create!(:data => "Street2", :geom => LineString.from_coordinates([[4,4],[7,7]],123))
-    @s3 ||= Street.create!(:data => "Street3", :geom => LineString.from_coordinates([[8,8],[18,18]],123))
+    @s3 ||= Street.create!(:data => "Street3", :geom => LineString.from_coordinates([[8,8],[18,18],[20,20],[25,25],[30,30],[38,38]],123))
     @s4 ||= Street.create!(:data => "Street3", :geom => LineString.from_coordinates([[10,8],[15,18]],123))
     @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(1,1,123))
     @p2 ||= Position.create!(:data => "Point2", :geom => Point.from_x_y(5,5,123))
@@ -116,6 +116,10 @@ describe "PostgisFunctions" do
       lambda{ @p1.azimuth(@s2) }.should_raise "Err"
     end
 
+    it "should see in what fraction of the ls it is" do
+      @p1.where_on_line(@s1).should eql(0.0)
+    end
+
   end
 
   describe "LineString" do
@@ -183,7 +187,7 @@ describe "PostgisFunctions" do
     end
 
     it "number of points" do
-      @s3.num_points.should eql(2)
+      @s3.num_points.should eql(6)
     end
 
     it "startpoint" do
@@ -220,6 +224,37 @@ describe "PostgisFunctions" do
       @s1.length_spheroid(:miles).should be_close(97.478,0.001)
     end
 
+    it "should check for envelope intersection" do
+      @s1.envelopes_intersect?(@s2).should be_false
+    end
+
+    it "boundary" do
+      @s1.boundary.should be_instance_of(MultiPoint)
+    end
+
+    it "intersection with a point" do
+      @s1.intersection(@p2).should be_instance_of(GeometryCollection)
+    end
+
+    it "should locate a point" do
+      @s1.locate_point(@p1).should eql(0.0)
+    end
+
+    it "should locate a point" do
+      @s1.locate_point(@p2).should eql(1.0)
+    end
+
+    it "should simplify a line" do
+      @s3.simplify.points.length.should eql(2)
+    end
+
+    it "should simplify the first correcty" do
+      @s3.simplify.points[0].y.should be_close(8.0, 0.1)
+    end
+
+    it "should simplify the last correcty" do
+      @s3.simplify.points[1].y.should be_close(38.0, 0.1)
+    end
   end
 
 
@@ -229,12 +264,20 @@ describe "PostgisFunctions" do
       City.by_size.first.data.should == "City1" #[@c1, @c2, @c3]
     end
 
+    it "is closed?" do
+      @c2.is_closed?.should be_true
+    end
+
     it "total area" do
       @c3.area.should be_close(1093.270089, 0.1)
     end
 
     it "total area 2" do
       @c2.area.should be_close(1159.5, 0.1)
+    end
+
+    it "dimension x" do
+      @c2.dimension.should eql(2)
     end
 
     it "perimter 2d" do
@@ -310,6 +353,14 @@ describe "PostgisFunctions" do
 
     it "distance to a linestring" do
       @c1.distance_to(@s1).should be_close(1.8,0.001)
+    end
+
+    it "should simplify me" do
+      @c3.simplify.should be_instance_of(Polygon)
+    end
+
+    it "should simplify me number of points" do
+      @c3.simplify[0].length.should eql(4)
     end
 
   end

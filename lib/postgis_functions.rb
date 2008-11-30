@@ -9,7 +9,6 @@
 # PostGis Manual -  http://postgis.refractions.net/documentation/manual-1.3/ch06.html
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
-require 'acts_as_geom'
 
 module PostgisFunctions
   #EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
@@ -32,7 +31,7 @@ module PostgisFunctions
     operation = type.to_s
     #use all commands in lowcase form
     #operation = operation.camelize unless operation =~ /spher|max|npoints/
-    operation = "ST_#{operation}" unless operation =~ /th3d/
+    operation = "ST_#{operation}" unless operation =~ /th3d|pesinter/
     join_method = " AND "
 
     sql =   "SELECT #{operation}(#{fields.join(",")}) FROM #{froms.join(",")} "
@@ -126,6 +125,34 @@ module PostgisFunctions
     !inside? other
   end
 
+  def dimension
+    calculate(:dimension, self).to_i
+  end
+
+  def simplify(tolerance=1)
+    calculate(:simplify, self, tolerance)
+  end
+
+  def simplify_preserve_topology(tolerance=1)
+    calculate(:simplifypreservetopology, self, tolerance)
+  end
+
+  def envelopes_intersect? other
+     calculate(:se_envelopesintersect, [self, other])
+  end
+
+  def boundary
+    calculate(:boundary, self)
+  end
+
+  def intersection other
+    calculate(:intersection, [self, other])
+  end
+
+  def azimuth other
+    #TODO: return if not point/point
+    calculate(:azimuth, [self, other])
+  end
 
   ####
   ###
@@ -135,13 +162,13 @@ module PostgisFunctions
   #
   #
   module PointFunctions
-    def in_bounds?(other,margin=0.5)
+    def d_within?(other,margin=0.5)
       calculate(:dwithin, [self, other], margin)
     end
+    alias_method "in_bounds?", "d_within?"
 
-    def azimuth other
-      #TODO: return if not point/point
-      calculate(:azimuth, [self, other])
+    def where_on_line line
+      calculate(:line_locate_point, [line, self])
     end
   end
 
@@ -205,6 +232,10 @@ module PostgisFunctions
       calculate(:touches, [self, other])
     end
 
+    def locate_point point
+      calculate(:line_locate_point, [self, point])
+    end
+
   end
 
   ###
@@ -225,6 +256,10 @@ module PostgisFunctions
 
     def perimeter3d
       calculate(:perimeter3d, self)
+    end
+
+    def is_closed?
+      calculate(:isclosed, self)
     end
 
     def overlaps? other
@@ -306,6 +341,9 @@ end
   # ST_length_spheroid
   # length3d_spheroid
   #
+  #x ST_Dimension Return the dimension of the ST_Geometry value.
+  #x ST_Boundary(geometry) Returns the closure of the combinatorial boundary of this Geometry. The combinatorial boundary is defined as described in section 3.12.3.2 of the OGC SPEC. Because the result of this function is a closure, and hence topologically closed, the resulting boundary can be represented using representational geometry primitives as discussed in the OGC SPEC, section 3.12.2.
+
   # ST_Area(geometry)
   # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
   # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
@@ -324,6 +362,23 @@ end
   # ST_distance_sphere
   # ST_distance_spheroid
   # ST_max_distance Returns the largest distance between two line strings.
+  #
+  #x ST_Simplify(geometry, tolerance)
+  #x ST_SimplifyPreserveTopology(geometry, tolerance)    Returns a "simplified" version of the given geometry using the Douglas-Peuker algorithm. Will avoid creating derived geometries (polygons in particular) that are invalid.
+  #x ST_IsClosed(geometry)
+  #x ST_Intersection
+  #x SE_EnvelopesIntersect
+  #x SE_LocateAlong
+  #x SE_LocateBetween
+  #x ST_line_interpolate_point(linestring, location)
+  #x ST_line_substring(linestring, start, end)
+  #x ST_line_locate_point(LineString, Point)   Returns a float between 0 and 1 representing the location of the closest point on LineString to the given Point, as a fraction of total 2d line length.
+  #x ST_locate_along_measure(geometry, float8)   Return a derived geometry collection value with elements that match the specified measure. Polygonal elements are not supported.
+  #x ST_locate_between_measures(geometry, float8, float8)
+  #
+  #x ST_Polygonize(geometry set)
+  #x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
+  # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
   #
   # ST_Intersects(geometry, geometry) - Do not call with a GeometryCollection as an argument
   # ST_Touches(geometry, geometry)

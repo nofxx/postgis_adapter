@@ -7,6 +7,8 @@
 #require 'active_record'
 require 'geo_ruby'
 require 'common_spatial_adapter'
+require 'postgis_functions'
+require 'acts_as_geom'
 
 include GeoRuby::SimpleFeatures
 include SpatialAdapter
