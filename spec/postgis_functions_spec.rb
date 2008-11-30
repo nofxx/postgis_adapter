@@ -68,10 +68,20 @@ describe "PostgisFunctions" do
     end
 
     it "should select the spherical distance in km" do
-     @p1.spherical_distance(@p2).km.should be_close(628516.874554178, 0.0001)
+     @p1.spherical_distance(@p2, :km).should be_close(628.5, 0.1)
     end
 
+    it "should select the spherical distance in miles" do
+     @p1.spherical_distance(@p2, :miles).should be_close(390.6, 0.1)
+    end
 
+    it "distance to in km" do
+      @p1.distance_to(@p2, :km).should be_close(5656.854, 0.01)
+    end
+
+    it "should select the spheroid distance" do
+     @p1.spheroid_distance(@p2).should be_close(627129.502, 0.01)
+    end
 
     it "inside city?" do
       @p1.inside?(@c1).should be_false
@@ -168,6 +178,18 @@ describe "PostgisFunctions" do
     it "endpoint" do
       @s2.end_point.should be_instance_of(Point)
       @s2.end_point.x.should be_close(7.0, 0.1)
+    end
+
+    it "spheroid length" do
+      @s1.spheroid_length.should be_close(156876.1494,0.0001)
+    end
+
+    it "spheroid length in km" do
+      @s1.spheroid_length(:km).should be_close(156.87,0.01)
+    end
+
+    it "spheroid length in miles" do
+      @s1.spheroid_length(:miles).should be_close(97.49,0.01)
     end
 
   end

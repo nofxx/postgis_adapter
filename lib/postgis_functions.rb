@@ -7,7 +7,7 @@
 require 'acts_as_geom'
 
 module PostgisFunctions
-
+  EARTH_SPHEROID = "'SPHEROID[\"GRS_1980\",6378137,298.257222101]'"
   # #
   # PostGis Manual:
   #
@@ -29,18 +29,19 @@ module PostgisFunctions
     wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
 
     operation = type.to_s
-    operation = operation.camelize unless operation =~ /spher|max|npoints/
+    #use all commands in lowcase form
+    #operation = operation.camelize unless operation =~ /spher|max|npoints/
     operation = "ST_#{operation}" unless operation =~ /th3d/
     join_method = " AND "
 
     sql =   "SELECT #{operation}(#{fields.join(",")}) FROM #{froms.join(",")} "
     sql <<  "WHERE #{wheres.join(join_method)}" if wheres
-    p sql
-    sql
+    #p sql; sql
   end
 
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
+    p value
     if value =~ /^\D/
       {"f" => false, "t" => true}[value]
     elsif value =~ /\./
@@ -64,8 +65,11 @@ module PostgisFunctions
   #
   # COMMON GEOMETRICAL FUNCTIONS
   #
-  def distance_convert(value, unit)
-
+  def distance_convert(value, unit, from = nil)
+    case unit
+    when :km, :kilo   then   from ? value*1000 : value/1000
+    when :miles,:mile then   from ? value*1609 : value/1609
+    end
   end
 
   def spatially_equal?(other)
@@ -81,12 +85,21 @@ module PostgisFunctions
   end
 
   def distance_to(other, unit=nil)
-    return dis = calculate(:distance, [self, other]) unless unit
-    unit == :km ? dis/1000 : dis/500
+    dis = calculate(:distance, [self, other])
+    return dis unless unit
+    distance_convert(dis, unit, true)
   end
 
-  def spherical_distance other
-    calculate(:distance_sphere, [self, other])
+  def spherical_distance(other, unit=nil)
+    dis = calculate(:distance_sphere, [self, other])
+    return dis unless unit
+    distance_convert(dis, unit)
+  end
+
+  def spheroid_distance(other, spheroid = EARTH_SPHEROID, unit=nil)
+    dis = calculate(:distance_spheroid, [self, other], spheroid)
+    return dis unless unit
+    distance_convert(dis, unit)
   end
 
   def within? other
@@ -98,7 +111,7 @@ module PostgisFunctions
   end
 
   def inside? other
-    calculate(:covered_by, [self, other])
+    calculate(:coveredby, [self, other])
   end
 
   def outside? other
@@ -145,17 +158,23 @@ module PostgisFunctions
       calculate(:length, self)
     end
 
+    def spheroid_length(unit=nil, spheroid = EARTH_SPHEROID)
+      dis = calculate(:length_spheroid, self, spheroid)
+      return dis unless unit
+      distance_convert(dis, unit)
+    end
+
     # ST_NumPoints does not work
     def num_points
       calculate(:npoints, self).to_i
     end
 
     def start_point
-      calculate(:start_point, self)
+      calculate(:startpoint, self)
     end
 
     def end_point
-      calculate(:end_point, self)
+      calculate(:endpoint, self)
     end
 
     def intersects? other
