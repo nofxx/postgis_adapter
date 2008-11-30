@@ -6,6 +6,8 @@
 #
 # Thanks to the great Spatial Adapter by Guilhem Vellut
 #
+require 'acts_as_geom'
+
 module PostgisFunctions
 
   # #
@@ -14,47 +16,6 @@ module PostgisFunctions
   #http://postgis.refractions.net/documentation/manual-1.3/ch06.html
   #
   #
-  # #
-  # Measurement:
-  #
-  # ST_length(geometry)
-  # ST_length_spheroid
-  # length3d_spheroid
-  #
-  # ST_Area(geometry)
-  # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
-  # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
-  # ST_perimeter3d(geometry)
-  #
-  # ST_azimuth(geometry, geometry)
-  # ST_Centroid(geometry)
-  #
-  #
-  # #
-  # Relationship:
-  #
-  # ST_Equals(geometry, geometry)   - Spatially equal
-  #
-  # ST_Distance(geometry, geometry) - Cartesian
-  # ST_distance_sphere
-  # ST_distance_spheroid
-  # ST_max_distance Returns the largest distance between two line strings.
-  #
-  # ST_Intersects(geometry, geometry) - Do not call with a GeometryCollection as an argument
-  # ST_Touches(geometry, geometry)
-  # ST_Crosses(geometry, geometry)
-  # ST_Within(geometry, geometry) - A has to be completely inside B.
-  # ST_Contains(geometry, geometry)
-  # ST_Covers(geometry, geometry)
-  # ST_CoveredBy(geometry, geometry)- true if no point in Geometry B is outside Geometry A
-  # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
-
-  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
-  #x ST_Disjoint(geometry, geometry)
-  #x ST_Overlaps
-
-  #
-  # Returns 1 (TRUE)
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {
@@ -145,219 +106,156 @@ module PostgisFunctions
   def outside? other
     !inside? other
   end
-end
 
-####
-###
-##
-#
-# POINT
-#
-#
-#
-#
-module PointFunctions
-  class << self
 
-    def included base #:nodoc:
-      base.extend ClassMethods
-
-      class << base
-        attr_accessor :has_geom_options
-      end
+  ####
+  ###
+  ##
+  #
+  # POINT
+  #
+  #
+  module PointFunctions
+    def in_bounds?(other,margin=0.5)
+      calculate(:dwithin, [self, other], margin)
     end
 
-    module ClassMethods
+    def azimuth other
+      #TODO: return if not point/point
+      calculate(:azimuth, [self, other])
+    end
+  end
 
-      def has_point column="geom"
-        include InstanceMethods
-        has_geom_options = {:column => column}
-      end
+  ####
+  ###
+  ##
+  #
+  # LINESTRING
+  #
+  #
+  # Linear Referencing
+  #
+  # ST_line_interpolate_point
+  # ST_line_substring
+  # ST_line_locate_point
+  # ST_locate_along_measure
+  # ST_locate_between_measures
+  #
+  module LineStringFunctions
 
-      def close_to(p, srid=4326)
-        find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
 
-      def closest_to(p, srid=4326)
-        find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
-
+    def length
+      calculate(:length, self)
     end
 
-    module InstanceMethods
-      include PostgisFunctions
+    def num_points
+      calculate(:npoints, self).to_i
+    end# ST_NumPoints
 
-      def in_bounds?(other,margin=0.5)
-        calculate(:dwithin, [self, other], margin)
-      end
+    def start_point
+      calculate(:start_point, self)
+    end
+    #ST_StartPoint
 
-      def azimuth other
-        #TODO: return if not point/point
-        calculate(:azimuth, [self, other])
-      end
+    def end_point
+      calculate(:end_point, self)
+    end
+    #ST_EndPoint
+
+    def intersects? other
+      calculate(:intersects, [self, other])
+    end
+
+    def crosses? other
+      calculate(:crosses, [self, other])
+    end
+
+    def touches? other
+      calculate(:touches, [self, other])
+    end
+
+  end
+
+  ###
+  ##
+  #
+  # Polygon
+  #
+  #
+  module PolygonFunctions
+
+    def area
+      calculate(:area, self)
+    end
+
+    def perimeter
+      calculate(:perimeter, self)
+    end
+
+    def perimeter3d
+      calculate(:perimeter3d, self)
+    end
+
+    def overlaps? other
+      calculate(:overlaps, [self, other])
+    end
+
+    def covers? other
+      calculate(:covers, [self, other])
+    end
+
+    def touches? other
+      calculate(:touches, [self, other])
+    end
+
+    def disjoint? other
+      calculate(:disjoint, [self, other])
     end
   end
 end
 
-####
-###
-##
-#
-# LINESTRING
-#
-#
-# Linear Referencing
-#
-# ST_line_interpolate_point
-# ST_line_substring
-# ST_line_locate_point
-# ST_locate_along_measure
-# ST_locate_between_measures
-#
-module LineStringFunctions
+# #
+  # Measurement:
+  #
+  # ST_length(geometry)
+  # ST_length_spheroid
+  # length3d_spheroid
+  #
+  # ST_Area(geometry)
+  # ST_perimeter(geometry) Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
+  # ST_perimeter2d(geometry)   Returns the 2-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
+  # ST_perimeter3d(geometry)
+  #
+  # ST_azimuth(geometry, geometry)
+  # ST_Centroid(geometry)
+  #
+  #
+  # #
+  # Relationship:
+  #
+  # ST_Equals(geometry, geometry)   - Spatially equal
+  #
+  # ST_Distance(geometry, geometry) - Cartesian
+  # ST_distance_sphere
+  # ST_distance_spheroid
+  # ST_max_distance Returns the largest distance between two line strings.
+  #
+  # ST_Intersects(geometry, geometry) - Do not call with a GeometryCollection as an argument
+  # ST_Touches(geometry, geometry)
+  # ST_Crosses(geometry, geometry)
+  # ST_Within(geometry, geometry) - A has to be completely inside B.
+  # ST_Contains(geometry, geometry)
+  # ST_Covers(geometry, geometry)
+  # ST_CoveredBy(geometry, geometry)- true if no point in Geometry B is outside Geometry A
+  # ST_DWithin(geometry, geometry, float) - if geom is within dist(float)
 
-  class << self
+  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
+  #x ST_Disjoint(geometry, geometry)
+  #x ST_Overlaps
 
-    def included base #:nodoc:
-      base.extend ClassMethods
-    end
+  #
+# # Returns 1 (TRUE)
 
-    module ClassMethods
-      def has_line_string column="geom"
-        include InstanceMethods
-      end
-
-      def close_to(p, srid=4326)
-        find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
-
-      def by_size sort='asc'
-        find(:all, :order => "length(geom) #{sort}" )
-      end
-
-      def longest
-        find(:first, :order => "length(geom) DESC")
-      end
-
-    end
-
-    module InstanceMethods
-      include PostgisFunctions
-
-      def length
-        calculate(:length, self)
-      end
-
-      def num_points
-        calculate(:npoints, self).to_i
-      end# ST_NumPoints
-
-      def start_point
-        calculate(:start_point, self)
-      end
-      #ST_StartPoint
-
-      def end_point
-        calculate(:end_point, self)
-      end
-      #ST_EndPoint
-
-      def intersects? other
-        calculate(:intersects, [self, other])
-      end
-
-      def crosses? other
-        calculate(:crosses, [self, other])
-      end
-
-      def touches? other
-        calculate(:touches, [self, other])
-      end
-
-    end
-  end
-end
-
-###
-##
-#
-#
-#
-# Polygon
-#
-#
-module PolygonFunctions
-
-  class << self
-
-    def included base #:nodoc:
-      base.extend ClassMethods
-    end
-
-    module ClassMethods
-      def has_polygon column="geom"
-        include InstanceMethods
-      end
-
-      def contains(p, srid=4326)
-        find(:all, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
-      end
-
-      def contain(p, srid=4326)
-        find(:first, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
-      end
-
-      def close_to(p, srid=4326)
-        find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
-
-      def closest_to(p, srid=4326)
-        find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
-
-      def by_size sort='asc'
-        find(:all, :order => "Area(geom) #{sort}" )
-      end
-
-      def by_perimeter sort='asc'
-        find(:all, :order => "Perimeter(geom) #{sort}" )
-      end
-
-    end
-
-    module InstanceMethods
-      include PostgisFunctions
-
-      def area
-        calculate(:area, self)
-      end
-
-      def perimeter
-        calculate(:perimeter, self)
-      end
-
-      def perimeter3d
-        calculate(:perimeter3d, self)
-      end
-
-      def overlaps? other
-        calculate(:overlaps, [self, other])
-      end
-
-      def covers? other
-        calculate(:covers, [self, other])
-      end
-
-      def touches? other
-        calculate(:touches, [self, other])
-      end
-
-      def disjoint? other
-        calculate(:disjoint, [self, other])
-      end
-    end
-  end
-end
 
 #POINT(0 0)
 #LINESTRING(0 0,1 1,1 2)

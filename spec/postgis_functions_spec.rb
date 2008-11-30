@@ -4,18 +4,15 @@ describe "PostgisFunctions" do
   before(:all) do
 
     class City < ActiveRecord::Base
-      include PolygonFunctions
-      has_polygon :geom
+      acts_as_geom [:geom => :polygon]
     end
 
     class Position < ActiveRecord::Base
-      include PointFunctions
-      has_point :geom
+      acts_as_geom [:geom => :point]
     end
 
     class Street < ActiveRecord::Base
-      include LineStringFunctions
-      has_line_string :geom
+      acts_as_geom [:geom => :linestring]
     end
 
     class CommonGeo < ActiveRecord::Base
