@@ -67,6 +67,12 @@ describe "PostgisFunctions" do
      @p1.spherical_distance(@p2).should be_close(628516.874554178, 0.0001)
     end
 
+    it "should select the spherical distance in km" do
+     @p1.spherical_distance(@p2).km.should be_close(628516.874554178, 0.0001)
+    end
+
+
+
     it "inside city?" do
       @p1.inside?(@c1).should be_false
     end

@@ -28,6 +28,10 @@ module PostgisFunctions
         end
       end
     end
+
+    def get_points
+      postgis_geoms[:points]
+    end
   end
 end
 

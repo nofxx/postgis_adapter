@@ -23,6 +23,6 @@ require 'autotest/timestamp'
 module Autotest::Growl
   Autotest.add_hook :initialize do |at|
     # growl "autotest", "Rodando..", "Started autotest", ''
-    %w{.hg .git .DS_store}.each {|exception|at.add_exception(exception)}
+    %w{.hg .git .DS_store .log}.each {|exception|at.add_exception(exception)}
   end
 end
