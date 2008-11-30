@@ -64,15 +64,15 @@ describe "PostgisFunctions" do
     end
 
     it "should select the spherical distance" do
-     @p1.spherical_distance(@p2).should be_close(628516.874554178, 0.0001)
+     @p1.distance_spherical_to(@p2).should be_close(628516.874554178, 0.0001)
     end
 
     it "should select the spherical distance in km" do
-     @p1.spherical_distance(@p2, :km).should be_close(628.5, 0.1)
+     @p1.distance_sphere_to(@p2, :km).should be_close(628.5, 0.1)
     end
 
     it "should select the spherical distance in miles" do
-     @p1.spherical_distance(@p2, :miles).should be_close(390.6, 0.1)
+     @p1.distance_sphere_to(@p2, :miles).should be_close(390.6, 0.1)
     end
 
     it "distance to in km" do
@@ -80,7 +80,15 @@ describe "PostgisFunctions" do
     end
 
     it "should select the spheroid distance" do
-     @p1.spheroid_distance(@p2).should be_close(627129.502, 0.01)
+      @p1.distance_spheroid_to(@p2).should be_close(627129.45,0.01)
+    end
+
+    it "should select the spheroid distance in km" do
+      @p1.distance_spheroid_to(@p2, :km).should be_close(627.1295, 0.01)
+    end
+
+    it "should select the spheroid distance in cm" do
+      @p1.distance_spheroid_to(@p2, :cm).should be_close(62712945.76, 0.01)
     end
 
     it "inside city?" do
@@ -123,6 +131,14 @@ describe "PostgisFunctions" do
 
     it "its length" do
       @s1.length.should be_close(1.4142135623731, 0.000001)
+    end
+
+    it "its length in km" do
+      @s1.length(:km).should be_close(1414.213, 0.001)
+    end
+
+    it "its length in miles" do
+      @s1.length(:miles).should be_close(878.751, 0.001)
     end
 
     it "crosses ?" do
@@ -180,16 +196,28 @@ describe "PostgisFunctions" do
       @s2.end_point.x.should be_close(7.0, 0.1)
     end
 
-    it "spheroid length" do
-      @s1.spheroid_length.should be_close(156876.1494,0.0001)
+    it "3d length" do
+      @s1.length_3d.should be_close(1.4142135623731,0.0001)
     end
 
-    it "spheroid length in km" do
-      @s1.spheroid_length(:km).should be_close(156.87,0.01)
+    it "3d length in km" do
+      @s1.length_spheroid(:km).should be_close(156.876,0.001)
     end
 
     it "spheroid length in miles" do
-      @s1.spheroid_length(:miles).should be_close(97.49,0.01)
+      @s1.length_spheroid(:miles).should be_close(97.478,0.001)
+    end
+
+    it "spheroid length" do
+      @s1.length_spheroid.should be_close(156876.1381,0.0001)
+    end
+
+    it "spheroid length in km" do
+      @s1.length_spheroid(:km).should be_close(156.876,0.001)
+    end
+
+    it "spheroid length in miles" do
+      @s1.length_spheroid(:miles).should be_close(97.478,0.001)
     end
 
   end

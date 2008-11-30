@@ -1,19 +1,20 @@
 # #
-# PostGIS Adapter
+#
+# PostGIS Adapter - http://github.com/nofxx/postgis_adapter
 #
 #
-# http://github.com/nofxx/postgis_adapter
+#
+# Links:
+#
+# PostGis Manual -  http://postgis.refractions.net/documentation/manual-1.3/ch06.html
+# Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
 require 'acts_as_geom'
 
 module PostgisFunctions
-  EARTH_SPHEROID = "'SPHEROID[\"GRS_1980\",6378137,298.257222101]'"
-  # #
-  # PostGis Manual:
-  #
-  #http://postgis.refractions.net/documentation/manual-1.3/ch06.html
-  #
-  #
+  #EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
+  EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
+
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {
@@ -66,10 +67,14 @@ module PostgisFunctions
   # COMMON GEOMETRICAL FUNCTIONS
   #
   def distance_convert(value, unit, from = nil)
-    case unit
-    when :km, :kilo   then   from ? value*1000 : value/1000
-    when :miles,:mile then   from ? value*1609 : value/1609
+    factor = case unit
+    when :cm, :cent     then  100.0
+    when :km, :kilo     then  0.001
+    when :miles,:mile   then  0.00062137119
+    when :nmi, :nmile   then  0.0005399568
     end
+    factor *= 1e6 if from
+    value * factor
   end
 
   def spatially_equal?(other)
@@ -84,19 +89,22 @@ module PostgisFunctions
     calculate(:centroid, self)
   end
 
+  # Distance to using cartesian formula
   def distance_to(other, unit=nil)
     dis = calculate(:distance, [self, other])
     return dis unless unit
     distance_convert(dis, unit, true)
   end
 
-  def spherical_distance(other, unit=nil)
+  # Distance to using sphere (Haversine?) formula
+  def distance_sphere_to(other, unit=nil)
     dis = calculate(:distance_sphere, [self, other])
     return dis unless unit
     distance_convert(dis, unit)
   end
+  alias_method :distance_spherical_to, :distance_sphere_to
 
-  def spheroid_distance(other, spheroid = EARTH_SPHEROID, unit=nil)
+  def distance_spheroid_to(other, unit=nil, spheroid = EARTH_SPHEROID)
     dis = calculate(:distance_spheroid, [self, other], spheroid)
     return dis unless unit
     distance_convert(dis, unit)
@@ -154,11 +162,19 @@ module PostgisFunctions
   #
   module LineStringFunctions
 
-    def length
-      calculate(:length, self)
+    def length(unit=nil)
+      dis = calculate(:length, self)
+      return dis unless unit
+      distance_convert(dis, unit, true)
     end
 
-    def spheroid_length(unit=nil, spheroid = EARTH_SPHEROID)
+    def length_3d(unit=nil)
+      dis = calculate(:length3d, self)
+      return dis unless unit
+      distance_convert(dis, unit)
+    end
+
+    def length_spheroid(unit=nil, spheroid = EARTH_SPHEROID)
       dis = calculate(:length_spheroid, self, spheroid)
       return dis unless unit
       distance_convert(dis, unit)
@@ -233,6 +249,7 @@ module PostgisFunctions
   #
   # Class Methods
   #
+  # Falling back to AR here.
   #
   module ClassMethods
 

@@ -17,20 +17,22 @@ module PostgisFunctions
     def acts_as_geom(geoms, options = {})
       cattr_accessor :postgis_geoms
       self.postgis_geoms = {:geoms => geoms, :opts => options}
+      p geoms
       geoms.each do |g|
         case g.values.first
         when :point
-          include PointFunctions
+          send :include, PointFunctions
         when :polygon
-          include PolygonFunctions
+          send :include, PolygonFunctions
         when :line_string, :linestring
-          include LineStringFunctions
+          send :include, LineStringFunctions
         end
       end
     end
 
-    def get_points
-      postgis_geoms[:points]
+    def get_geom_type(column)
+      p column
+
     end
   end
 end
