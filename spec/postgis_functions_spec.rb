@@ -92,19 +92,19 @@ describe "PostgisFunctions" do
     end
 
     it "inside city?" do
-      @p1.inside?(@c1).should be_false
+      @p1.should_not be_inside(@c1)
     end
 
     it "ouside city?" do
-      @p1.outside?(@c1).should be_true
+      @p1.should be_outside(@c1)
     end
 
     it "in bounds of a geometry?" do
-      @p1.in_bounds?(@s1).should be_true
+      @p1.should be_in_bounds(@s1)
     end
 
     it "in bounds of a geometry? with option" do
-      @p3.in_bounds?(@s1, 1).should be_false
+      @p3.should_not be_in_bounds(@s1, 1)
     end
 
     it "calculate another point azimuth??" do
@@ -146,7 +146,7 @@ describe "PostgisFunctions" do
     end
 
     it "crosses ?" do
-      @s1.crosses?(@s2).should be_false
+      @s1.should_not be_crosses(@s2)
     end
 
     it "crosses 2?" do
@@ -154,7 +154,7 @@ describe "PostgisFunctions" do
     end
 
     it "touches ?" do
-      @s1.touches?(@s2).should be_false
+      @s1.should_not be_touches(@s2)
     end
 
     it "touches 2?" do
@@ -265,7 +265,7 @@ describe "PostgisFunctions" do
     end
 
     it "is closed?" do
-      @c2.is_closed?.should be_true
+      @c2.should be_closed
     end
 
     it "total area" do
@@ -297,7 +297,7 @@ describe "PostgisFunctions" do
     end
 
     it "calculate spatially equality" do
-      @c1.spatially_equal?(@c2).should be_false
+      @c1.should_not be_spatially_equal(@c2)
     end
 
     it "find all cities that contains a point" do
@@ -313,16 +313,16 @@ describe "PostgisFunctions" do
     end
 
     it "city covers point?" do
-      @c1.covers?(@p4).should be_true
+      @c1.should be_covers(@p4)
     end
 
     it "city within point?" do
-      @c1.within?(@c2).should be_false
+      @c1.should_not be_within(@c2)
     end
 
     it "city overlaps point?" do
       pending
-      @c1.overlaps?(@c2).should be_true
+      @c1.should be_overlaps(@c2)
     end
 
     it "city disjoint point?" do
@@ -366,66 +366,93 @@ describe "PostgisFunctions" do
   end
 
   describe "BBox operations" do
-    
+
     it "should check stricly left" do
       @p1.bbox("<<", @c1).should be_true
-    end  
+    end
 
     it "should check stricly right" do
       @p1.bbox(">>", @c1).should be_false
-    end  
-
-    it  do
-      @p1.strictly_left_of?(@c1).should be_true
-    end  
-    
-    it  do
-      @p1.strictly_right_of?(@c1).should be_false
-    end 
-
-    it do
-      @p1.overlaps_or_right_of?(@c1).should be_false
-    end 
-
-    it do
-      @p1.overlaps_or_left_of?(@c1).should be_true
-    end 
-
-    it do
-      @p1.completely_contained_by?(@c1).should be_false
     end
-    
+
+    it  do
+      @p1.should be_strictly_left_of(@c1)
+    end
+
+    it  do
+      @p1.should_not be_strictly_right_of(@c1)
+    end
+
+    it do
+      @p1.should_not be_overlaps_or_right_of(@c1)
+    end
+
+    it do
+      @p1.should be_overlaps_or_left_of(@c1)
+    end
+
+    it do
+      @p1.should_not be_completely_contained_by(@c1)
+    end
+
     it  do
       @c2.completely_contains?(@p1).should be_false
-    end 
-
-    it  do
-      @p1.overlaps_or_above_of?(@c1).should be_true
     end
 
     it  do
-      @p1.overlaps_or_below_of?(@c1).should be_true
-    end 
+      @p1.should be_overlaps_or_above(@c1)
+    end
+
+    it  do
+      @p1.should be_overlaps_or_below(@c1)
+    end
 
     it do
-      @p1.strictly_above_of?(@c1).should be_false
+      @p1.should_not be_strictly_above(@c1)
     end
-    
+
     it do
-      @p1.strictly_below_of?(@c1).should be_false
-    end  
-    
+      @p1.should_not be_strictly_below(@c1)
+    end
+
     it do
       @p1.interacts_with?(@c1).should be_false
-    end  
-    
+    end
+
     it do
       @p1.binary_equal?(@c1).should be_false
-    end 
-    
+    end
+
     it do
       @p1.same_as?(@c1).should be_false
-    end  
+    end
+  end
+
+  #TODO is sorted rspec helper
+  describe "Class methods" do
+
+    it "should find all dwithin one" do
+      Position.all_within(@s1.geom).should be_instance_of(Array)
+    end
+
+    it "should find all dwithin one" do
+      City.by_perimeter.should be_instance_of(Array)
+    end
+
+    it "should sort by polygon area" do
+      City.by_area.should be_instance_of(Array)
+    end
+
+    it "should sort by all within" do
+      City.all_within(@s1.geom).should be_instance_of(Array)
+    end
+
+    it "should sort by all within" do
+      City.by_boundaries.should be_instance_of(Array)
+    end
+
+
+
   end
 
 end

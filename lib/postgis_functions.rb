@@ -29,7 +29,7 @@ module PostgisFunctions
     fields = tables.map { |f| f[:uid] + ".geom" }          # W1.geom
     froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}    # streets W1
     wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
-    
+
     # BBox =>  SELECT (A <> B)
     # Data =>  SELECT Fun(A,B)
     unless type == :bbox
@@ -43,7 +43,7 @@ module PostgisFunctions
       opcode = nil
       s_join = " #{options} "
     end
- 
+
     sql =   "SELECT #{opcode}(#{fields.join(s_join)}) FROM #{froms.join(",")} "
     sql <<  "WHERE #{wheres.join(" AND ")}" if wheres
     #p sql; sql
@@ -163,7 +163,7 @@ module PostgisFunctions
     #TODO: return if not point/point
     calculate(:azimuth, [self, other])
   end
-  
+
   ###
   ##
   #
@@ -200,28 +200,28 @@ module PostgisFunctions
   def completely_contains? other
     bbox("~", other)
   end
-  
-  def overlaps_or_above_of? other
+
+  def overlaps_or_above? other
     bbox("|&>", other)
   end
-  
-  def overlaps_or_below_of? other
+
+  def overlaps_or_below? other
     bbox("&<|", other)
   end
-  
+
   def overlaps_or_left_of? other
     bbox("&<", other)
   end
-  
+
   def overlaps_or_right_of? other
     bbox("&>", other)
   end
 
-  def strictly_above_of? other
+  def strictly_above? other
     bbox("|>>", other)
   end
 
-  def strictly_below_of? other
+  def strictly_below? other
     bbox("<<|", other)
   end
 
@@ -347,7 +347,7 @@ module PostgisFunctions
       calculate(:perimeter3d, self)
     end
 
-    def is_closed?
+    def closed?
       calculate(:isclosed, self)
     end
 
@@ -375,26 +375,24 @@ module PostgisFunctions
   #
   # Falling back to AR here.
   #
+  # TODO: ewkb or ewkt?
+  #
   module ClassMethods
 
-    def close_to(p, srid=4326)
-      find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-    end
-
     def closest_to(p, srid=4326)
-      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+      find(:first, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
     end
 
     def close_to(p, srid=4326)
-      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+      find(:all, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
     end
 
     def by_size sort='asc'
-      find(:all, :order => "length(geom) #{sort}" )
+      find(:all, :order => "ST_length(geom) #{sort}" )
     end
 
     def longest
-      find(:first, :order => "length(geom) DESC")
+      find(:first, :order => "ST_length(geom) DESC")
     end
 
     def contains(p, srid=4326)
@@ -405,21 +403,23 @@ module PostgisFunctions
       find(:first, :conditions => ["ST_Contains(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))"])
     end
 
-    def close_to(p, srid=4326)
-      find(:all, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-    end
-
-    def closest_to(p, srid=4326)
-      find(:first, :order => "Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-    end
-
-    def by_size sort='asc'
-      find(:all, :order => "Area(geom) #{sort}" )
+    def by_area sort='asc'
+      find(:all, :order => "ST_Area(geom) #{sort}" )
     end
 
     def by_perimeter sort='asc'
-      find(:all, :order => "Perimeter(geom) #{sort}" )
+      find(:all, :order => "ST_Perimeter(geom) #{sort}" )
     end
+
+    def all_within(other, margin=1)
+#      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKB(E'#{other.as_ewkb}'), #{margin})")
+      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKT(E'#{other.as_ewkt}'), #{margin})")
+    end
+
+    def by_boundaries sort='asc'
+      find(:all, :order => "ST_Boundary(geom) #{sort}" )
+    end
+
   end
 end
 
