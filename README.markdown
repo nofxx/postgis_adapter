@@ -25,8 +25,8 @@ On Rails:
 
 If you are using Spatial Adapter, *remove it first*.
 
-ActiveRecord
-------------
+How to Use
+----------
 
 Geometric columns in your ActiveRecord models now appear just like
 any other column of other basic data types. They can also be dumped
@@ -39,51 +39,50 @@ of basic types.
     class TablePoint < ActiveRecord::Base
     end
 
-That was easy! As you see, there is no need to declare a column
-as geometric. The plugin will get this information by itself.
-
-
-### Access
+That was easy! As you see, there is no need to declare a column as geometric.
+The plugin will get this information by itself.
 
 Here is an example of PostGIS row creation and access, using the
 model and the table defined above :
 
-  	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4,123))
+  	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y(1,2))
   	pt.save
-  	pt = TablePoint.find_first
-  	puts pt.geom.x #access the geom column like any other
+  	pt = TablePoint.first
+  	puts pt.geom.x
+  	=> 1
 
 
-PostGIS Extra Functions
+PostGIS Extra Functions (
 -----------------------
 
-To be documented, here are the cool stuff postgis only let you do:
+Here are this fork additions, this stuff you need to enable. To do so, change your
+class to:
 
-### How to Use
 
-    class Park < ActiveRecord::Base
-      acts_as_geom :area
+    class Street < ActiveRecord::Base
+      acts_as_geom :line
     end
 
     ...
 
+    @place  =   Poi.new(    :data  =>   **Point**      )
+    @park   =   Park.new(   :area  =>  **Polygon**     )
+    @street =   Street.new( :line  => **LineString**   )
 
-    @point  =   Poi.new(    :geom =>   **Point**      )
-    @park   =   Park.new(   :geom =>  **Polygon**     )
-    @street =   Street.new( :geom => **LineString**   )
 
+### Play!
 
-### And your objects can do:
-
-    @point.inside?(@park)
-    => true
-    @point.in_bounds?(@park, 0.5) # margin
+    @place.inside?(@park)
     => true
 
-And back:
-
-    @point.outside?(@park)
+    @place.in_bounds?(@park, 0.5) # margin
     => false
+
+    @place.outside?(@park)
+
+    @street.crosses?(@park)
+
+    @area.contains?(@place)
 
 Play with polygons:
 
@@ -93,12 +92,22 @@ Play with polygons:
     @park.contains?(@point)
     => true
 
+    @park.overlaps?(@other_park)
+    => false
+
 And LineStrings:
 
     @street_east.intersects?(@street_west)
     => false
+
     @street_central.length
-    => 45.53636
+    => 4508.53636
+
+    @street_central.length(:miles)
+    => 2.81798593
+
+    @street.length_spheroid
+    => 4.40853636
 
 
 ### And for classes:
@@ -115,13 +124,37 @@ And LineStrings:
     Areas.contains(@point)
     => [Array of areas contains the point...
 
+
 ### BBox Support
 
     @area.strictly_left_of? @point
 
-Same as:
+    @area.overlaps_or_above? @street
+
+    ...
+
+    completely_contained_by?
+    completely_contains?
+    overlaps_or_above?
+    overlaps_or_below?
+    overlaps_or_left_of?
+    overlaps_or_right_of?
+    strictly_above?
+    strictly_below?
+    strictly_left_of?
+    strictly_right_of?
+    interacts_with?
+    binary_equal?
+    same_as?
+
+
+Or use a (almost) postgis like notation:
 
     @area.bbox "<<", @point
+
+    @area.bbox "|>>", @point
+
+    @area.bbox "@",  @park
 
 
 ### Wiki
@@ -129,6 +162,7 @@ Same as:
 Check out the wiki pages:
 http://github.com/nofxx/postgis_adapter/wikis
 For all functions.
+
 
 ### Find_by
 
