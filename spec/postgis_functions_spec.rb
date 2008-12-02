@@ -274,6 +274,15 @@ describe "PostgisFunctions" do
     it do
       @s1.overlaps?(@s2).should be_false
     end
+
+    it do
+      @s1.convex_hull.should be_instance_of(LineString)
+    end
+
+    it do
+      @s1.interpolate_point(0.7).should be_instance_of(Point)
+      @s1.interpolate_point(0.7).x.should be_close(1.7,0.1)
+    end
   end
 
 
