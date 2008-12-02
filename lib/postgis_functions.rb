@@ -17,129 +17,142 @@ module PostgisFunctions
   #EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
   EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
 
-  # Construct the postgis sql query
-  # TODO: ST_Transform() ?? # Convert between distances. Implement this?
-  #
-  # Area return in square feet
-  # Distance/DWithin/Length/Perimeter —  in projected units.
-  # DistanceSphere/Spheroid —  in meters.
-  #
-  #
-  def construct_geometric_sql(type,geoms,options)
-
-    tables = geoms.map do |t| {
-      :class => t.class.to_s.downcase.pluralize,
-      :uid =>  unique_identifier,
-      :id => t[:id] }
-    end
-
-    fields = tables.map { |f| f[:uid] + ".geom" }          # W1.geom
-    froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}    # streets W1
-    wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
-
-    # BBox =>  SELECT (A <> B)
-    # Data =>  SELECT Fun(A,B)
-    unless type == :bbox
-      opcode = type.to_s
-      #use all commands in lowcase form
-      #opcode = opcode.camelize unless opcode =~ /spher|max|npoints/
-      opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
-      s_join = ","
-      fields << options if options
-    else
-      opcode = nil
-      s_join = " #{options} "
-    end
-
-    sql =   "SELECT #{opcode}(#{fields.join(s_join)}) FROM #{froms.join(",")} "
-    sql <<  "WHERE #{wheres.join(" AND ")}" if wheres
-    #p sql; sql
-  end
-
-  # Execute the query, we may receive:
-  #
-  # "t" or "f" for boolean queries
-  # BIGHASH    for geometries
-  # Rescue     a float
-  #
-  def execute_geometrical_calculation(operation, subject, options) #:nodoc:
-    value = connection.select_value(construct_geometric_sql(operation, subject, options))
-    if value =~ /^\D/
-      {"f" => false, "t" => true}[value]
-    else
-      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value.to_f
-    end
-  end
-
-  def calculate(operation, subject, options = nil)
+  def postgis_calculate(operation, subject, options = nil)
     subject = [subject] unless subject.respond_to?(:map)
     return execute_geometrical_calculation(operation, subject, options)
-  end
-
-  # Get a unique ID for tables
-  def unique_identifier
-    @u_id ||= "W1"
-    @u_id = @u_id.succ
   end
 
   # #
   #
   # COMMON GEOMETRICAL FUNCTIONS
   #
-  #
-  #
+
+  # Given geometries represent the same geometry? Directionality is ignored.
+  # Returns boolean
   def spatially_equal?(other)
-    calculate(:equals, [self, other])
+    postgis_calculate(:equals, [self, other])
   end
 
-  def envelope;    calculate(:envelope, self);  end
-  def centroid;    calculate(:centroid, self);  end
-  def boundary;    calculate(:boundary, self);  end
+  # Object or collection envelope. Returns Geometry.
+  def envelope;    postgis_calculate(:envelope, self);  end
+
+  # Object or collection centroid (point). Returns Geometry.
+  def centroid;    postgis_calculate(:centroid, self);  end
+
+
+  def boundary;    postgis_calculate(:boundary, self);  end
 
   # Distance to using cartesian formula
   def distance_to(other, unit=nil)
-    dis = calculate(:distance, [self, other])
+    dis = postgis_calculate(:distance, [self, other])
     return dis unless unit
     distance_convert(dis, unit, true)
   end
 
+  # Returns TRUE if geometry A is completely inside geometry B.
+  # For this function to make sense, the source geometries must both be of the same
+  # coordinate projection, having the same SRID. It is a given that
+  # if ST_Within(A,B) is true and ST_Within(B,A) is true, then the
+  # two geometries are considered spatially equal.
+  #
+  # Performed by the GEOS module
+  # Do not call with a GEOMETRYCOLLECTION as an argument
+  # Do not use this function with invalid geometries. You will get unexpected results.
+  #
+  # This function call will automatically include a bounding box comparison that will
+  # make use of any indexes that are available on the geometries. To avoid index use,
+  # use the function _ST_Within.
+  #
+  # Returns boolean ST_Within(geometry A, geometry B);
   def within? other
-    calculate(:within, [self, other])
+    postgis_calculate(:within, [self, other])
   end
 
   def contains? other
-    calculate(:contains, [self, other])
+    postgis_calculate(:contains, [self, other])
   end
 
   def inside? other
-    calculate(:coveredby, [self, other])
+    postgis_calculate(:coveredby, [self, other])
   end
+
   def outside? other;    !inside? other;  end
 
+  # True if Geometries "spatially intersect" - (share any portion of space)
+  # False if they don't (they are Disjoint).
+  # Overlaps, Touches, Within all imply spatial intersection.
+  # If any of the aforementioned returns true, then the geometries also
+  # spatially intersect. Disjoint implies false for spatial intersection.
+  #
+  # Returns boolean
+  def intersects? other
+    postgis_calculate(:intersects, [self, other])
+  end
+
   def dimension
-    calculate(:dimension, self).to_i
+    postgis_calculate(:dimension, self).to_i
   end
 
   def simplify(tolerance=1)
-    calculate(:simplify, self, tolerance)
+    postgis_calculate(:simplify, self, tolerance)
   end
 
   def simplify_preserve_topology(tolerance=1)
-    calculate(:simplifypreservetopology, self, tolerance)
+    postgis_calculate(:simplifypreservetopology, self, tolerance)
   end
 
   def envelopes_intersect? other
-     calculate(:se_envelopesintersect, [self, other])
+     postgis_calculate(:se_envelopesintersect, [self, other])
   end
 
   def intersection other
-    calculate(:intersection, [self, other])
+    postgis_calculate(:intersection, [self, other])
   end
 
-  def azimuth other
-    #TODO: return if not point/point
-    calculate(:azimuth, [self, other])
+  # Returns TRUE if the Geometries share space, are of the same dimension, but are
+  # not completely contained by each other. They intersect, but one does not
+  # completely contain another.
+  #
+  # Do not call with a GeometryCollection as an argument
+  # This function call will automatically include a bounding box comparison that
+  # will make use of any indexes that are available on the geometries. To avoid
+  # index use, use the function _ST_Overlaps.
+  #
+  # Performed by the GEOS module
+  #
+  # Returns # boolean ST_Overlaps(geometry A, geometry B);
+  def overlaps? other
+    postgis_calculate(:overlaps, [self, other])
+    rescue
+    ActiveRecord::StatementInvalid
   end
+
+  # Returns TRUE if the geometries have at least one point in common,
+  # but their interiors do not intersect.
+  #
+  # If the only points in common between g1 and g2 lie in the union of the
+  # boundaries of g1 and g2. The ST_Touches relation applies to all Area/Area,
+  # Line/Line, Line/Area, Point/Area and Point/Line pairs of relationships,
+  # but not to the Point/Point pair.
+  #
+  # Returns boolean ST_Touches(geometry g1, geometry g2);
+  def touches? other
+    postgis_calculate(:touches, [self, other])
+  end
+
+  # NEW
+  #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
+  #boolean ST_OrderingEquals(g
+  #  ST_PointOnSurface — Returns a POINT guaranteed to lie on the surface.
+  #geometry ST_PointOnSurface(geometry g1);eometry A, geometry B);
+  #ST_ConvexHull — The convex hull of a geometry represents the minimum closed geometry that encloses all geometries within the set.
+  #Synopsis
+  #geometryST_ConvexHull(geometry geomA);
+  #Description
+  #The convex hull of a geometry represents the minimum closed geometry that encloses all geometries within the set.
+  #It is usually used with MULTI and Geometry Collections. Although it is not an aggregate - you can use it in conjunction with ST_Collect to get the convex hull of a set of points. ST_ConvexHull(ST_Collect(somepointfield)).
+  #It is often used to determine an affected area based on a set of point observations.
+  #Performed by the GEOS module
 
   ###
   ##
@@ -167,7 +180,7 @@ module PostgisFunctions
   #   A ~= B - true if A and B geometries are binary equal?
   #
   def bbox(operator, other)
-    calculate(:bbox, [self, other], operator)
+    postgis_calculate(:bbox, [self, other], operator)
   end
 
   def completely_contained_by? other
@@ -231,25 +244,34 @@ module PostgisFunctions
   #
   module PointFunctions
     def d_within?(other,margin=0.5)
-      calculate(:dwithin, [self, other], margin)
+      postgis_calculate(:dwithin, [self, other], margin)
     end
     alias_method "in_bounds?", "d_within?"
 
     # Return a float from 0.0 to 1.0
     def where_on_line line
-      calculate(:line_locate_point, [line, self])
+      postgis_calculate(:line_locate_point, [line, self])
     end
 
     # Distance to using sphere (Haversine?) formula
     def distance_sphere_to(other)
-      dis = calculate(:distance_sphere, [self, other])
+      dis = postgis_calculate(:distance_sphere, [self, other])
     end
     alias_method :distance_spherical_to, :distance_sphere_to
 
     # Distance to using a spheroid
     # Slower then sphere or length, but more precise.
     def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
-      calculate(:distance_spheroid, [self, other], spheroid)
+      postgis_calculate(:distance_spheroid, [self, other], spheroid)
+      rescue
+        ActiveRecord::StatementInvalid
+    end
+
+    def azimuth other
+      #TODO: return if not point/point
+      postgis_calculate(:azimuth, [self, other])
+      rescue
+        ActiveRecord::StatementInvalid
     end
 
     # New stuff:
@@ -257,8 +279,9 @@ module PostgisFunctions
     #  point_inside_circle(<geometry>,<circle_center_x>,<circle_center_y>,<radius>).
     # Returns the true if the geometry is a point and is inside the circle.
     def inside_circle?(x,y,r)
-      calculate(:point_inside_circle, self, [x,y,r])
+      postgis_calculate(:point_inside_circle, self, [x,y,r])
     end
+
 
   end
 
@@ -272,50 +295,74 @@ module PostgisFunctions
   #
   module LineStringFunctions
 
-    # Returns length using cartesian formula.
+
+    # Returns the 2D length of the geometry if it is a linestring, multilinestring,
+    # ST_Curve, ST_MultiCurve. 0 is returned for areal geometries. For areal geometries
+    # use 'perimeter'. Measurements are in the units of the spatial reference system
+    # of the geometry.
+    #
+    # Returns Float
     def length
-      dis = calculate(:length, self)
+      dis = postgis_calculate(:length, self)
     end
 
+    # Returns the 3-dimensional or 2-dimensional length of the geometry if it is
+    # a linestring or multi-linestring. For 2-d lines it will just return the 2-d
+    # length (same as 'length')
+    #
+    # Returns Float
     def length_3d
-      dis = calculate(:length3d, self)
+      dis = postgis_calculate(:length3d, self)
     end
 
-    # Returns length using spheroid formula.
-    # Arguments are (unit, spheroid)
+    # Calculates the length of a geometry on an ellipsoid. This is useful if the
+    # coordinates of the geometry are in longitude/latitude and a length is
+    # desired without reprojection. The ellipsoid is a separate database type and
+    # can be constructed as follows:
+    #
+    # SPHEROID[<NAME>,<SEMI-MAJOR AXIS>,<INVERSE FLATTENING>]
+    #
+    # Example:
+    #   SPHEROID["GRS_1980",6378137,298.257222101]
+    #
+    # Defauls to:
+    #
+    #   SPHEROID["IERS_2003",6378136.6,298.25642]
+    #
+    # Returns Float
+    #
     def length_spheroid(spheroid = EARTH_SPHEROID)
-      dis = calculate(:length_spheroid, self, spheroid)
+      dis = postgis_calculate(:length_spheroid, self, spheroid)
     end
+
+    #float ST_Max_Distance(geometry g1, geometry g2);
+    #Not implemented in postgis yet
 
     # Return the number of points of the geometry.
     # PostGis ST_NumPoints does not work as nov/08
-    def num_points;     calculate(:npoints, self).to_i;    end
+    def num_points;     postgis_calculate(:npoints, self).to_i;    end
 
     # Return the first and last points.
-    def start_point;    calculate(:startpoint, self);    end
-    def end_point;      calculate(:endpoint, self);    end
+    def start_point;    postgis_calculate(:startpoint, self);    end
+    def end_point;      postgis_calculate(:endpoint, self);    end
 
-    def intersects? other
-      calculate(:intersects, [self, other])
-    end
+
 
     def crosses? other
-      calculate(:crosses, [self, other])
+      postgis_calculate(:crosses, [self, other])
     end
 
-    def touches? other
-      calculate(:touches, [self, other])
-    end
+
 
     # Locate a point on the line, return a float from 0 to 1
     def locate_point point
-      calculate(:line_locate_point, [self, point])
+      postgis_calculate(:line_locate_point, [self, point])
     end
 
     #Not implemented in postgis
     # ST_max_distance Returns the largest distance between two line strings.
     #def max_distance other
-    #  calculate(:max_distance, [self, other])
+    #  postgis_calculate(:max_distance, [self, other])
     #end
   end
 
@@ -328,35 +375,42 @@ module PostgisFunctions
   module PolygonFunctions
 
     def area
-      calculate(:area, self)
+      postgis_calculate(:area, self)
     end
 
+    # Returns the 2D perimeter of the geometry if it is a ST_Surface, ST_MultiSurface
+    # (Polygon, Multipolygon). 0 is returned for non-areal geometries. For linestrings
+    # use 'length'. Measurements are in the units of the spatial reference system of
+    # the geometry.
+    #
+    # Returns float ST_Perimeter(geometry g1);
     def perimeter
-      calculate(:perimeter, self)
+      postgis_calculate(:perimeter, self)
     end
 
+    # Returns the 3-dimensional perimeter of the geometry, if it is a polygon or multi-polygon.
+    # If the geometry is 2-dimensional, then the 2-dimensional perimeter is returned.
+    #
+    # Returns float ST_Perimeter3D(geometry geomA);
     def perimeter3d
-      calculate(:perimeter3d, self)
+      postgis_calculate(:perimeter3d, self)
     end
 
     def closed?
-      calculate(:isclosed, self)
+      postgis_calculate(:isclosed, self)
     end
 
-    def overlaps? other
-      calculate(:overlaps, [self, other])
-    end
 
     def covers? other
-      calculate(:covers, [self, other])
+      postgis_calculate(:covers, [self, other])
     end
 
     def touches? other
-      calculate(:touches, [self, other])
+      postgis_calculate(:touches, [self, other])
     end
 
     def disjoint? other
-      calculate(:disjoint, [self, other])
+      postgis_calculate(:disjoint, [self, other])
     end
   end
 
@@ -413,6 +467,70 @@ module PostgisFunctions
     end
 
   end
+
+  private
+
+
+    # Construct the postgis sql query
+  # TODO: ST_Transform() ?? # Convert between distances. Implement this?
+  #
+  # Area return in square feet
+  # Distance/DWithin/Length/Perimeter —  in projected units.
+  # DistanceSphere/Spheroid —  in meters.
+  #
+  #
+  def construct_geometric_sql(type,geoms,options)
+
+    tables = geoms.map do |t| {
+      :class => t.class.to_s.downcase.pluralize,
+      :uid =>  unique_identifier,
+      :id => t[:id] }
+    end
+
+    fields = tables.map { |f| f[:uid] + ".geom" }          # W1.geom
+    froms = tables.map { |f| "#{f[:class]} #{f[:uid]}"}    # streets W1
+    wheres = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}"} # W1.id = 5
+
+    # BBox =>  SELECT (A <> B)
+    # Data =>  SELECT Fun(A,B)
+    unless type == :bbox
+      opcode = type.to_s
+      #use all commands in lowcase form
+      #opcode = opcode.camelize unless opcode =~ /spher|max|npoints/
+      opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
+      s_join = ","
+      fields << options if options
+    else
+      opcode = nil
+      s_join = " #{options} "
+    end
+
+    sql =   "SELECT #{opcode}(#{fields.join(s_join)}) FROM #{froms.join(",")} "
+    sql <<  "WHERE #{wheres.join(" AND ")}" if wheres
+    #p sql; sql
+  end
+
+  # Execute the query, we may receive:
+  #
+  # "t" or "f" for boolean queries
+  # BIGHASH    for geometries
+  # Rescue     a float
+  #
+  def execute_geometrical_calculation(operation, subject, options) #:nodoc:
+    value = connection.select_value(construct_geometric_sql(operation, subject, options))
+    if value =~ /^\D/
+      {"f" => false, "t" => true}[value]
+    else
+      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value.to_f
+    end
+  end
+
+  # Get a unique ID for tables
+  def unique_identifier
+    @u_id ||= "W1"
+    @u_id = @u_id.succ
+  end
+
 end
 
 

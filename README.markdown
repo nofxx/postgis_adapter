@@ -1,12 +1,13 @@
 Postgis Adapter
 ===============
 
-*Spatial Adapter by Guilhem Vellut*:
 A plugin for ActiveRecord which manages the PostGIS geometric columns
 in a transparent way (that is like the other base data type columns).
 It also provides a way to manage these columns in migrations.
 
-*this* = Spatial Adapter *+* PostGIS Functions *-* MySQL
+This fork adds handy methods to make geometrical calculations on postgis.
+
+http://postgis.refractions.net/documentation/manual-svn
 
 *PostGIS and Rails 2+ only*.
 
