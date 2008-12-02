@@ -43,63 +43,63 @@ describe "PostgisFunctions" do
       Position.closest_to(@p1.geom,123).data.should == @p1.data
     end
 
-    it "distance to a linestring" do
+    it  do
       @p1.distance_to(@s2).should be_close(4.24264068711928, 0.0001)
     end
 
-    it "distance to a linestring" do
+    it  do
       @p1.distance_to(@s3).should be_close(9.89949493661167, 0.0001)
     end
 
-    it "distance to a linestring" do
+    it  do
       @p2.distance_to(@s3).should be_close(4.24264068711928, 0.0001)
     end
 
-    it "distance to another point" do
+    it  do
       @p1.distance_to(@p2).should be_close(5.65685424949238, 0.0001)
     end
 
-    it "distance to a polygon" do
-      @p1.distance_to(@c2).should be_close(21.0237960416286, 0.0001)
+    it do
+      @p1.distance_spherical_to(@p2).should be_close(628516.874554178, 0.0001)
     end
 
-    it "should select the spherical distance" do
-     @p1.distance_spherical_to(@p2).should be_close(628516.874554178, 0.0001)
+    it do
+      @p1.distance_sphere_to(@p3).should be_close(1098726.61466584, 0.00001)
     end
 
-    it "should select the spherical distance in km" do
-     @p1.distance_sphere_to(@p2, :km).should be_close(628.5, 0.1)
+    it  do
+      @p1.distance_to(@c1).should be_close(3.0, 0.0001)
     end
 
-    it "should select the spherical distance in miles" do
-     @p1.distance_sphere_to(@p2, :miles).should be_close(390.6, 0.1)
+    it  do
+      @p1.distance_to(@c2).should be_close(21.0237960416286, 0.000001)
     end
 
-    it "distance to in km" do
-      @p1.distance_to(@p2, :km).should be_close(5656.854, 0.01)
+    it  do
+      @p1.distance_to(@s2).should be_close(4.24264068711928, 0.000001)
     end
 
-    it "should select the spheroid distance" do
+    it  do
       @p1.distance_spheroid_to(@p2).should be_close(627129.45,0.01)
     end
 
-    it "should select the spheroid distance in km" do
-      @p1.distance_spheroid_to(@p2, :km).should be_close(627.1295, 0.01)
+    it do
+      @p1.distance_spheroid_to(@p2).should be_close(627129.457699803, 0.000001)
     end
 
-    it "should select the spheroid distance in cm" do
-      @p1.distance_spheroid_to(@p2, :cm).should be_close(62712945.76, 0.01)
+    it do
+      @p1.distance_spheroid_to(@p3).should be_close(1096324.40267746, 0.000001)
     end
 
-    it "inside city?" do
+    it do
       @p1.should_not be_inside(@c1)
     end
 
-    it "ouside city?" do
+    it do
       @p1.should be_outside(@c1)
     end
 
-    it "in bounds of a geometry?" do
+    it do
       @p1.should be_in_bounds(@s1)
     end
 
@@ -112,7 +112,7 @@ describe "PostgisFunctions" do
     end
 
     it "calculate linestring azimuth??" do
-    pending
+      pending
       lambda{ @p1.azimuth(@s2) }.should_raise "Err"
     end
 
@@ -138,34 +138,34 @@ describe "PostgisFunctions" do
     end
 
     it "its length in km" do
-      @s1.length(:km).should be_close(1414.213, 0.001)
+      @s2.length.should be_close(4.2, 0.1)
     end
 
     it "its length in miles" do
-      @s1.length(:miles).should be_close(878.751, 0.001)
+      @s3.length.should be_close(42.4264068, 0.001)
     end
 
-    it "crosses ?" do
+    it  do
       @s1.should_not be_crosses(@s2)
     end
 
-    it "crosses 2?" do
-      @s4.crosses?(@s3).should be_true
+    it do
+      @s4.should be_crosses(@s3)
     end
 
-    it "touches ?" do
+    it do
       @s1.should_not be_touches(@s2)
     end
 
-    it "touches 2?" do
+    it do
       @s4.touches?(@s3).should be_false
     end
 
-    it "should check for crosses" do
-      @s4.intersects?(@s3).should be_true
+    it do
+      @s4.should be_intersects(@s3)
     end
 
-    it "should get a polygon for envelope" do
+    it do
       @s1.envelope.should be_instance_of(Polygon)
     end
 
@@ -182,8 +182,22 @@ describe "PostgisFunctions" do
       @s1.centroid.srid.should eql(123)
     end
 
-    it "distance to a point" do
+    it do
       @s1.distance_to(@p3).should be_close(8.48528137423857,0.0001)
+    end
+
+    it do
+      pending
+      @s1.distance_spheroid_to(@p3).should_raise
+    end
+
+    it do
+      pending
+      @p3.distance_spheroid_to(@s1).should_raise
+    end
+
+    it do
+      @s1.distance_to(@p3).should be_close(8.48,0.01)
     end
 
     it "number of points" do
@@ -204,31 +218,19 @@ describe "PostgisFunctions" do
       @s1.length_3d.should be_close(1.4142135623731,0.0001)
     end
 
-    it "3d length in km" do
-      @s1.length_spheroid(:km).should be_close(156.876,0.001)
-    end
-
-    it "spheroid length in miles" do
-      @s1.length_spheroid(:miles).should be_close(97.478,0.001)
-    end
-
-    it "spheroid length" do
+    it do
       @s1.length_spheroid.should be_close(156876.1381,0.0001)
     end
 
-    it "spheroid length in km" do
-      @s1.length_spheroid(:km).should be_close(156.876,0.001)
+#    it do
+#      @s1.length_spheroid.in_miles.should be_close(156.876,0.001)
+#    end
+
+    it do
+      @s1.should_not be_envelopes_intersect(@s2)
     end
 
-    it "spheroid length in miles" do
-      @s1.length_spheroid(:miles).should be_close(97.478,0.001)
-    end
-
-    it "should check for envelope intersection" do
-      @s1.envelopes_intersect?(@s2).should be_false
-    end
-
-    it "boundary" do
+    it do
       @s1.boundary.should be_instance_of(MultiPoint)
     end
 
@@ -264,15 +266,15 @@ describe "PostgisFunctions" do
       City.by_size.first.data.should == "City1" #[@c1, @c2, @c3]
     end
 
-    it "is closed?" do
+    it do
       @c2.should be_closed
     end
 
-    it "total area" do
+    it do
       @c3.area.should be_close(1093.270089, 0.1)
     end
 
-    it "total area 2" do
+    it do
       @c2.area.should be_close(1159.5, 0.1)
     end
 
@@ -296,7 +298,7 @@ describe "PostgisFunctions" do
       @c1.contains?(@p4).should be_true
     end
 
-    it "calculate spatially equality" do
+    it do
       @c1.should_not be_spatially_equal(@c2)
     end
 
@@ -308,15 +310,15 @@ describe "PostgisFunctions" do
       City.contain(@p4.geom, 123).data.should eql("City1")
     end
 
-    it "city covers point?" do
-      @c1.covers?(@p1).should be_false
+    it do
+      @c1.should_not be_covers(@p1)
     end
 
-    it "city covers point?" do
+    it do
       @c1.should be_covers(@p4)
     end
 
-    it "city within point?" do
+    it do
       @c1.should_not be_within(@c2)
     end
 
@@ -450,8 +452,6 @@ describe "PostgisFunctions" do
     it "should sort by all within" do
       City.by_boundaries.should be_instance_of(Array)
     end
-
-
 
   end
 

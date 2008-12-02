@@ -6,10 +6,14 @@
 #
 # Links:
 #
-# PostGis Manual -  http://postgis.refractions.net/documentation/manual-1.3/ch06.html
+# PostGis Manual -  http://postgis.refractions.net/documentation/manual-svn/ch07.html
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
-
+#
+# New stuff:
+#ST_point_inside_circle(geometry, float, float, float)
+#    The syntax for this functions is point_inside_circle(<geometry>,<circle_center_x>,<circle_center_y>,<radius>). Returns the true if the geometry is a point and is inside the circle. Returns false otherwise.
+#
 module PostgisFunctions
 
   # Defaul Earth Spheroid
@@ -59,8 +63,6 @@ module PostgisFunctions
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
     if value =~ /^\D/
       {"f" => false, "t" => true}[value]
-    elsif value =~ /\./
-      value.to_f
     else
       GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value.to_f
     end
@@ -82,18 +84,12 @@ module PostgisFunctions
   # COMMON GEOMETRICAL FUNCTIONS
   #
   # Convert between distances.
-  # Lengths return result in km.
-  # Other operations return in meters
-  def distance_convert(value, unit, from = nil)
-    factor = case unit
-    when :cm, :cent     then  100.0
-    when :km, :kilo     then  0.001
-    when :miles,:mile   then  0.00062137119
-    when :nmi, :nmile   then  0.0005399568
-    end
-    factor *= 1e6 if from
-    value * factor
-  end
+  #
+  # Area return in square feet
+  # Distance/DWithin/Length/Perimeter —  in projected units.
+  # DistanceSphere/Spheroid —  in meters.
+  # TODO: ST_Transform() ??
+
 
   def spatially_equal?(other)
     calculate(:equals, [self, other])
@@ -108,22 +104,6 @@ module PostgisFunctions
     dis = calculate(:distance, [self, other])
     return dis unless unit
     distance_convert(dis, unit, true)
-  end
-
-  # Distance to using sphere (Haversine?) formula
-  def distance_sphere_to(other, unit=nil)
-    dis = calculate(:distance_sphere, [self, other])
-    return dis unless unit
-    distance_convert(dis, unit)
-  end
-  alias_method :distance_spherical_to, :distance_sphere_to
-
-  # Distance to using a spheroid
-  # Slower then sphere or length, but more precise.
-  def distance_spheroid_to(other, unit=nil, spheroid = EARTH_SPHEROID)
-    dis = calculate(:distance_spheroid, [self, other], spheroid)
-    return dis unless unit
-    distance_convert(dis, unit)
   end
 
   def within? other
@@ -262,6 +242,18 @@ module PostgisFunctions
     def where_on_line line
       calculate(:line_locate_point, [line, self])
     end
+
+    # Distance to using sphere (Haversine?) formula
+    def distance_sphere_to(other)
+      dis = calculate(:distance_sphere, [self, other])
+    end
+    alias_method :distance_spherical_to, :distance_sphere_to
+
+    # Distance to using a spheroid
+    # Slower then sphere or length, but more precise.
+    def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
+      dis = calculate(:distance_spheroid, [self, other], spheroid)
+    end
   end
 
   ####
@@ -275,24 +267,18 @@ module PostgisFunctions
   module LineStringFunctions
 
     # Returns length using cartesian formula.
-    def length(unit=nil)
+    def length
       dis = calculate(:length, self)
-      return dis unless unit
-      distance_convert(dis, unit, true)
     end
 
-    def length_3d(unit=nil)
+    def length_3d
       dis = calculate(:length3d, self)
-      return dis unless unit
-      distance_convert(dis, unit)
     end
 
     # Returns length using spheroid formula.
     # Arguments are (unit, spheroid)
-    def length_spheroid(unit=nil, spheroid = EARTH_SPHEROID)
+    def length_spheroid(spheroid = EARTH_SPHEROID)
       dis = calculate(:length_spheroid, self, spheroid)
-      return dis unless unit
-      distance_convert(dis, unit)
     end
 
     # Return the number of points of the geometry.
@@ -412,8 +398,8 @@ module PostgisFunctions
     end
 
     def all_within(other, margin=1)
-#      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKB(E'#{other.as_ewkb}'), #{margin})")
-      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKT(E'#{other.as_ewkt}'), #{margin})")
+#      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKB(E'#{other.as_ewkt}'), #{margin})")
+      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKT(E'#{other.as_hex_ewkb}'), #{margin})")
     end
 
     def by_boundaries sort='asc'
@@ -492,3 +478,13 @@ end
 #ST_AsGML
 #ST_AsKML
 #ST_AsSVG
+#  def distance_convert(value, unit, from = nil)
+#    factor = case unit
+#    when :km, :kilo     then  1
+#    when :miles,:mile   then  0.62137119
+#    when :cm, :cent     then  0.1
+#    when :nmi, :nmile   then  0.5399568
+#    end
+#    factor *= 1e3 if from
+#    value * factor
+#  end
