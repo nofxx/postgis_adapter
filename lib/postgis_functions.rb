@@ -10,10 +10,6 @@
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
 #
-# New stuff:
-#ST_point_inside_circle(geometry, float, float, float)
-#    The syntax for this functions is point_inside_circle(<geometry>,<circle_center_x>,<circle_center_y>,<radius>). Returns the true if the geometry is a point and is inside the circle. Returns false otherwise.
-#
 module PostgisFunctions
 
   # Defaul Earth Spheroid
@@ -22,6 +18,13 @@ module PostgisFunctions
   EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
 
   # Construct the postgis sql query
+  # TODO: ST_Transform() ?? # Convert between distances. Implement this?
+  #
+  # Area return in square feet
+  # Distance/DWithin/Length/Perimeter —  in projected units.
+  # DistanceSphere/Spheroid —  in meters.
+  #
+  #
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {
@@ -83,14 +86,8 @@ module PostgisFunctions
   #
   # COMMON GEOMETRICAL FUNCTIONS
   #
-  # Convert between distances.
   #
-  # Area return in square feet
-  # Distance/DWithin/Length/Perimeter —  in projected units.
-  # DistanceSphere/Spheroid —  in meters.
-  # TODO: ST_Transform() ??
-
-
+  #
   def spatially_equal?(other)
     calculate(:equals, [self, other])
   end
@@ -252,8 +249,17 @@ module PostgisFunctions
     # Distance to using a spheroid
     # Slower then sphere or length, but more precise.
     def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
-      dis = calculate(:distance_spheroid, [self, other], spheroid)
+      calculate(:distance_spheroid, [self, other], spheroid)
     end
+
+    # New stuff:
+    # ST_point_inside_circle(geometry, float, float, float)
+    #  point_inside_circle(<geometry>,<circle_center_x>,<circle_center_y>,<radius>).
+    # Returns the true if the geometry is a point and is inside the circle.
+    def inside_circle?(x,y,r)
+      calculate(:point_inside_circle, self, [x,y,r])
+    end
+
   end
 
   ####

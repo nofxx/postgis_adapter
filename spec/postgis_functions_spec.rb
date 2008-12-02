@@ -120,6 +120,14 @@ describe "PostgisFunctions" do
       @p1.where_on_line(@s1).should eql(0.0)
     end
 
+    it do
+      @p1.should be_inside_circle(2.0,2.0,20.0)
+    end
+
+    it do
+      @p1.should_not be_inside_circle(50,50,2)
+    end
+
   end
 
   describe "LineString" do
@@ -133,28 +141,28 @@ describe "PostgisFunctions" do
       Street.longest.data.should == "Street3"
     end
 
-    it "its length" do
+    it do
       @s1.length.should be_close(1.4142135623731, 0.000001)
     end
 
-    it "its length in km" do
+    it do
       @s2.length.should be_close(4.2, 0.1)
     end
 
-    it "its length in miles" do
+    it do
       @s3.length.should be_close(42.4264068, 0.001)
     end
 
-    it  do
-      @s1.should_not be_crosses(@s2)
+    it do
+      @s1.crosses?(@s2).should_not be_true
     end
 
     it do
-      @s4.should be_crosses(@s3)
+      @s4.crosses?(@s3).should be_true
     end
 
     it do
-      @s1.should_not be_touches(@s2)
+      @s1.touches?(@s2).should be_false
     end
 
     it do
@@ -162,7 +170,11 @@ describe "PostgisFunctions" do
     end
 
     it do
-      @s4.should be_intersects(@s3)
+      @s4.intersects?(@s3).should be_true
+    end
+
+    it do
+      @s4.intersects?(@s1).should be_false
     end
 
     it do
