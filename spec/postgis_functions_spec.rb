@@ -60,7 +60,7 @@ describe "PostgisFunctions" do
     end
 
     it do
-      @p1.distance_spherical_to(@p2).should be_close(628516.874554178, 0.0001)
+      @p1.distance_sphere_to(@p2).should be_close(628516.874554178, 0.0001)
     end
 
     it do
@@ -280,8 +280,16 @@ describe "PostgisFunctions" do
     end
 
     it do
+      @s1.line_substring(0.2,0.5).should be_instance_of(LineString)
+    end
+
+    it do
       @s1.interpolate_point(0.7).should be_instance_of(Point)
       @s1.interpolate_point(0.7).x.should be_close(1.7,0.1)
+    end
+
+    it do
+      @s1.simple?.should be_true
     end
   end
 
@@ -393,6 +401,10 @@ describe "PostgisFunctions" do
     #Strange again.... s2 s3 ... error
     it do
       @c3.touches?(@s1).should be_false
+    end
+
+    it do
+      @c2.should be_simple
     end
 
 

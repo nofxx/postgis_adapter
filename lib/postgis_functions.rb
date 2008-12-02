@@ -107,7 +107,7 @@ module PostgisFunctions
   end
 
   # Returns the 2-dimensional minimum cartesian distance between two
-  # geometries in projected units. (Cartesian formula)
+  # geometries in projected units.
   #
   # Returns float ST_Distance(geometry g1, geometry g2);
   #
@@ -168,19 +168,12 @@ module PostgisFunctions
   end
   alias_method "inside?", "covered_by?"
 
-  def outside? other;    !covered_by? other;  end
-
-  # True if Geometries "spatially intersect" - (share any portion of space)
-  # False if they don't (they are Disjoint).
-  # Overlaps, Touches, Within all imply spatial intersection.
-  # If any of the aforementioned returns true, then the geometries also
-  # spatially intersect. Disjoint implies false for spatial intersection.
-  #
-  # Returns boolean
-  def intersects? other
-    postgis_calculate(:intersects, [self, other])
+  # Eye-candy. Returns boolean.
+  def outside? other
+    !covered_by? other
   end
 
+  # Returns how many dimensions the geom has (2, 3 or 4)
   def dimension
     postgis_calculate(:dimension, self).to_i
   end
@@ -195,9 +188,11 @@ module PostgisFunctions
   # Note topology may not be preserved and may result in invalid geometries.
   # Use (see ST_SimplifyPreserveTopology) to preserve topology.
   #
+  # Performed by the GEOS Module.
+  #
   # Returns geometry ST_Simplify(geometry geomA, float tolerance);
   #
-  def simplify(tolerance=1)
+  def simplify(tolerance=0.1)
     postgis_calculate(:simplify, self, tolerance)
   end
 
@@ -212,10 +207,26 @@ module PostgisFunctions
   #
   # Returns geometry ST_SimplifyPreserveTopology(geometry geomA, float tolerance);
   #
-  def simplify_preserve_topology(tolerance=1)
+  def simplify_preserve_topology(tolerance=0.1)
     postgis_calculate(:simplifypreservetopology, self, tolerance)
   end
 
+  # True if Geometries "spatially intersect" - (share any portion of space)
+  # False if they don't (they are Disjoint).
+  # Overlaps, Touches, Within all imply spatial intersection.
+  # If any of the aforementioned returns true, then the geometries also
+  # spatially intersect. Disjoint implies false for spatial intersection.
+  #
+  # Returns boolean
+  #
+  def intersects? other
+    postgis_calculate(:intersects, [self, other])
+  end
+
+  # True if Geometries Envelopes "spatially intersect" - (share any portion of space)
+  #
+  # Returns boolean
+  #
   def envelopes_intersect? other
      postgis_calculate(:se_envelopesintersect, [self, other])
   end
@@ -249,7 +260,8 @@ module PostgisFunctions
   #
   # Performed by the GEOS module
   #
-  # Returns # boolean ST_Overlaps(geometry A, geometry B);
+  # Returns  boolean ST_Overlaps(geometry A, geometry B);
+  #
   def overlaps? other
     postgis_calculate(:overlaps, [self, other])
     rescue
@@ -265,19 +277,36 @@ module PostgisFunctions
   # but not to the Point/Point pair.
   #
   # Returns boolean ST_Touches(geometry g1, geometry g2);
+  #
   def touches? other
     postgis_calculate(:touches, [self, other])
   end
 
-  #The convex hull of a geometry represents the minimum closed geometry that encloses all geometries within the set.
-  #It is usually used with MULTI and Geometry Collections. Although it is not an aggregate - you can use it in conjunction with ST_Collect to get the convex hull of a set of points. ST_ConvexHull(ST_Collect(somepointfield)).
-  #It is often used to determine an affected area based on a set of point observations.
-  #Performed by the GEOS module
+  # The convex hull of a geometry represents the minimum closed geometry that
+  # encloses all geometries within the set.
+  # It is usually used with MULTI and Geometry Collections. Although it is not
+  # an aggregate - you can use it in conjunction with ST_Collect to get the convex
+  # hull of a set of points. ST_ConvexHull(ST_Collect(somepointfield)).
+  # It is often used to determine an affected area based on a set of point observations.
+  #
+  # Performed by the GEOS module
   #
   # Returns Geometry ST_ConvexHull(geometry geomA);
+  #
   def convex_hull
     postgis_calculate(:convexhull, self)
   end
+
+  # Returns true if this Geometry has no anomalous geometric points, such as
+  # self intersection or self tangency.
+  #
+  # Returns boolean ST_IsSimple(geometry geomA);
+  #
+  def is_simple?
+    postgis_calculate(:issimple, self)
+  end
+  alias_method "simple?", "is_simple?"
+
 
   # NEW
   #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
@@ -383,7 +412,7 @@ module PostgisFunctions
     #
     # Returns boolean ST_DWithin(geometry g1, geometry g2, double precision distance);
     #
-    def d_within?(other,margin=0.5)
+    def d_within?(other, margin=0.1)
       postgis_calculate(:dwithin, [self, other], margin)
     end
     alias_method "in_bounds?", "d_within?"
@@ -402,17 +431,35 @@ module PostgisFunctions
       postgis_calculate(:line_locate_point, [line, self])
     end
 
-
-    # Distance to using sphere (Haversine?) formula
+    # Returns linear distance in meters between two lon/lat points.
+    # Uses a spherical earth and radius of 6370986 meters.
+    # Faster than 'distance_spheroid', but less accurate.
+    #
+    # Only implemented for points.
+    #
+    # Returns float ST_Distance_Sphere(geometry pointlonlatA, geometry pointlonlatB);
+    #
     def distance_sphere_to(other)
       dis = postgis_calculate(:distance_sphere, [self, other])
     end
-    alias_method :distance_spherical_to, :distance_sphere_to
 
-    # Distance to using a spheroid
-    # Slower then sphere or length, but more precise.
+    # Calculates the distance on an ellipsoid. This is useful if the
+    # coordinates of the geometry are in longitude/latitude and a length is
+    # desired without reprojection. The ellipsoid is a separate database type and
+    # can be constructed as follows:
     #
-    # Returns float
+    # This is slower then 'distance_sphere_to', but more precise.
+    #
+    # SPHEROID[<NAME>,<SEMI-MAJOR AXIS>,<INVERSE FLATTENING>]
+    #
+    # Example:
+    #   SPHEROID["GRS_1980",6378137,298.257222101]
+    #
+    # Defaults to:
+    #
+    #   SPHEROID["IERS_2003",6378136.6,298.25642]
+    #
+    # Returns Float
     #
     def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
       postgis_calculate(:distance_spheroid, [self, other], spheroid)
@@ -443,7 +490,6 @@ module PostgisFunctions
       postgis_calculate(:point_inside_circle, self, [x,y,r])
     end
 
-
   end
 
   ####
@@ -455,7 +501,6 @@ module PostgisFunctions
   #
   #
   module LineStringFunctions
-
 
     # Returns the 2D length of the geometry if it is a linestring, multilinestring,
     # ST_Curve, ST_MultiCurve. 0 is returned for areal geometries. For areal geometries
@@ -504,11 +549,21 @@ module PostgisFunctions
     # Return the number of points of the geometry.
     # PostGis ST_NumPoints does not work as nov/08
     #
-    def num_points;     postgis_calculate(:npoints, self).to_i;    end
+    # Returns Integer
+    #
+    def num_points
+      postgis_calculate(:npoints, self).to_i
+    end
 
-    # Returns geomtry last points.
-    def start_point;    postgis_calculate(:startpoint, self);    end
-    def end_point;      postgis_calculate(:endpoint, self);    end
+    # Returns geometry start point.
+    def start_point
+      postgis_calculate(:startpoint, self)
+    end
+
+    #Returns geometry last point.
+    def end_point
+      postgis_calculate(:endpoint, self)
+    end
 
     # Takes two geometry objects and returns TRUE if their intersection
     # "spatially cross", that is, the geometries have some, but not all interior
@@ -525,9 +580,16 @@ module PostgisFunctions
       postgis_calculate(:crosses, [self, other])
     end
 
-
-
-    # Locate a point on the line, return a float from 0 to 1
+    # Returns a float between 0 and 1 representing the location of the closest point
+    # on LineString to the given Point, as a fraction of total 2d line length.
+    #
+    # You can use the returned location to extract a Point (ST_Line_Interpolate_Point)
+    # or a substring (ST_Line_Substring).
+    #
+    # This is useful for approximating numbers of addresses.
+    #
+    # Returns float (0 to 1) ST_Line_Locate_Point(geometry a_linestring, geometry a_point);
+    #
     def locate_point point
       postgis_calculate(:line_locate_point, [self, point])
     end
@@ -543,18 +605,20 @@ module PostgisFunctions
       postgis_calculate(:line_interpolate_point, self, fraction)
     end
 
-#ST_Line_Substring — Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are float8 values between 0 and 1.
-#Synopsis
-
-#geometry ST_Line_Substring(geometry a_linestring, float startfraction, float endfraction);
-#Description
-
-#Return a linestring being a substring of the input one starting and ending at the given fractions of total 2d length. Second and third arguments are float8 values between 0 and 1. This only works with LINESTRINGs. To use with contiguous MULTILINESTRINGs use in conjunction with ST_LineMerge.
-
-#If 'start' and 'end' have the same value this is equivalent to ST_Line_Interpolate_Point.
-
-#See ST_Line_Locate_Point for computing the line location nearest to a Point.
-
+    # Return a linestring being a substring of the input one starting and ending
+    # at the given fractions of total 2d length. Second and third arguments are
+    # float8 values between 0 and 1. This only works with LINESTRINGs. To use
+    # with contiguous MULTILINESTRINGs use in conjunction with ST_LineMerge.
+    #
+    # If 'start' and 'end' have the same value this is equivalent to 'interpolate_point'.
+    #
+    # See 'locate_point' for computing the line location nearest to a Point.
+    #
+    # Returns geometry ST_Line_Substring(geometry a_linestring, float startfraction, float endfraction);
+    #
+    def line_substring(s,e)
+      postgis_calculate(:line_substring, self, [s, e])
+    end
 
     #Not implemented in postgis
     # ST_max_distance Returns the largest distance between two line strings.
@@ -613,6 +677,7 @@ module PostgisFunctions
     def closed?
       postgis_calculate(:isclosed, self)
     end
+    alias_method "is_closed?", "closed?"
 
     # Returns 1 (TRUE) if no point in Geometry B is outside Geometry A
     #
@@ -652,8 +717,6 @@ module PostgisFunctions
   # Class Methods
   #
   # Falling back to AR here.
-  #
-  # TODO: ewkb or ewkt?
   #
   module ClassMethods
 
@@ -703,7 +766,7 @@ module PostgisFunctions
   private
 
 
-    # Construct the postgis sql query
+  # Construct the postgis sql query
   # TODO: ST_Transform() ?? # Convert between distances. Implement this?
   #
   # Area return in square feet
@@ -727,8 +790,6 @@ module PostgisFunctions
     # Data =>  SELECT Fun(A,B)
     unless type == :bbox
       opcode = type.to_s
-      #use all commands in lowcase form
-      #opcode = opcode.camelize unless opcode =~ /spher|max|npoints/
       opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
       s_join = ","
       fields << options if options
@@ -742,7 +803,8 @@ module PostgisFunctions
     #p sql; sql
   end
 
-  # Execute the query, we may receive:
+  # Execute the query and parse the return.
+  # We may receive:
   #
   # "t" or "f" for boolean queries
   # BIGHASH    for geometries
@@ -769,9 +831,9 @@ end
   #
   #x SE_LocateAlong
   #x SE_LocateBetween
-  #x ST_line_interpolate_point(linestring, location)
+
   #x ST_line_substring(linestring, start, end)
-  #x ST_line_locate_point(LineString, Point)   Returns a float between 0 and 1 representing the location of the closest point on LineString to the given Point, as a fraction of total 2d line length.
+
   #x ST_locate_along_measure(geometry, float8)   Return a derived geometry collection value with elements that match the specified measure. Polygonal elements are not supported.
   #x ST_locate_between_measures(geometry, float8, float8)
   #
@@ -780,8 +842,6 @@ end
   # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
 
   #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
-  #x ST_Disjoint(geometry, geometry)
-  #x ST_Overlaps
 
 
 # POINT(0 0)
@@ -794,15 +854,13 @@ end
 
 #
 #Accessors
-#ST_Dimension
+
 #ST_Dump
-#ST_EndPoint
-#ST_Envelope
+
 #ST_ExteriorRing
 #ST_GeometryN
 #ST_GeometryType
 #ST_InteriorRingN
-#ST_IsClosed
 #ST_IsEmpty
 #ST_IsRing
 #ST_IsSimple
@@ -811,11 +869,8 @@ end
 #ST_M
 #ST_NumGeometries
 #ST_NumInteriorRings
-#ST_NumPoints
-#ST_npoints
 #ST_PointN
 #ST_SetSRID
-#ST_StartPoint
 #ST_Summary1
 #ST_X
 #ST_XMin,ST_XMax
@@ -843,4 +898,5 @@ end
 #    end
 #    factor *= 1e3 if from
 #    value * factor
-#  end
+#  end      #use all commands in lowcase form
+      #opcode = opcode.camelize unless opcode =~ /spher|max|npoints/

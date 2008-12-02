@@ -65,9 +65,7 @@ ActiveRecord::SchemaDumper.class_eval do
 
       tbl.puts "  end"
       tbl.puts
-
       indexes(table, tbl)
-
       tbl.rewind
       stream.print tbl.read
     rescue => e
@@ -76,8 +74,7 @@ ActiveRecord::SchemaDumper.class_eval do
       stream.puts
     end
 
-    stream
-  end
+    stream  end
 
   def indexes(table, stream)
     indexes = @connection.indexes(table)

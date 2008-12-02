@@ -66,7 +66,7 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
 
   alias :original_native_database_types :native_database_types
   def native_database_types
-    original_native_database_types.merge!(geometry_data_types)
+    original_native_database_types.update(geometry_data_types)
   end
 
   alias :original_quote :quote
@@ -131,7 +131,10 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   alias :original_add_column :add_column
   def add_column(table_name, column_name, type, options = {})
     unless geometry_data_types[type].nil? or (options[:create_using_addgeometrycolumn] == false)
-      geom_column = ActiveRecord::ConnectionAdapters::PostgreSQLColumnDefinition.new(self,column_name, type, nil,nil,options[:null],options[:srid] || -1 , options[:with_z] || false , options[:with_m] || false)
+      geom_column = ActiveRecord::ConnectionAdapters::PostgreSQLColumnDefinition.
+        new(self,column_name, type, nil,nil,options[:null],options[:srid] || -1 ,
+        options[:with_z] || false , options[:with_m] || false)
+
       execute geom_column.to_sql(table_name)
     else
       original_add_column(table_name,column_name,type,options)
@@ -177,7 +180,10 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
 
     result.each do |row|
       if current_index != row[0]
-        indexes << ActiveRecord::ConnectionAdapters::IndexDefinition.new(table_name, row[0], row[1] == "t", row[3] == "gist" ,[]) #index type gist indicates a spatial index (probably not totally true but let's simplify!)
+        #index type gist indicates a spatial index (probably not totally true but let's simplify!)
+        indexes << ActiveRecord::ConnectionAdapters::IndexDefinition.
+          new(table_name, row[0], row[1] == "t", row[3] == "gist" ,[])
+
         current_index = row[0]
       end
       indexes.last.columns << row[2]
