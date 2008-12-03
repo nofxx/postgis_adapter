@@ -4,7 +4,13 @@
 #
 #
 #
-# Links:
+# Hope you enjoy this software. Please post any bugs/suggestions to the lighthouse tracker:
+# http://nofxx.lighthouseapp.com/projects/20712-postgisadapter
+#
+#
+#
+#
+# Some Links:
 #
 # PostGis Manual -  http://postgis.refractions.net/documentation/manual-svn/ch07.html
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
@@ -12,9 +18,10 @@
 #
 module PostgisFunctions
 
-  # Defaul Earth Spheroid
+  # Default Earth Spheroid
   #
-  #EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
+  # EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
+  #
   EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
 
   def postgis_calculate(operation, subject, options = nil)
