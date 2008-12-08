@@ -2,7 +2,9 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe "PostgisFunctions" do
   before(:all) do
-    #load_schema
+    
+    
+    #load_schema 
 
     class City < ActiveRecord::Base
       acts_as_geom :geom
@@ -107,11 +109,11 @@ describe "PostgisFunctions" do
       @p3.should_not be_in_bounds(@s1, 1)
     end
 
-    it "calculate another point azimuth??" do
+    it do
       @p1.azimuth(@p2).should be_close(0.785398163397448,0.000001)
     end
 
-    it "calculate linestring azimuth??" do
+    it do
       @p1.azimuth(@s2).should raise_error
     end
 
@@ -125,6 +127,10 @@ describe "PostgisFunctions" do
 
     it do
       @p1.should_not be_inside_circle(50,50,2)
+    end
+    
+    it  do
+      @p1.disjoint?(@s2).should be_true
     end
 
   end
@@ -291,6 +297,10 @@ describe "PostgisFunctions" do
     it do
       @s1.simple?.should be_true
     end
+    
+    it  do
+      @s1.disjoint?(@s2).should be_true
+    end
   end
 
 
@@ -360,11 +370,6 @@ describe "PostgisFunctions" do
       @c3.overlaps?(@c2).should raise_error # WHY??
     end
 
-    it "city disjoint point?" do
-      pending
-      @c1.disjoint?(@s2).should be_false
-    end
-
     it "should get a polygon for envelope" do
       @c2.envelope.should be_instance_of(Polygon)
     end
@@ -406,7 +411,15 @@ describe "PostgisFunctions" do
     it do
       @c2.should be_simple
     end
-
+    
+    it  do
+      @c2.disjoint?(@p2).should be_true
+    end
+    
+    # weird...
+    # it  do
+    #   @c1.disjoint?(@s2).should be_true
+    # end
 
   end
 
