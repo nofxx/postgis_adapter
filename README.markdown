@@ -15,7 +15,8 @@ http://postgis.refractions.net/documentation/manual-svn
 ### Dependencies
 
 - georuby
-- postgres
+- postgres 8.3+
+- postgis  1.3+
 
 
 ### Installation
@@ -53,11 +54,10 @@ model and the table defined above :
   	=> 1
 
 
-PostGIS Extra Functions (
------------------------
+PostGIS Functions
+-----------------
 
-Here are this fork additions, this stuff you need to enable. To do so, change your
-class to:
+Here are this fork additions. To use it:
 
 
     class Street < ActiveRecord::Base
@@ -85,7 +85,7 @@ class to:
 
     @area.contains?(@place)
 
-Play with polygons:
+Polygons:
 
     @park.area
     => 1345
@@ -96,7 +96,7 @@ Play with polygons:
     @park.overlaps?(@other_park)
     => false
 
-And LineStrings:
+Line Strings:
 
     @street_east.intersects?(@street_west)
     => false
@@ -158,6 +158,15 @@ Or use a (almost) postgis like notation:
     @area.bbox "@",  @park
 
 
+### Warning
+
+*To be fixed:*
+
+This only supports one geom column per model. Still looking for the best way to
+implement a multi geom.
+
+http://nofxx.lighthouseapp.com/projects/20712/tickets/3-multiple-geoms-in-model
+
 ### Wiki
 
 Check out the wiki pages:
@@ -205,8 +214,9 @@ index on the column :
   	  create_table :places do |t|
         t.string :name
       	t.point  :geom, :srid => 123, :with_z => true, :null => false
-    	  t.timestamps
-    	end
+    	 
+        t.timestamps
+      end
   	  add_index :table_points, :geom, :spatial=>true
     end
 
@@ -268,8 +278,9 @@ http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
 
 ### TODO
 
-- Support of other geometric datatype libraries in addition to GeoRuby
+- Multi geom model
 - Tutorials
+- Gemify?
 
 License
 -------
@@ -281,10 +292,9 @@ PostGis Adapter is released under the MIT license.
 Support
 -------
 
-rspec`d on postgresql 8.3.5 / postgis 1.3.3
+Tested using rails 2.2.2 / postgresql 8.3.5 / postgis 1.3.3 / linux / osx
 
-Any questions, enhancement proposals, bug notifications or
-corrections can be sent to:
+Any questions, enhancement proposals, bug notifications or corrections:
 
 ### PostGis Adapter
 
