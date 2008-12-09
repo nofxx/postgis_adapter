@@ -355,11 +355,11 @@ describe "PostgisFunctions" do
     end
 
     it do
-      @c1.should_not be_covers(@p1)
+      @c1.covers?(@p1).should be_false
     end
 
     it do
-      @c1.should be_covers(@p4)
+      @c1.covers?(@p4).should be_true
     end
 
     it do

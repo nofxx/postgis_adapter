@@ -8,6 +8,12 @@
 require 'geo_ruby'
 require 'common_spatial_adapter'
 require 'postgis_functions'
+require 'postgis_functions/common'
+require 'postgis_functions/class'
+require 'postgis_functions/point'
+require 'postgis_functions/linestring'
+require 'postgis_functions/polygon'
+require 'postgis_functions/bbox'
 require 'acts_as_geom'
 
 include GeoRuby::SimpleFeatures
