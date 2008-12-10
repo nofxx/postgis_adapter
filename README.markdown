@@ -7,7 +7,7 @@ It also provides a way to manage these columns in migrations.
 
 This fork adds handy methods to make geometrical calculations on postgis.
 
-http://postgis.refractions.net/documentation/manual-svn
+[Postgis Manual](http://postgis.refractions.net/documentation/manual-svn)
 
 *PostGIS and Rails 2+ only*.
 
@@ -169,8 +169,7 @@ http://nofxx.lighthouseapp.com/projects/20712/tickets/3-multiple-geoms-in-model
 
 ### Wiki
 
-Check out the wiki pages:
-http://github.com/nofxx/postgis_adapter/wikis
+Check out the [wiki pages](http://github.com/nofxx/postgis_adapter/wikis).
 For all functions.
 
 
@@ -270,17 +269,6 @@ something like this :
        the_geom.y=123456.7
        place.the_geom = the_geom
 
-
-Project
--------
-
-http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
-
-### TODO
-
-- Multi geom model
-- Tutorials
-- Gemify?
 
 License
 -------
