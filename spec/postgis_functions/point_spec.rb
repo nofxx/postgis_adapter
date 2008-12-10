@@ -117,5 +117,6 @@ describe "Point" do
    it do
      @p3.polygonize.geometries.should be_empty
    end
- end
+
+end
 

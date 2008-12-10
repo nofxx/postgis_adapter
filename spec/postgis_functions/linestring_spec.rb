@@ -24,23 +24,38 @@ describe "LineString" do
     Street.longest.data.should == "Street3"
   end
 
-  it do
-    @s1.length.should be_close(1.4142135623731, 0.000001)
+  describe "Length" do
+    
+    it do
+      @s1.length.should be_close(1.4142135623731, 0.000001)
+    end
+
+    it do
+      @s2.length.should be_close(4.2, 0.1)
+    end
+
+    it do
+      @s3.length.should be_close(42.4264068, 0.001)
+    end
+    
+    it "3d length" do
+      @s1.length_3d.should be_close(1.4142135623731,0.0001)
+    end
+
+    it do
+      @s1.length_spheroid.should be_close(156876.1381,0.0001)
+    end
+
+    #    it do
+    #      @s1.length_spheroid.in_miles.should be_close(156.876,0.001)
+    #    end
   end
 
-  it do
-    @s2.length.should be_close(4.2, 0.1)
+  it "should not cross s2" do
+    @s1.crosses?(@s2).should be_false
   end
 
-  it do
-    @s3.length.should be_close(42.4264068, 0.001)
-  end
-
-  it do
-    @s1.crosses?(@s2).should_not be_true
-  end
-
-  it do
+  it "should cross s3" do
     @s4.crosses?(@s3).should be_true
   end
 
@@ -52,83 +67,84 @@ describe "LineString" do
     @s4.touches?(@s3).should be_false
   end
 
-  it do
+  it "should intersect with linestring" do
     @s4.intersects?(@s3).should be_true
   end
 
-  it do
+  it "should not intersect with this linestring" do
     @s4.intersects?(@s1).should be_false
   end
 
-  it do
-    @s1.envelope.should be_instance_of(Polygon)
-  end
-
-  it "should get a polygon for envelope" do
-    @s1.envelope.rings[0].points[0].should be_instance_of(Point)
-  end
-
-  it "should get the center" do
-    @s1.centroid.x.should be_close(1.5,0.01)
-    @s1.centroid.y.should be_close(1.5,0.01)
-  end
-
-  it "should get the center with the correct srid" do
-    @s1.centroid.srid.should eql(123)
-  end
-
-  it do
-    @s1.distance_to(@p3).should be_close(8.48528137423857,0.0001)
-  end
-
-  it do
-    @p1.distance_spheroid_to(@c3).should raise_error
-  end
-
-  it do
-    @p3.distance_spheroid_to(@s1).should raise_error
-  end
-
-  it do
-    @s1.distance_to(@p3).should be_close(8.48,0.01)
-  end
-
-  it "number of points" do
-    @s3.num_points.should eql(6)
-  end
-
-  it "startpoint" do
-    @s3.start_point.should be_instance_of(Point)
-    @s3.start_point.x.should be_close(8.0, 0.1)
-  end
-
-  it "endpoint" do
-    @s2.end_point.should be_instance_of(Point)
-    @s2.end_point.x.should be_close(7.0, 0.1)
-  end
-
-  it "3d length" do
-    @s1.length_3d.should be_close(1.4142135623731,0.0001)
-  end
-
-  it do
-    @s1.length_spheroid.should be_close(156876.1381,0.0001)
-  end
-
-  #    it do
-  #      @s1.length_spheroid.in_miles.should be_close(156.876,0.001)
-  #    end
-
-  it do
-    @s1.should_not be_envelopes_intersect(@s2)
-  end
-
-  it do
-    @s1.boundary.should be_instance_of(MultiPoint)
-  end
 
   it "intersection with a point" do
     @s1.intersection(@p2).should be_instance_of(GeometryCollection)
+  end
+  
+  
+  describe "Self" do
+    
+    it do
+      @s1.envelope.should be_instance_of(Polygon)
+    end
+
+    it "should get a polygon for envelope" do
+      @s1.envelope.rings[0].points[0].should be_instance_of(Point)
+    end
+
+    it "should get the center" do
+      @s1.centroid.x.should be_close(1.5,0.01)
+      @s1.centroid.y.should be_close(1.5,0.01)
+    end
+
+    it "should get the center with the correct srid" do
+      @s1.centroid.srid.should eql(123)
+    end
+  
+    it "number of points" do
+      @s3.num_points.should eql(6)
+    end
+
+    it "startpoint" do
+      @s3.start_point.should be_instance_of(Point)
+      @s3.start_point.x.should be_close(8.0, 0.1)
+    end
+
+    it "endpoint" do
+      @s2.end_point.should be_instance_of(Point)
+      @s2.end_point.x.should be_close(7.0, 0.1)
+    end
+
+    it do
+      @s1.should_not be_envelopes_intersect(@s2)
+    end
+
+
+    it do
+      @s1.boundary.should be_instance_of(MultiPoint)
+    end
+      
+  end
+
+  describe "Distance" do
+    
+    it do
+      @s1.distance_to(@p3).should be_close(8.48528137423857,0.0001)
+    end
+
+    it do
+      lambda { @p1.distance_spheroid_to(@c3) }.should raise_error
+    end
+
+    it do
+      lambda { @p3.distance_spheroid_to(@s1) }.should raise_error
+    end
+
+    it do
+      @s1.distance_to(@p3).should be_close(8.48,0.01)
+    end
+  
+  
+
   end
 
   it "should locate a point" do
@@ -173,7 +189,7 @@ describe "LineString" do
   end
 
   it do
-    @s1.simple?.should be_true
+    @s1.should be_simple #?.should be_true
   end
 
   it  do
@@ -189,11 +205,15 @@ describe "LineString" do
   end
   
   it do
-    @s2.locate_along_measure(1.6).should eql(0.0)
+    @s2.locate_along_measure(1.6).should be_nil
   end
   
   it do
-    @s2.locate_between_measures(0.1,0.3).should eql(0.0)
+    @s2.locate_between_measures(0.1,0.3).should be_nil
+  end
+  
+  it "should build area" do
+    @s2.build_area.should be_nil
   end
     
 end

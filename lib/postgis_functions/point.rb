@@ -70,8 +70,6 @@ module PostgisFunctions
     #
     def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
       postgis_calculate(:distance_spheroid, [self, other], spheroid)
-      rescue
-        ActiveRecord::StatementInvalid
     end
 
     #

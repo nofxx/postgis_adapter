@@ -84,7 +84,7 @@ describe "Point" do
      end
 
      it "city overlaps point?" do
-       @c3.overlaps?(@c2).should raise_error # WHY??
+       lambda { @c3.overlaps?(@c2) }.should raise_error # WHY??
      end
 
      it "should get a polygon for envelope" do

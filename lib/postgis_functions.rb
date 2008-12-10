@@ -22,9 +22,11 @@ module PostgisFunctions
 
   EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
 
-  def postgis_calculate(operation, subject, options = nil)
-    subject = [subject] unless subject.respond_to?(:map)
-    return execute_geometrical_calculation(operation, subject, options)
+  def postgis_calculate(operation, subjects, options = nil)
+    subjects = [subjects] unless subjects.respond_to?(:map)
+    return execute_geometrical_calculation(operation, subjects, options)
+    rescue Exception => e
+    raise StandardError, "#{e}"
   end
 
 
@@ -47,25 +49,27 @@ module PostgisFunctions
       :id => t[:id] }
     end
 
-    fields  = tables.map { |f| "#{f[:uid]}.geom" }            # W1.geom
-    froms   = tables.map { |f| "#{f[:class]} #{f[:uid]}" }    # streets W1
-    wheres  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }  # W1.id = 5
-
-    # BBox =>  SELECT (A <> B)
-    # Data =>  SELECT Fun(A,B)
-    unless type == :bbox
+    fields      = tables.map { |f| "#{f[:uid]}.geom" }            # W1.geom
+    conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }  # W1.id = 5
+    tables.map! { |f| "#{f[:class]} #{f[:uid]}" }    # streets W1
+    
+    #
+    # Data =>  SELECT Func(A,B)
+    # BBox =>  SELECT (A <=> B)
+    #
+    if type == :bbox
+      opcode = nil
+      s_join = " #{options} "
+    else
       opcode = type.to_s
       opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
       s_join = ","
       fields << options if options
-    else
-      opcode = nil
-      s_join = " #{options} "
     end
 
     sql =   "SELECT #{opcode}(#{fields.join(s_join)}) "
-    sql <<  "FROM #{froms.join(",")} " if froms
-    sql <<  "WHERE #{wheres.join(" AND ")}" if wheres
+    sql <<  "FROM #{tables.join(",")} "           if tables
+    sql <<  "WHERE #{conditions.join(" AND ")}"   if conditions
     #p sql; sql
   end
 
@@ -78,6 +82,7 @@ module PostgisFunctions
   #
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
+    return nil unless value
     if value =~ /^\D/
       {"f" => false, "t" => true}[value] 
     else

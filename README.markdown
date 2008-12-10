@@ -286,7 +286,7 @@ Any questions, enhancement proposals, bug notifications or corrections:
 
 ### PostGis Adapter
 
-http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
+[Project Tracker](http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter)
 
 ### SpatialAdapter
 

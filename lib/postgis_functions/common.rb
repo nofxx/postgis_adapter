@@ -294,8 +294,6 @@ module PostgisFunctions
   #
   def overlaps? other
     postgis_calculate(:overlaps, [self, other])
-    rescue
-    ActiveRecord::StatementInvalid
   end
 
   # True if the geometries have at least one point in common,
@@ -327,6 +325,18 @@ module PostgisFunctions
   #
   def convex_hull
     postgis_calculate(:convexhull, self)
+  end
+  
+  #
+  # Creates an areal geometry formed by the constituent linework of given geometry.
+  # The return type can be a Polygon or MultiPolygon, depending on input. 
+  # If the input lineworks do not form polygons NULL is returned. The inputs can 
+  # be LINESTRINGS, MULTILINESTRINGS, POLYGONS, MULTIPOLYGONS, and GeometryCollections.
+  #
+  # Returns Boolean ST_BuildArea(geometry A);
+  #
+  def build_area
+    postgis_calculate(:buildarea, self)
   end
   
   #
