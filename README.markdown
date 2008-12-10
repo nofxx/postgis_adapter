@@ -28,7 +28,7 @@ If you are using Spatial Adapter, *remove it first*.
     sudo gem sources --add http://gems.github.com
     sudo gem install nofxx-postgis_adapter
   
-    config.gem "nofxx-postgis_adapter", :lib => "postgis_adapter", :source => 'http://gems.github.com
+    config.gem "nofxx-postgis_adapter", :lib => "postgis_adapter", :source => "http://gems.github.com"
   
 ### As plugin:
 
