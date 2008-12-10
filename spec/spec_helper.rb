@@ -21,3 +21,4 @@ require File.dirname(__FILE__) + '/db/models_postgis.rb'
 def load_schema
   load(File.dirname(__FILE__) + "/db/schema_postgis.rb")
 end
+

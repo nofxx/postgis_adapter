@@ -28,7 +28,6 @@ module PostgisFunctions
   end
 
 
-
   private
 
 
@@ -94,23 +93,7 @@ module PostgisFunctions
 
 end
 
-
-  #
-  #x SE_LocateAlong
-  #x SE_LocateBetween
-
-  #x ST_line_substring(linestring, start, end)
-
-  #x ST_locate_along_measure(geometry, float8)   Return a derived geometry collection value with elements that match the specified measure. Polygonal elements are not supported.
-  #x ST_locate_between_measures(geometry, float8, float8)
-  #
-  #x ST_Polygonize(geometry set)
-  #x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
-  # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
-
-  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
-
-
+#
 # POINT(0 0)
 # LINESTRING(0 0,1 1,1 2)
 # POLYGON((0 0,4 0,4 4,0 4,0 0),(1 1, 2 1, 2 2, 1 2,1 1))
@@ -118,12 +101,10 @@ end
 # MULTILINESTRING((0 0,1 1,1 2),(2 3,3 2,5 4))
 # MULTIPOLYGON(((0 0,4 0,4 4,0 4,0 0),(1 1,2 1,2 2,1 2,1 1)), ..)
 # GEOMETRYCOLLECTION(POINT(2 3),LINESTRING((2 3,3 4)))
-
 #
 #Accessors
-
+#
 #ST_Dump
-
 #ST_ExteriorRing
 #ST_GeometryN
 #ST_GeometryType
@@ -156,6 +137,7 @@ end
 #ST_AsGML
 #ST_AsKML
 #ST_AsSVG
+# 
 #  def distance_convert(value, unit, from = nil)
 #    factor = case unit
 #    when :km, :kilo     then  1

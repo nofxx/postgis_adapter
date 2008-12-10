@@ -39,3 +39,18 @@ end
 
 class  TableSrid4dPolygon < ActiveRecord::Base
 end
+
+class City < ActiveRecord::Base
+  acts_as_geom :geom
+end
+
+class Position < ActiveRecord::Base
+  acts_as_geom :geom
+end
+
+class Street < ActiveRecord::Base
+  acts_as_geom :geom
+end
+
+class CommonGeo < ActiveRecord::Base
+end

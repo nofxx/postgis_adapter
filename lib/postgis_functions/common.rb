@@ -340,12 +340,32 @@ module PostgisFunctions
   end
   alias_method "simple?", "is_simple?"
 
-
+  #
+  # Aggregate. Creates a GeometryCollection containing possible polygons formed 
+  # from the constituent linework of a set of geometries.
+  #
+  # Geometry Collections are often difficult to deal with with third party tools, 
+  # so use ST_Polygonize in conjunction with ST_Dump to dump the polygons out into
+  #  individual polygons.
+  #
+  # Returns Geometry ST_Polygonize(geometry set geomfield);
+  #
+  def polygonize#(geom)
+    postgis_calculate(:polygonize, self)
+  end
+  
   # NEW
   #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
   #boolean ST_OrderingEquals(g
   #  ST_PointOnSurface — Returns a POINT guaranteed to lie on the surface.
   #geometry ST_PointOnSurface(geometry g1);eometry A, geometry B);
+
+
+  #x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
+  # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
+
+  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
+  
   
   
   
