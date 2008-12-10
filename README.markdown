@@ -12,20 +12,28 @@ This fork adds handy methods to make geometrical calculations on postgis.
 *PostGIS and Rails 2+ only*.
 
 
+Install
+-------
+
+If you are using Spatial Adapter, *remove it first*.
+
 ### Dependencies
 
 - georuby
 - postgres 8.3+
 - postgis  1.3+
 
+### As gem:
 
-### Installation
-
-On Rails:
+  sudo gem sources --add http://gems.github.com
+  sudo gem install nofxx-postgis_adapter
+  
+  config.gem "nofxx-postgis_adapter", :lib => "postgis_adapter", :source => 'http://gems.github.com
+  
+### As plugin:
 
     script/plugin install git://github.com/nofxx/postgis_adapter.git
 
-If you are using Spatial Adapter, *remove it first*.
 
 How to Use
 ----------
