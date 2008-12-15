@@ -10,6 +10,9 @@ module PostgisFunctions
     #
     module ClassMethods
 
+      #
+      # Returns the closest record 
+      #
       def closest_to(p, srid=4326)
         find(:first, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
       end
@@ -18,7 +21,10 @@ module PostgisFunctions
         find(:all, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
       end
 
-      def by_size sort='asc'
+      #
+      #
+      #
+      def by_linestring_length sort='asc'
         find(:all, :order => "ST_length(geom) #{sort}" )
       end
 

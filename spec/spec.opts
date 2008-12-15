@@ -1,6 +1,6 @@
 --colour
 --format
-profile
+spinner
 --timeout
 20
 --diff
