@@ -70,7 +70,7 @@ module PostgisFunctions
     sql =   "SELECT #{opcode}(#{fields.join(s_join)}) "
     sql <<  "FROM #{tables.join(",")} "           if tables
     sql <<  "WHERE #{conditions.join(" AND ")}"   if conditions
-    p sql; sql
+    #p sql; sql
   end
 
   #
@@ -83,7 +83,7 @@ module PostgisFunctions
   # Rescue     a float
   #
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
-    p value = connection.select_value(construct_geometric_sql(operation, subject, options))
+    value = connection.select_value(construct_geometric_sql(operation, subject, options))
     return nil unless value
     if value =~ /t|f/
       {"f" => false, "t" => true}[value] 
