@@ -247,6 +247,13 @@ the geometric column is a point:
   	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 
+=== Annotate
+
+If you are using annotate_models, check out this fork which adds geometrical annotations for PostgisAdapter and SpatialAdapter:
+
+http://github.com/nofxx/annotate_models
+
+
 == Geometric data types
 
 Ruby geometric datatypes are currently made available only through
@@ -256,11 +263,6 @@ of a future release of the Spatial Adapter to support additional
 geometric datatype libraries, such as Ruby/GEOS, as long as they
 can support reading and writing of EWKB.
 
-== Annotate
-
-If you are using annotate_models, check out this fork which adds geometrical annotations for PostgisAdapter and SpatialAdapter:
-
-http://github.com/nofxx/annotate_models
 
 
 === Warning
