@@ -24,7 +24,7 @@ module PostgisFunctions
       #
       #
       #
-      def by_linestring_length sort='asc'
+      def by_length sort='asc'
         find(:all, :order => "ST_length(geom) #{sort}" )
       end
 

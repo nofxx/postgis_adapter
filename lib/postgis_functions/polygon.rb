@@ -15,7 +15,7 @@ module PostgisFunctions
     # Returns Float ST_Area(geometry g1);
     #
     def area
-      postgis_calculate(:area, self)
+      postgis_calculate(:area, self).to_f
     end
 
     #
@@ -27,7 +27,7 @@ module PostgisFunctions
     # Returns Float ST_Perimeter(geometry g1);
     #
     def perimeter
-      postgis_calculate(:perimeter, self)
+      postgis_calculate(:perimeter, self).to_f
     end
 
     #
@@ -37,7 +37,7 @@ module PostgisFunctions
     # Returns Float ST_Perimeter3D(geometry geomA);
     #
     def perimeter3d
-      postgis_calculate(:perimeter3d, self)
+      postgis_calculate(:perimeter3d, self).to_f
     end
 
     #

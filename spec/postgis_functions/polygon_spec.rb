@@ -24,7 +24,7 @@ describe "Point" do
    describe "Polygon" do
 
      it "sort by area size" do
-       City.by_size.first.data.should == "City1" #[@c1, @c2, @c3]
+       City.by_area.first.data.should == "City1" #[@c1, @c2, @c3]
      end
 
      it do

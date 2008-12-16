@@ -9,19 +9,6 @@ module PostgisFunctions
   module PointFunctions
 
     #
-    # True if the geometries are within the specified distance of one another.
-    # The distance is specified in units defined by the spatial reference system
-    # of the geometries. For this function to make sense, the source geometries
-    # must both be of the same coorindate projection, having the same SRID.
-    #
-    # Returns boolean ST_DWithin(geometry g1, geometry g2, double precision distance);
-    #
-    def d_within?(other, margin=0.1)
-      postgis_calculate(:dwithin, [self, other], margin)
-    end
-    alias_method "in_bounds?", "d_within?"
-
-    #
     # Returns a float between 0 and 1 representing the location of the closest point
     # on LineString to the given Point, as a fraction of total 2d line length.
     #
@@ -33,7 +20,7 @@ module PostgisFunctions
     # Returns float (0 to 1) ST_Line_Locate_Point(geometry a_linestring, geometry a_point);
     #
     def where_on_line line
-      postgis_calculate(:line_locate_point, [line, self])
+      postgis_calculate(:line_locate_point, [line, self]).to_f
     end
 
     #
@@ -46,7 +33,7 @@ module PostgisFunctions
     # Returns Float ST_Distance_Sphere(geometry pointlonlatA, geometry pointlonlatB);
     #
     def distance_sphere_to(other)
-      dis = postgis_calculate(:distance_sphere, [self, other])
+      dis = postgis_calculate(:distance_sphere, [self, other]).to_f
     end
 
     #
@@ -69,7 +56,7 @@ module PostgisFunctions
     # Returns ST_Distance_Spheroid(geometry geomA, geometry geomB, spheroid);
     #
     def distance_spheroid_to(other, spheroid = EARTH_SPHEROID)
-      postgis_calculate(:distance_spheroid, [self, other], spheroid)
+      postgis_calculate(:distance_spheroid, [self, other], spheroid).to_f
     end
 
     #
@@ -83,7 +70,7 @@ module PostgisFunctions
     #
     def azimuth other
       #TODO: return if not point/point
-      postgis_calculate(:azimuth, [self, other])
+      postgis_calculate(:azimuth, [self, other]).to_f
       rescue
         ActiveRecord::StatementInvalid
     end

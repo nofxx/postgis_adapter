@@ -14,6 +14,7 @@ describe "Point" do
      @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(1,1,123))
      @p2 ||= Position.create!(:data => "Point2", :geom => Point.from_x_y(5,5,123))
      @p3 ||= Position.create!(:data => "Point3", :geom => Point.from_x_y(8,8,123))
+     @p4 ||= Position.create!(:data => "Point5", :geom => Point.from_x_y(18.1,18,123))
    end
    
    
@@ -82,13 +83,6 @@ describe "Point" do
      @p1.should be_outside(@c1)
    end
 
-   it do
-     @p1.should be_in_bounds(@s1)
-   end
-
-   it "in bounds of a geometry? with option" do
-     @p3.should_not be_in_bounds(@s1, 1)
-   end
 
    it do
      @p1.azimuth(@p2).should be_close(0.785398163397448,0.000001)
@@ -117,6 +111,26 @@ describe "Point" do
    it do
      @p3.polygonize.geometries.should be_empty
    end
+   
+   it do
+     @p1.should be_in_bounds(@s1)
+   end
 
+   it "in bounds of a geometry? with option" do
+     @p3.should_not be_in_bounds(@s1, 1)
+   end
+   
+   it { @p4.in_bounds?(@s3, 0.01).should be_false } 
+   
+   it { @p4.where_on_line(@s3).should be_close(0.335, 0.0001) }   
+   
+   it { @s3.locate_point(@p4).should be_close(0.335, 0.1)}
+   
+   it { @s3.interpolate_point(0.335).x.should be_close(18.05, 0.01) }
+  
+   it { @p1.relate?(@s3, "T*T***FF*").should be_false }
+   
+   it { @p1.relate?(@s3).should eql("FF0FFF102") }
+   
 end
 

@@ -17,7 +17,7 @@ module PostgisFunctions
     # Returns Float
     #
     def length
-      dis = postgis_calculate(:length, self)
+      dis = postgis_calculate(:length, self).to_f
     end
 
     #
@@ -28,7 +28,7 @@ module PostgisFunctions
     # Returns Float
     #
     def length_3d
-      dis = postgis_calculate(:length3d, self)
+      dis = postgis_calculate(:length3d, self).to_f
     end
 
     #
@@ -49,7 +49,7 @@ module PostgisFunctions
     # Returns Float length_spheroid(geometry linestring, spheroid);
     #
     def length_spheroid(spheroid = EARTH_SPHEROID)
-      dis = postgis_calculate(:length_spheroid, self, spheroid)
+      dis = postgis_calculate(:length_spheroid, self, spheroid).to_f
     end
 
     #
@@ -104,7 +104,7 @@ module PostgisFunctions
     # Returns float (0 to 1) ST_Line_Locate_Point(geometry a_linestring, geometry a_point);
     #
     def locate_point point
-      postgis_calculate(:line_locate_point, [self, point])
+      postgis_calculate(:line_locate_point, [self, point]).to_f
     end
     
     #

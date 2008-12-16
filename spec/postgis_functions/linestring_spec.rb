@@ -16,8 +16,8 @@ describe "LineString" do
   end
    
   it "should sort by size" do
-    Street.by_size.first.data.should == "Street1"
-    Street.by_size.last.data.should == "Street3"
+    Street.by_length.first.data.should == "Street1"
+    Street.by_length.last.data.should == "Street3"
   end
 
   it "largest" do

@@ -98,7 +98,7 @@ module PostgisFunctions
   # Returns Float ST_Distance(geometry g1, geometry g2);
   #
   def distance_to(other)
-    postgis_calculate(:distance, [self, other])
+    postgis_calculate(:distance, [self, other]).to_f
   end
   
   #
@@ -124,6 +124,19 @@ module PostgisFunctions
     postgis_calculate(:within, [self, other])
   end
 
+  #
+  # True if the geometries are within the specified distance of one another.
+  # The distance is specified in units defined by the spatial reference system
+  # of the geometries. For this function to make sense, the source geometries
+  # must both be of the same coorindate projection, having the same SRID.
+  #
+  # Returns boolean ST_DWithin(geometry g1, geometry g2, double precision distance);
+  #
+  def d_within?(other, margin=0.1)
+    postgis_calculate(:dwithin, [self, other], margin)
+  end
+  alias_method "in_bounds?", "d_within?"
+  
   #
   # True if geometry B is completely inside geometry A. 
   #
@@ -217,7 +230,12 @@ module PostgisFunctions
   def simplify(tolerance=0.1)
     postgis_calculate(:simplify, self, tolerance)
   end
-  #TODO:  #def simplify!
+  
+  
+  def simplify!(tolerance=0.1)
+    #FIXME: not good..
+    self.geom = simplify
+  end
 
   #
   # Returns a "simplified" version of the given geometry using the Douglas-Peuker
@@ -364,20 +382,57 @@ module PostgisFunctions
     postgis_calculate(:polygonize, self)
   end
   
-  # NEW
-  #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
-  #boolean ST_OrderingEquals(g
-  #  ST_PointOnSurface — Returns a POINT guaranteed to lie on the surface.
-  #geometry ST_PointOnSurface(geometry g1);eometry A, geometry B);
-
-
-  #x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
-  # ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?
-
-  #x ST_Relate(geometry, geometry, intersectionPatternMatrix)
-  
-  
-  
-  
+  #
+  # Returns true if this Geometry is spatially related to anotherGeometry, 
+  # by testing for intersections between the Interior, Boundary and Exterior 
+  # of the two geometries as specified by the values in the 
+  # intersectionPatternMatrix. If no intersectionPatternMatrix is passed in, 
+  # then returns the maximum intersectionPatternMatrix that relates the 2 geometries.
+  # 
+  # 
+  # Version 1: Takes geomA, geomB, intersectionMatrix and Returns 1 (TRUE) if 
+  # this Geometry is spatially related to anotherGeometry, by testing for 
+  # intersections between the Interior, Boundary and Exterior of the two 
+  # geometries as specified by the values in the intersectionPatternMatrix.
+  # 
+  # This is especially useful for testing compound checks of intersection, 
+  # crosses, etc in one step.
+  # 
+  # Do not call with a GeometryCollection as an argument
+  # 
+  # This is the "allowable" version that returns a boolean, not an integer. 
+  # This is defined in OGC spec.
+  # This DOES NOT automagically include an index call. The reason for that 
+  # is some relationships are anti e.g. Disjoint. If you are using a relationship 
+  # pattern that requires intersection, then include the && index call.
+  # 
+  # Version 2: Takes geomA and geomB and returns the DE-9IM 
+  # (dimensionally extended nine-intersection matrix)
+  # 
+  # Do not call with a GeometryCollection as an argument
+  # Not in OGC spec, but implied. see s2.1.13.2
+  # 
+  #  Both Performed by the GEOS module
+  # 
+  #  Returns:
+  #
+  #  text ST_Relate(geometry geomA, geometry geomB);
+  #  boolean ST_Relate(geometry geomA, geometry geomB, text intersectionPatternMatrix);
+  #
+  def relate?(other, m = nil)
+    # Relate is case sentitive.......
+    m = "'#{m}'" if m
+    postgis_calculate("Relate", [self, other], m)
+  end  
   
 end
+
+# NEW
+#ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
+#boolean ST_OrderingEquals(g
+#  ST_PointOnSurface — Returns a POINT guaranteed to lie on the surface.
+#geometry ST_PointOnSurface(geometry g1);eometry A, geometry B);
+
+
+#x ST_SnapToGrid(geometry, geometry, sizeX, sizeY, sizeZ, sizeM)
+# ST_X , ST_Y, SE_M, SE_Z, SE_IsMeasured has_m?

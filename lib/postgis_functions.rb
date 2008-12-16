@@ -56,7 +56,7 @@ module PostgisFunctions
     #
     # Data =>  SELECT Func(A,B)
     # BBox =>  SELECT (A <=> B)
-    #
+    # 
     if type == :bbox
       opcode = nil
       s_join = " #{options} "
@@ -70,23 +70,25 @@ module PostgisFunctions
     sql =   "SELECT #{opcode}(#{fields.join(s_join)}) "
     sql <<  "FROM #{tables.join(",")} "           if tables
     sql <<  "WHERE #{conditions.join(" AND ")}"   if conditions
-    #p sql; sql
+    p sql; sql
   end
 
+  #
   # Execute the query and parse the return.
   # We may receive:
   #
   # "t" or "f" for boolean queries
   # BIGHASH    for geometries
+  # HASH       for ST_Relate
   # Rescue     a float
   #
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
-    value = connection.select_value(construct_geometric_sql(operation, subject, options))
+    p value = connection.select_value(construct_geometric_sql(operation, subject, options))
     return nil unless value
-    if value =~ /^\D/
+    if value =~ /t|f/
       {"f" => false, "t" => true}[value] 
     else
-      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value.to_f
+      GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value
     end
   end
 
