@@ -53,4 +53,5 @@ class Street < ActiveRecord::Base
 end
 
 class CommonGeo < ActiveRecord::Base
+  acts_as_geom :geom
 end

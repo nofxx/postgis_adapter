@@ -1,6 +1,5 @@
 --colour
---format
-spinner
+--format RspecSpinner::Spinner
 --timeout
 20
 --diff

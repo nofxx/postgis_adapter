@@ -9,6 +9,7 @@ rescue LoadError
   require 'postgres'
 require 'activerecord'
 end
+  require 'rspec_spinner'
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database_postgis.yml')

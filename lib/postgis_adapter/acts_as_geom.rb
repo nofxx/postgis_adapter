@@ -14,7 +14,6 @@ module PostgisFunctions
     # acts_as_geom :geom
     def acts_as_geom(*columns)
       cattr_accessor :postgis_geoms
-
       geoms = columns.map do |g|
         geom_type = get_geom_type(g)
         case geom_type
@@ -25,13 +24,15 @@ module PostgisFunctions
         when :line_string
           send :include, LineStringFunctions
         end
-        {g => geom_type}
+        g
       end
-      self.postgis_geoms = {:geoms => geoms}#, :opts => options}
+      self.postgis_geoms = {:columns => geoms}#, :opts => options}
     end
 
     def get_geom_type(column)
       self.columns.select { |c| c.name == column.to_s}.first.geometry_type
+    rescue ActiveRecord::StatementInvalid => e
+      nil
     end
   end
 end

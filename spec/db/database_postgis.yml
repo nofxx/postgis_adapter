@@ -1,4 +1,4 @@
 adapter: postgresql
-database: postgis_plugin_test
+database: postgis_plugin
 username: postgres
 password:

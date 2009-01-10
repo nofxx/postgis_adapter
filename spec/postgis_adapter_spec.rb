@@ -48,9 +48,9 @@ describe "PostgisAdapter" do
     end
 
     it "should test multipoint" do
-      mp = TableMultiPoint.create!(:geom => MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]]))
+      mp = TableMultiPoint.create!(:geom => MultiPoint.from_coordinates([[12.4,-4326.3],[-65.1,4326.4],[4326.55555555,4326]]))
       find = TableMultiPoint.find(:first)
-      find.geom.should == MultiPoint.from_coordinates([[12.4,-123.3],[-65.1,123.4],[123.55555555,123]])
+      find.geom.should == MultiPoint.from_coordinates([[12.4,-4326.3],[-65.1,4326.4],[4326.55555555,4326]])
     end
 
   end
@@ -68,18 +68,18 @@ describe "PostgisAdapter" do
    end
 
    it "should test_srid_line_string" do
-    ls = TableSridLineString.create!(:geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],123))
+    ls = TableSridLineString.create!(:geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326))
     ls = TableSridLineString.find(:first)
-    ls_e = LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],123)
+    ls_e = LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326)
     ls.geom.should be_instance_of(LineString)
-    ls.geom.srid.should eql(123)
+    ls.geom.srid.should eql(4326)
     end
 
 
     it "hsould test_multi_line_string" do
-      ml = TableMultiLineString.create!(:geom => MultiLineString.from_line_strings([LineString.from_coordinates([[1.5,45.2],[-54.12312,-0.012]]),LineString.from_coordinates([[1.5,45.2],[-54.12312,-0.012],[45.123,123.3]])]))
+      ml = TableMultiLineString.create!(:geom => MultiLineString.from_line_strings([LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012]]),LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012],[45.4326,4326.3]])]))
       find = TableMultiLineString.find(:first)
-      find.geom.should == MultiLineString.from_line_strings([LineString.from_coordinates([[1.5,45.2],[-54.12312,-0.012]]),LineString.from_coordinates([[1.5,45.2],[-54.12312,-0.012],[45.123,123.3]])])
+      find.geom.should == MultiLineString.from_line_strings([LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012]]),LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012],[45.4326,4326.3]])])
     end
   end
 
@@ -103,11 +103,11 @@ describe "PostgisAdapter" do
     end
 
     it "should test_srid_4d_polygon" do
-      pg = TableSrid4dPolygon.create(:geom => Polygon.from_coordinates([[[0,0,2,-45.1],[4,0,2,5],[4,4,2,4.67],[0,4,2,1.34],[0,0,2,-45.1]],[[1,1,2,12.3],[3,1,2,123],[3,3,2,12.2],[1,3,2,12],[1,1,2,12.3]]],123,true,true))
+      pg = TableSrid4dPolygon.create(:geom => Polygon.from_coordinates([[[0,0,2,-45.1],[4,0,2,5],[4,4,2,4.67],[0,4,2,1.34],[0,0,2,-45.1]],[[1,1,2,12.3],[3,1,2,4326],[3,3,2,12.2],[1,3,2,12],[1,1,2,12.3]]],4326,true,true))
       find = TableSrid4dPolygon.find(:first)
-      pg_e = Polygon.from_coordinates([[[0,0,2,-45.1],[4,0,2,5],[4,4,2,4.67],[0,4,2,1.34],[0,0,2,-45.1]],[[1,1,2,12.3],[3,1,2,123],[3,3,2,12.2],[1,3,2,12],[1,1,2,12.3]]],123,true,true)
+      pg_e = Polygon.from_coordinates([[[0,0,2,-45.1],[4,0,2,5],[4,4,2,4.67],[0,4,2,1.34],[0,0,2,-45.1]],[[1,1,2,12.3],[3,1,2,4326],[3,3,2,12.2],[1,3,2,12],[1,1,2,12.3]]],4326,true,true)
       pg.geom.should == pg_e
-      pg.geom.srid.should eql(123)
+      pg.geom.srid.should eql(4326)
     end
   end
 
@@ -134,7 +134,7 @@ describe "PostgisAdapter" do
         create_table "parks", :force => true do |t|
           t.column "data" , :string, :limit => 100
           t.column "value", :integer
-          t.column "geom", :point,:null=>false,:srid=>123
+          t.column "geom", :point,:null=>false,:srid=>4326
         end
         add_index "parks","geom",:spatial=>true,:name => "example_spatial_index"
       end
@@ -143,13 +143,13 @@ describe "PostgisAdapter" do
     end
 
     it "should create some points" do
-      Park.create!(:data => "Point1", :geom => Point.from_x_y(1.2,0.75,123))
-      Park.create!(:data => "Point2",:geom => Point.from_x_y(0.6,1.3,123))
-      Park.create!(:data => "Point3", :geom => Point.from_x_y(2.5,2,123))
+      Park.create!(:data => "Point1", :geom => Point.from_x_y(1.2,0.75,4326))
+      Park.create!(:data => "Point2",:geom => Point.from_x_y(0.6,1.3,4326))
+      Park.create!(:data => "Point3", :geom => Point.from_x_y(2.5,2,4326))
     end
 
     it "should find by geom" do
-      pts = Park.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],123))
+      pts = Park.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match /Point/
@@ -157,12 +157,12 @@ describe "PostgisAdapter" do
     end
 
     it "should find by geom again" do
-      pts = Park.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],123))
+      pts = Park.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
       pts[0].data.should eql("Point3")
     end
 
     it "should find by geom column bbox condition" do
-      pts = Park.find_all_by_geom([[0,0],[2,2],123])
+      pts = Park.find_all_by_geom([[0,0],[2,2],4326])
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match /Point/

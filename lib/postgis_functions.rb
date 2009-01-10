@@ -18,9 +18,8 @@
 #
 #
 module PostgisFunctions
-  # EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'"
-
-  EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'"
+  EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'" # SRID => 4326
+  #EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'" # SRID => 
 
   def postgis_calculate(operation, subjects, options = nil)
     subjects = [subjects] unless subjects.respond_to?(:map)
@@ -29,12 +28,13 @@ module PostgisFunctions
     raise StandardError, "#{e}"
   end
 
-
   private
 
-
+  def get_column_name
+    @geo_column ||= postgis_geoms[:columns].first
+  end
+ 
   # Construct the postgis sql query
-  # TODO: ST_Transform() ?? # Convert between distances. Implement this?
   #
   # Area return in square feet
   # Distance/DWithin/Length/Perimeter —  in projected units.
@@ -49,7 +49,7 @@ module PostgisFunctions
       :id => t[:id] }
     end
 
-    fields      = tables.map { |f| "#{f[:uid]}.geom" }            # W1.geom
+    fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }            # W1.geom
     conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }  # W1.id = 5
     tables.map! { |f| "#{f[:class]} #{f[:uid]}" }    # streets W1
     
@@ -57,17 +57,16 @@ module PostgisFunctions
     # Data =>  SELECT Func(A,B)
     # BBox =>  SELECT (A <=> B)
     # 
-    if type == :bbox
-      opcode = nil
-      s_join = " #{options} "
-    else
+    unless type == :bbox
       opcode = type.to_s
       opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
-      s_join = ","
       fields << options if options
+      fields = fields.join(",")
+    else
+      fields = fields.join(" #{options} ")
     end
 
-    sql =   "SELECT #{opcode}(#{fields.join(s_join)}) "
+    sql =   "SELECT #{opcode}(#{fields}) "
     sql <<  "FROM #{tables.join(",")} "           if tables
     sql <<  "WHERE #{conditions.join(" AND ")}"   if conditions
     #p sql; sql
@@ -94,7 +93,7 @@ module PostgisFunctions
 
   # Get a unique ID for tables
   def unique_identifier
-    @u_id ||= "W1"
+    @u_id ||= "T1"
     @u_id = @u_id.succ
   end
 

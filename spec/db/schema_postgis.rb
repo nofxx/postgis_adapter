@@ -54,33 +54,30 @@ ActiveRecord::Schema.define() do
     t.point "geom", :null => false, :with_m => true, :with_z => true
   end
 
-   create_table "table_srid_line_strings", :force => true do |t|
-    t.line_string "geom", :null => false , :srid => 123
+  create_table "table_srid_line_strings", :force => true do |t|
+    t.line_string "geom", :null => false , :srid => 4326
   end
 
   create_table "table_srid4d_polygons", :force => true do |t|
-    t.polygon "geom", :with_m => true, :with_z => true, :srid => 123
+    t.polygon "geom", :with_m => true, :with_z => true, :srid => 4326
   end
 
-        create_table :cities do |t|
-          t.string :data, :limit => 100
-          t.integer :value
-          t.polygon  :geom,:null=>false,:srid=>123
-        end
+  create_table :cities do |t|
+    t.string :data, :limit => 100
+    t.integer :value
+    t.polygon  :geom,:null=>false,:srid=>4326
+  end
 
-        create_table :positions do |t|
-          t.string :data, :limit => 100
-          t.integer :value
-          t.point  :geom,:null=>false,:srid=>123
-        end
+  create_table :positions do |t|
+    t.string :data, :limit => 100
+    t.integer :value
+    t.point  :geom,:null=>false,:srid=>4326
+  end
 
-        create_table :streets do |t|
-          t.string :data, :limit => 100
-          t.integer :value
-          t.line_string  :geom,:null=>false,:srid=>123
-        end
-
-
-
+  create_table :streets do |t|
+    t.string :data, :limit => 100
+    t.integer :value
+    t.line_string  :geom,:null=>false,:srid=>4326
+  end
 
 end

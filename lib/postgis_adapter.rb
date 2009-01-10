@@ -10,9 +10,6 @@ require 'postgis_adapter/common_spatial_adapter'
 require 'postgis_functions'
 require 'postgis_functions/common'
 require 'postgis_functions/class'
-require 'postgis_functions/point'
-require 'postgis_functions/linestring'
-require 'postgis_functions/polygon'
 require 'postgis_functions/bbox'
 require 'postgis_adapter/acts_as_geom'
 
@@ -20,12 +17,11 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 module PostgisAdapter
-  VERSION = '0.1.8'
+  VERSION = '0.2.1'
 end
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns
 ActiveRecord::SchemaDumper.ignore_tables << "spatial_ref_sys" << "geometry_columns"
-
 
 #add a method to_yaml to the Geometry class which will transform a geometry in a form suitable to be used in a YAML file (such as in a fixture)
 GeoRuby::SimpleFeatures::Geometry.class_eval do
@@ -33,7 +29,6 @@ GeoRuby::SimpleFeatures::Geometry.class_eval do
     as_hex_ewkb
   end
 end
-
 
 ActiveRecord::Base.class_eval do
   require 'active_record/version'
