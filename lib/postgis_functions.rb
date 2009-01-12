@@ -40,7 +40,6 @@ module PostgisFunctions
   # Distance/DWithin/Length/Perimeter —  in projected units.
   # DistanceSphere/Spheroid —  in meters.
   #
-  #
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {

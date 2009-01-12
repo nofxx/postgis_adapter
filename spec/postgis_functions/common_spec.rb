@@ -39,33 +39,37 @@ describe "Common Functions" do
     it { @p1.distance_spheroid_to(@p2).should be_close(627129.50,0.01) }
     it { @p1.distance_spheroid_to(@p2).should be_close(627129.502639041, 0.000001) }
     it { @p1.distance_spheroid_to(@p3).should be_close(1096324.48117672, 0.000001) }
-    
+
     it { @p1.should_not be_inside(@c1) }
     it { @p1.should be_outside(@c1) }
     it { @p1.should be_inside_circle(2.0,2.0,20.0) }
     it { @p1.should_not be_inside_circle(50,50,2) }
     it { @p1.should be_in_bounds(@s1) }
     it { @p3.should_not be_in_bounds(@s1, 1) }
-    it { @p4.in_bounds?(@s3, 0.01).should be_false } 
-    
+    it { @p4.in_bounds?(@s3, 0.01).should be_false }
+
     it { @p1.azimuth(@p2).should be_close(0.785398163397448,0.000001) }
     it { @p1.azimuth(@s2).should raise_error }
     it { @p1.disjoint?(@s2).should be_true }
     it { @p3.polygonize.geometries.should be_empty }
-    it { @p4.where_on_line(@s3).should be_close(0.335, 0.0001) }   
+    it { @p4.where_on_line(@s3).should be_close(0.335, 0.0001) }
     it { @s3.locate_point(@p4).should be_close(0.335, 0.1)}
     it { @s3.interpolate_point(0.335).x.should be_close(18.05, 0.01) }
-    
+
     it { @p1.relate?(@s3, "T*T***FF*").should be_false }
     it { @p1.relate?(@s3).should eql("FF0FFF102") }
 
     it "should transform srid" do
-      @p1.geom = @p1.transform(29101) 
+      @p1.geom = @p1.transform(29101)
       @p1.geom.srid.should eql(29101)
     end
 
     it "should see in what fraction of the ls it is" do
       @p1.where_on_line(@s1).should eql(0.0)
+    end
+
+    it "should see in what fraction of the ls it is" do
+      @p2.where_on_line(@s2).should be_close(0.3333, 0.1)
     end
 
   end
@@ -83,7 +87,7 @@ describe "Common Functions" do
     it "should find one city (first) that contains a point" do
       City.contain(@p4.geom, 4326).data.should eql("City1")
     end
-    
+
     it { @c2.should be_closed }
     it { @c3.area.should be_close(1093.270089, 0.1) }
     it { @c2.area.should be_close(1159.5, 0.1) }
@@ -143,9 +147,13 @@ describe "Common Functions" do
     it { @c2.disjoint?(@p2).should be_true }
     it { @c3.polygonize.should have(2).geometries }
 
+    it "should acts as jack" do
+      @c2.segmentize(0.1).should be_instance_of(Polygon)
+    end
+
     # weird...
     # it  do
-    #   @c1.disjoint?(@s2).should be_true
+    #   @c1.disjoint?(@p2).should be_true
     # end
 
   end
@@ -241,7 +249,7 @@ describe "Common Functions" do
 
     it do @s1.locate_point(@p1).should eql(0.0) end
     it do @s1.locate_point(@p2).should eql(1.0) end
-    
+
     it "should simplify a line" do
       @s3.simplify.points.length.should eql(2)
     end
@@ -258,7 +266,7 @@ describe "Common Functions" do
     it { @s1.overlaps?(@s2).should be_false }
     it { @s1.convex_hull.should be_instance_of(LineString) }
     it { @s1.line_substring(0.2,0.5).should be_instance_of(LineString) }
-    
+
     it do
       @s1.interpolate_point(0.7).should be_instance_of(Point)
       @s1.interpolate_point(0.7).x.should be_close(1.7,0.1)
@@ -275,7 +283,10 @@ describe "Common Functions" do
       @s2.build_area.should be_nil
     end
 
+    it "should acts as jack" do
+      @s2.segmentize(0.1).should be_instance_of(LineString)
+    end
+
   end
 
 end
-

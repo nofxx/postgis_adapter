@@ -19,7 +19,7 @@ module PostgisFunctions
   # (it must be noted ST_OrderingEquals is a little more stringent than
   # simply verifying order of points are the same).
   #
-  # This function will return false if either geometry is invalid even 
+  # This function will return false if either geometry is invalid even
   # if they are binary equal.
   #
   # Returns Boolean ST_Equals(geometry A, geometry B);
@@ -74,9 +74,9 @@ module PostgisFunctions
   def centroid
     postgis_calculate(:centroid, self)
   end
-  
+
   #
-  # Returns the closure of the combinatorial boundary of this Geometry. 
+  # Returns the closure of the combinatorial boundary of this Geometry.
   # The combinatorial boundary is defined as described in section 3.12.3.2 of the
   # OGC SPEC. Because the result of this function is a closure, and hence topologically
   # closed, the resulting boundary can be represented using representational
@@ -100,7 +100,7 @@ module PostgisFunctions
   def distance_to(other)
     postgis_calculate(:distance, [self, other]).to_f
   end
-  
+
   #
   # True if geometry A is completely inside geometry B.
   #
@@ -136,11 +136,11 @@ module PostgisFunctions
     postgis_calculate(:dwithin, [self, other], margin)
   end
   alias_method "in_bounds?", "d_within?"
-  
+
   #
-  # True if geometry B is completely inside geometry A. 
+  # True if geometry B is completely inside geometry A.
   #
-  # For this function to make sense, the source geometries must both be of the same 
+  # For this function to make sense, the source geometries must both be of the same
   # coordinate projection, having the same SRID. 'contains?' is the inverse of 'within?'.
   #
   # So a.contains?(b) is like b.within?(a) except in the case of invalid
@@ -156,7 +156,7 @@ module PostgisFunctions
   def contains? other
     postgis_calculate(:contains, [self, other])
   end
-  
+
   #
   # True if no point in Geometry A is outside Geometry B
   #
@@ -177,7 +177,7 @@ module PostgisFunctions
     postgis_calculate(:coveredby, [self, other])
   end
   alias_method "inside?", "covered_by?"
-  
+
   #
   # Eye-candy. See 'covered_by?'.
   #
@@ -230,8 +230,8 @@ module PostgisFunctions
   def simplify(tolerance=0.1)
     postgis_calculate(:simplify, self, tolerance)
   end
-  
-  
+
+
   def simplify!(tolerance=0.1)
     #FIXME: not good..
     self.update_attribute(get_column_name, simplify)
@@ -255,7 +255,7 @@ module PostgisFunctions
   #
   # True if Geometries "spatially intersect", share any portion of space.
   # False if they don't (they are Disjoint).
-  # 
+  #
   # 'overlaps?', 'touches?', 'within?' all imply spatial intersection.
   # If any of the aforementioned returns true, then the geometries also
   # spatially intersect. 'disjoint?' implies false for spatial intersection.
@@ -344,11 +344,11 @@ module PostgisFunctions
   def convex_hull
     postgis_calculate(:convexhull, self)
   end
-  
+
   #
   # Creates an areal geometry formed by the constituent linework of given geometry.
-  # The return type can be a Polygon or MultiPolygon, depending on input. 
-  # If the input lineworks do not form polygons NULL is returned. The inputs can 
+  # The return type can be a Polygon or MultiPolygon, depending on input.
+  # If the input lineworks do not form polygons NULL is returned. The inputs can
   # be LINESTRINGS, MULTILINESTRINGS, POLYGONS, MULTIPOLYGONS, and GeometryCollections.
   #
   # Returns Boolean ST_BuildArea(geometry A);
@@ -356,7 +356,7 @@ module PostgisFunctions
   def build_area
     postgis_calculate(:buildarea, self)
   end
-  
+
   #
   # Returns true if this Geometry has no anomalous geometric points, such as
   # self intersection or self tangency.
@@ -369,10 +369,10 @@ module PostgisFunctions
   alias_method "simple?", "is_simple?"
 
   #
-  # Aggregate. Creates a GeometryCollection containing possible polygons formed 
+  # Aggregate. Creates a GeometryCollection containing possible polygons formed
   # from the constituent linework of a set of geometries.
   #
-  # Geometry Collections are often difficult to deal with with third party tools, 
+  # Geometry Collections are often difficult to deal with with third party tools,
   # so use ST_Polygonize in conjunction with ST_Dump to dump the polygons out into
   #  individual polygons.
   #
@@ -381,75 +381,86 @@ module PostgisFunctions
   def polygonize#(geom)
     postgis_calculate(:polygonize, self)
   end
-  
+
   #
-  # Returns true if this Geometry is spatially related to anotherGeometry, 
-  # by testing for intersections between the Interior, Boundary and Exterior 
-  # of the two geometries as specified by the values in the 
-  # intersectionPatternMatrix. If no intersectionPatternMatrix is passed in, 
+  # Returns true if this Geometry is spatially related to anotherGeometry,
+  # by testing for intersections between the Interior, Boundary and Exterior
+  # of the two geometries as specified by the values in the
+  # intersectionPatternMatrix. If no intersectionPatternMatrix is passed in,
   # then returns the maximum intersectionPatternMatrix that relates the 2 geometries.
-  # 
-  # 
-  # Version 1: Takes geomA, geomB, intersectionMatrix and Returns 1 (TRUE) if 
-  # this Geometry is spatially related to anotherGeometry, by testing for 
-  # intersections between the Interior, Boundary and Exterior of the two 
+  #
+  #
+  # Version 1: Takes geomA, geomB, intersectionMatrix and Returns 1 (TRUE) if
+  # this Geometry is spatially related to anotherGeometry, by testing for
+  # intersections between the Interior, Boundary and Exterior of the two
   # geometries as specified by the values in the intersectionPatternMatrix.
-  # 
-  # This is especially useful for testing compound checks of intersection, 
+  #
+  # This is especially useful for testing compound checks of intersection,
   # crosses, etc in one step.
-  # 
+  #
   # Do not call with a GeometryCollection as an argument
-  # 
-  # This is the "allowable" version that returns a boolean, not an integer. 
+  #
+  # This is the "allowable" version that returns a boolean, not an integer.
   # This is defined in OGC spec.
-  # This DOES NOT automagically include an index call. The reason for that 
-  # is some relationships are anti e.g. Disjoint. If you are using a relationship 
+  # This DOES NOT automagically include an index call. The reason for that
+  # is some relationships are anti e.g. Disjoint. If you are using a relationship
   # pattern that requires intersection, then include the && index call.
-  # 
-  # Version 2: Takes geomA and geomB and returns the DE-9IM 
+  #
+  # Version 2: Takes geomA and geomB and returns the DE-9IM
   # (dimensionally extended nine-intersection matrix)
-  # 
+  #
   # Do not call with a GeometryCollection as an argument
   # Not in OGC spec, but implied. see s2.1.13.2
-  # 
+  #
   #  Both Performed by the GEOS module
-  # 
+  #
   #  Returns:
   #
-  #  text ST_Relate(geometry geomA, geometry geomB);
-  #  boolean ST_Relate(geometry geomA, geometry geomB, text intersectionPatternMatrix);
+  #  String ST_Relate(geometry geomA, geometry geomB);
+  #  Boolean ST_Relate(geometry geomA, geometry geomB, text intersectionPatternMatrix);
   #
   def relate?(other, m = nil)
     # Relate is case sentitive.......
     m = "'#{m}'" if m
     postgis_calculate("Relate", [self, other], m)
-  end  
+  end
 
-  # 
+  #
   # Transform the geometry into a different spatial reference system.
+  # The destination SRID must exist in the SPATIAL_REF_SYS table.
   #
-  # Return geometry ST_Transform(geometry g1, integer srid);
-  # Returns a new geometry with its coordinates transformed to spatial reference system referenced by the SRID integer parameter. The destination SRID must exist in the SPATIAL_REF_SYS table.
-  # ST_Transform is often confused with ST_SetSRID(). ST_Transform actually changes the coordinates of a geometry from one spatial reference system to another, while ST_SetSRID() simply changes the SRID identifier of the geometry
-  # Requires PostGIS be compiled with Proj support. Use PostGIS_Full_Version to confirm you have proj support compiled in.
-  #	
-  # If using more than one transformation, it is useful to have a functional index on the commonly used transformations to take advantage of index usage.
-  #
-  # Prior to 1.3.4, this function crashes if used with geometries that contain CURVES. This is fixed in 1.3.4+
   # This method implements the OpenGIS Simple Features Implementation Specification for SQL.
-  # This method supports Circular Strings and Curves
+  # This method supports Circular Strings and Curves (PostGIS 1.3.4+)
+  #
+  # Requires PostGIS be compiled with Proj support.
+  #
+  # Return Geometry ST_Transform(geometry g1, integer srid);
   #
   def transform(new_srid)
     postgis_calculate("Transform", self, new_srid)
   end
-  
+
+  # Return a modified geometry having no segment longer than the given distance. Distance computation is performed in 2d only.
+#  Synopsis
+
+#geometry ST_Segmentize(geometry geomA, float max_length);
+#Description
+
+#Returns a modified geometry having no segment longer than the given distance. Distance computation is performed in 2d only.
+
+#This will only increase segments. It will not lengthen segments shorter than max length
+
+  def segmentize(max_length=1.0)
+    postgis_calculate("segmentize", self, max_length)
+  end
+
   #
   # LINESTRING
   #
   #
   #
   module LineStringFunctions
-    
+
     #
     # Returns the 2D length of the geometry if it is a linestring, multilinestring,
     # ST_Curve, ST_MultiCurve. 0 is returned for areal geometries. For areal geometries
@@ -548,12 +559,12 @@ module PostgisFunctions
     def locate_point point
       postgis_calculate(:line_locate_point, [self, point]).to_f
     end
-    
+
     #
-    # Return a derived geometry collection value with elements that match the 
+    # Return a derived geometry collection value with elements that match the
     # specified measure. Polygonal elements are not supported.
     #
-    # Semantic is specified by: ISO/IEC CD 13249-3:200x(E) - Text for 
+    # Semantic is specified by: ISO/IEC CD 13249-3:200x(E) - Text for
     # Continuation CD Editing Meeting
     #
     # Returns geometry ST_Locate_Along_Measure(geometry ageom_with_measure, float a_measure);
@@ -561,9 +572,9 @@ module PostgisFunctions
     def locate_along_measure(measure)
       postgis_calculate(:locate_along_measure, self, measure)
     end
-    
+
     #
-    # Return a derived geometry collection value with elements that match the 
+    # Return a derived geometry collection value with elements that match the
     # specified range of measures inclusively. Polygonal elements are not supported.
     #
     # Semantic is specified by: ISO/IEC CD 13249-3:200x(E) - Text for Continuation CD Editing Meeting
@@ -573,7 +584,7 @@ module PostgisFunctions
     def locate_between_measures(a, b)
       postgis_calculate(:locate_between_measures, self, [a,b])
     end
-    
+
     #
     # Returns a point interpolated along a line. First argument must be a LINESTRING.
     # Second argument is a float8 between 0 and 1 representing fraction of total
@@ -603,7 +614,7 @@ module PostgisFunctions
       postgis_calculate(:line_substring, self, [s, e])
     end
 
-    ###  
+    ###
     #Not implemented in postgis yet
     # ST_max_distance Returns the largest distance between two line strings.
     #def max_distance other
@@ -699,7 +710,7 @@ module PostgisFunctions
     end
 
   end
-  
+
   ###
   ##
   #
@@ -775,7 +786,7 @@ module PostgisFunctions
     end
 
   end
-  
+
 end
 
 # NEW
