@@ -4,7 +4,8 @@
 # Spatial Adapter PostGIS Adapter for ActiveRecord
 #
 #
-#require 'active_record'
+require 'activerecord'
+require 'active_record/connection_adapters/postgresql_adapter'
 require 'geo_ruby'
 require 'postgis_adapter/common_spatial_adapter'
 require 'postgis_functions'
