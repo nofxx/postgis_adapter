@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # #
 #
 # COMMON GEOMETRICAL FUNCTIONS
@@ -440,16 +441,14 @@ module PostgisFunctions
     postgis_calculate("Transform", self, new_srid)
   end
 
-  # Return a modified geometry having no segment longer than the given distance. Distance computation is performed in 2d only.
-#  Synopsis
-
-#geometry ST_Segmentize(geometry geomA, float max_length);
-#Description
-
-#Returns a modified geometry having no segment longer than the given distance. Distance computation is performed in 2d only.
-
-#This will only increase segments. It will not lengthen segments shorter than max length
-
+  #
+  # Returns a modified geometry having no segment longer than the given distance.
+  # Distance computation is performed in 2d only.
+  #
+  # This will only increase segments. It will not lengthen segments shorter than max length
+  #
+  # Return Geometry ST_Segmentize(geometry geomA, float max_length);
+  #
   def segmentize(max_length=1.0)
     postgis_calculate("segmentize", self, max_length)
   end
@@ -726,8 +725,8 @@ module PostgisFunctions
     #
     # Returns Float ST_Area(geometry g1);
     #
-    def area
-      postgis_calculate(:area, self).to_f
+    def area transform=nil
+      postgis_calculate(:area, self, { :transform => transform }).to_f
     end
 
     #

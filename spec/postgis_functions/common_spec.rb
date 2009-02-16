@@ -91,6 +91,7 @@ describe "Common Functions" do
     it { @c2.should be_closed }
     it { @c3.area.should be_close(1093.270089, 0.1) }
     it { @c2.area.should be_close(1159.5, 0.1) }
+    it { @c2.area(32640).should be_close(5852791139841.2, 0.01) }
 
     it { @c2.dimension.should eql(2) }
     it { @c2.perimeter.should be_close(219.770013855493, 0.1) }
@@ -150,6 +151,7 @@ describe "Common Functions" do
     it "should acts as jack" do
       @c2.segmentize(0.1).should be_instance_of(Polygon)
     end
+
 
     # weird...
     # it  do

@@ -1,9 +1,8 @@
-# #
+# -*- coding: utf-8 -*-
 #
 # PostGIS Adapter - http://github.com/nofxx/postgis_adapter
 #
-# Hope you enjoy this plugin. 
-# 
+# Hope you enjoy this plugin.
 #
 #
 # Post any bugs/suggestions to the lighthouse tracker:
@@ -16,12 +15,11 @@
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
 #
-#
 module PostgisFunctions
   EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'" # SRID => 4326
-  #EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'" # SRID => 
+  #EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'" # SRID =>
 
-  def postgis_calculate(operation, subjects, options = nil)
+  def postgis_calculate(operation, subjects, options = {})
     subjects = [subjects] unless subjects.respond_to?(:map)
     return execute_geometrical_calculation(operation, subjects, options)
     rescue Exception => e
@@ -33,7 +31,8 @@ module PostgisFunctions
   def get_column_name
     @geo_column ||= postgis_geoms[:columns].first
   end
- 
+
+  #
   # Construct the postgis sql query
   #
   # Area return in square feet
@@ -47,16 +46,24 @@ module PostgisFunctions
       :uid =>  unique_identifier,
       :id => t[:id] }
     end
-
-    fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }            # W1.geom
-    conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }  # W1.id = 5
-    tables.map! { |f| "#{f[:class]} #{f[:uid]}" }    # streets W1
     
+    # Implement a better way for options?
+    if options.instance_of? Hash
+      transform = options.delete(:transform)
+      options = nil
+    end
+
+    fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }     # W1.geom
+    fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
+    conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5
+    tables.map! { |f| "#{f[:class]} #{f[:uid]}" }                        # streets W1
+
     #
-    # Data =>  SELECT Func(A,B)
-    # BBox =>  SELECT (A <=> B)
-    # 
-    unless type == :bbox
+    # Data  =>  SELECT Func(A,B)
+    # BBox  =>  SELECT (A <=> B)
+    # Func  =>  SELECT Func(Func(A))
+    #
+    if type != :bbox
       opcode = type.to_s
       opcode = "ST_#{opcode}" unless opcode =~ /th3d|pesinter/
       fields << options if options
@@ -84,7 +91,7 @@ module PostgisFunctions
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
     return nil unless value
     if value =~ /t|f/
-      {"f" => false, "t" => true}[value] 
+      {"f" => false, "t" => true}[value]
     else
       GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value
     end
@@ -142,7 +149,7 @@ end
 #ST_AsGML
 #ST_AsKML
 #ST_AsSVG
-# 
+#
 #  def distance_convert(value, unit, from = nil)
 #    factor = case unit
 #    when :km, :kilo     then  1

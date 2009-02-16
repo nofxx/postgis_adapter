@@ -10,7 +10,7 @@ module PostgisFunctions
   # These operators utilize indexes. They compare geometries by bounding boxes.
   #
   # You can use the literal forms or call directly using the 'bbox' method. eg.:
-  #  
+  #
   #   @point.bbox(">>", @area)
   #   @point.bbox("|&>", @area)
   #
