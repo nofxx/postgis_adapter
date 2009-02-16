@@ -723,6 +723,8 @@ module PostgisFunctions
     # Return the area measurement of an ST_Surface or ST_MultiSurface value.
     # Area is in the units of the spatial reference system.
     #
+    # Accepts optional parameter, the srid to transform to.
+    #
     # Returns Float ST_Area(geometry g1);
     #
     def area transform=nil
@@ -735,10 +737,12 @@ module PostgisFunctions
     # use 'length'. Measurements are in the units of the spatial reference system of
     # the geometry.
     #
+    # Accepts optional parameter, the srid to transform to.
+    #
     # Returns Float ST_Perimeter(geometry g1);
     #
-    def perimeter
-      postgis_calculate(:perimeter, self).to_f
+    def perimeter transform=nil
+      postgis_calculate(:perimeter, self, { :transform => transform }).to_f
     end
 
     #

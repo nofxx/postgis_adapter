@@ -89,13 +89,16 @@ describe "Common Functions" do
     end
 
     it { @c2.should be_closed }
+    it { @c2.dimension.should eql(2) }
+
     it { @c3.area.should be_close(1093.270089, 0.1) }
     it { @c2.area.should be_close(1159.5, 0.1) }
     it { @c2.area(32640).should be_close(5852791139841.2, 0.01) }
 
-    it { @c2.dimension.should eql(2) }
     it { @c2.perimeter.should be_close(219.770013855493, 0.1) }
+    it { @c2.perimeter(32640).should be_close(23061464.4268903, 0.1) }
     it { @c2.perimeter3d.should be_close(219.770013855493, 0.1) }
+
     it { @c1.contains?(@p1).should be_false }
     it { @c1.contains?(@p4).should be_true }
 

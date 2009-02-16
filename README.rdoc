@@ -11,32 +11,42 @@ Postgis Manual - http://postgis.refractions.net/documentation/manual-svn
 *PostGIS and Rails 2+ only*.
 
 
-=== Install
+== Install
 
 If you are using Spatial Adapter, *remove it first*.
 
 
-==== Dependencies
+=== Dependencies
 
 - georuby
 - postgres 8.3+
 - postgis  1.3+
 
 
-==== As gem:
+=== As gem:
 
-    sudo gem sources --add http://gems.github.com
-    sudo gem install nofxx-postgis_adapter
-  
+    sudo gem install postgis-adapter
+
+Rails:
+
+    config.gem "postgis_adapter"
+
+Github version:
+
+
+    sudo gem install nofxx-postgis_adapter --source http://gems.github.com
+
+Rails:
+
     config.gem "nofxx-postgis_adapter", :lib => "postgis_adapter", :source => "http://gems.github.com"
-    
-  
-==== As plugin:
+
+
+=== As plugin:
 
     script/plugin install git://github.com/nofxx/postgis_adapter.git
 
 
-=== How to Use
+== How to Use
 
 Geometric columns in your ActiveRecord models now appear just like
 any other column of other basic data types. They can also be dumped
@@ -55,11 +65,11 @@ The plugin will get this information by itself.
 Here is an example of PostGIS row creation and access, using the
 model and the table defined above :
 
-  	pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y(1,2))
-  	pt.save
-  	pt = TablePoint.first
-  	puts pt.geom.x
-  	=> 1
+        pt = TablePoint.new(:data => "Hello!",:geom => Point.from_x_y(1,2))
+        pt.save
+        pt = TablePoint.first
+        puts pt.geom.x
+        => 1
 
 
 == PostGIS Functions
@@ -78,7 +88,7 @@ Here are this fork additions. To use it:
     @street =   Street.new( :line  => **LineString**   )
 
 
-=== Play!
+== Play!
 
     @place.inside?(@park)
     => true
@@ -91,9 +101,9 @@ Here are this fork additions. To use it:
     @street.crosses?(@park)
 
     @area.contains?(@place)
-    
 
-Polygons:
+
+=== Polygons:
 
     @park.area
     => 1345
@@ -103,9 +113,14 @@ Polygons:
 
     @park.overlaps?(@other_park)
     => false
-    
 
-Line Strings:
+Supports transform (useful to transform SRID to UTM for area in Km^2)
+
+    @park.area(SRID)
+    => Area with new SRID
+
+
+=== Line Strings:
 
     @street_east.intersects?(@street_west)
     => false
@@ -120,7 +135,7 @@ Line Strings:
     => 4.40853636
 
 
-=== And for classes:
+=== Class Methods
 
     City.close_to(@point)
     => [Array of cities in order by distance...
@@ -158,7 +173,7 @@ Line Strings:
     same_as?
 
 
-Or use a (almost) postgis like notation:
+Or use a (almost) PostGIS like notation:
 
     @area.bbox "<<", @point
 
@@ -200,15 +215,15 @@ the find_by_*geom_column*: Either by passing a geometric object directly,
 or passing an array with the 2 opposite corners of a bounding box
 (with 2 or 3 coordinates depending of the dimension of the data).
 
-  	Park.find_by_geom(LineString.from_coordinates([[1.4,5.6],[2.7,8.9],[1.6,5.6]]))
+        Park.find_by_geom(LineString.from_coordinates([[1.4,5.6],[2.7,8.9],[1.6,5.6]]))
 
   or
 
-  	Park.find_by_geom([[3,5.6],[19.98,5.9]])
+        Park.find_by_geom([[3,5.6],[19.98,5.9]])
 
 In PostGIS, since you can only use operations with geometries with the same SRID, you can add a third element representing the SRID of the bounding box to the array. It is by default set to -1:
 
-  	Park.find_by_geom([[3,5.6],[19.98,5.9],123])
+        Park.find_by_geom([[3,5.6],[19.98,5.9],123])
 
 
 
@@ -221,13 +236,13 @@ geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
     ActiveRecord::Schema.define do
-  	  create_table :places do |t|
+          create_table :places do |t|
         t.string :name
-      	t.point  :geom, :srid => 123, :with_z => true, :null => false
-    	 
+        t.point  :geom, :srid => 123, :with_z => true, :null => false
+
         t.timestamps
       end
-  	  add_index :table_points, :geom, :spatial=>true
+          add_index :table_points, :geom, :spatial=>true
     end
 
 
@@ -242,9 +257,9 @@ is different for each database). You would use it like this, if
 the geometric column is a point:
 
     fixture:
-  	  id: 1
-  	  data: HELLO
-  	  geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
+          id: 1
+          data: HELLO
+          geom: <%= Point.from_x_y(123.5,321.9).to_yaml %>
 
 
 === Annotate
@@ -295,7 +310,7 @@ Postgis Adapter is released under the MIT license.
 
 == Support
 
-Tested using rails 2.2.2 / postgresql 8.3.5 / postgis 1.3.3 / linux / osx
+Tested using rails 2.2.2/2.3.0 / postgresql 8.3.5 / postgis 1.3.3 / linux / osx
 
 Any questions, enhancement proposals, bug notifications or corrections:
 
