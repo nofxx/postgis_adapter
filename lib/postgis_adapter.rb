@@ -18,7 +18,7 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 module PostgisAdapter
-  VERSION = '0.2.3'
+  VERSION = '0.3.0'
 end
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns
@@ -38,18 +38,23 @@ ActiveRecord::Base.class_eval do
     def self.get_conditions(attrs)
       attrs.map do |attr, value|
         attr = attr.to_s
+        column_name = connection.quote_column_name(attr)
         if columns_hash[attr].is_a?(SpatialColumn)
           if value.is_a?(Array)
             attrs[attr.to_sym]= "BOX3D(" + value[0].join(" ") + "," + value[1].join(" ") + ")"
-            "#{table_name}.#{connection.quote_column_name(attr)} && SetSRID(?::box3d, #{value[2] || DEFAULT_SRID} ) "
+            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value[2] || DEFAULT_SRID} ) "
           elsif value.is_a?(Envelope)
             attrs[attr.to_sym]= "BOX3D(" + value.lower_corner.text_representation + "," + value.upper_corner.text_representation + ")"
-            "#{table_name}.#{connection.quote_column_name(attr)} && SetSRID(?::box3d, #{value.srid} ) "
+            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value.srid} ) "
           else
-            "#{table_name}.#{connection.quote_column_name(attr)} && ? "
+            "#{table_name}.#{column_name} && ? "
           end
         else
-          "#{table_name}.#{connection.quote_column_name(attr)} #{attribute_condition(value)}"
+          begin
+            "#{table_name}.#{attribute_condition(column_name, value)}"
+          rescue ArgumentError
+            "#{table_name}.#{column_name} #{attribute_condition(value)}"
+          end
         end
       end.join(' AND ')
     end
