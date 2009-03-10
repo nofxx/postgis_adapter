@@ -7,7 +7,6 @@ init.rb
 install.rb
 lib/postgis_adapter.rb
 lib/postgis_adapter/acts_as_geom.rb
-lib/postgis_adapter/acts_as_geom_flymake.rb
 lib/postgis_adapter/common_spatial_adapter.rb
 lib/postgis_functions.rb
 lib/postgis_functions/bbox.rb

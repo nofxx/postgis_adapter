@@ -42,11 +42,11 @@ module PostgisFunctions
   def construct_geometric_sql(type,geoms,options)
 
     tables = geoms.map do |t| {
-      :class => t.class.to_s.downcase.pluralize,
+      :name => t.class.table_name,
       :uid =>  unique_identifier,
       :id => t[:id] }
     end
-    
+
     # Implement a better way for options?
     if options.instance_of? Hash
       transform = options.delete(:transform)
@@ -56,7 +56,7 @@ module PostgisFunctions
     fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }     # W1.geom
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5
-    tables.map! { |f| "#{f[:class]} #{f[:uid]}" }                        # streets W1
+    tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                        # streets W1
 
     #
     # Data  =>  SELECT Func(A,B)

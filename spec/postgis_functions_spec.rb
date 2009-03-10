@@ -6,6 +6,7 @@ describe "PostgisFunctions" do
     @c1 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[12,45],[45,42],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[-43,-20],[-42,-28]],4326))
     @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(-43,-22,4326))
+    @cg ||= CommonGeo.create!(:data => "Point1", :geom => Point.from_x_y(-43,-22,4326))
   end
 
   describe "Common Mix" do
@@ -13,6 +14,11 @@ describe "PostgisFunctions" do
     it "should calculate distance point to line" do
       @p1.distance_to(@s1).should be_close(0.248069469178417, 0.00000001)
     end
+
+    it "should calculate distance point to line" do
+      @cg.distance_to(@s1).should be_close(0.248069469178417, 0.00000001)
+    end
+
 
     it "should calculate inside a city" do
       @p1.should_not be_inside(@c1)
