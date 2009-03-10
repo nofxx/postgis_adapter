@@ -18,7 +18,7 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 module PostgisAdapter
-  VERSION = '0.3.1'
+  VERSION = '0.3.2'
 end
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns

@@ -161,6 +161,10 @@ describe "Common Functions" do
     #   @c1.disjoint?(@p2).should be_true
     # end
 
+    it "should find the UTM zone" do
+      @c2.utm_zone.should eql(32734)
+    end
+
   end
 
   describe "LineString" do

@@ -19,6 +19,9 @@ describe "PostgisFunctions" do
       @cg.distance_to(@s1).should be_close(0.248069469178417, 0.00000001)
     end
 
+     it "should calculate distance point to line" do
+      @p1.geom.as_kml.should be_close(0.248069469178417, 0.00000001)
+    end
 
     it "should calculate inside a city" do
       @p1.should_not be_inside(@c1)

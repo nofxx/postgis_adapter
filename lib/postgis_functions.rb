@@ -11,7 +11,7 @@
 #
 # Some links:
 #
-# PostGis Manual -  http://postgis.refractions.net/documentation/manual-svn/ch07.html
+# PostGis Manual - http://postgis.refractions.net/documentation/manual-svn/ch07.html
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
 #

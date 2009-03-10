@@ -454,6 +454,19 @@ module PostgisFunctions
   end
 
   #
+  # Return UTM Zone for a geom
+  #
+  # Return Integer
+  def utm_zone
+    geomgeog = postgis_calculate("Transform", self, 4326)
+    geom = geomgeog.respond_to?(:x) ? geomgeog : geomgeog.first.first
+    pref = geom.y > 0 ? 32700 : 32600
+    zone = ((geom.x + 180) / 6 + 1).to_i
+    zone + pref
+  end
+
+
+  #
   # LINESTRING
   #
   #
