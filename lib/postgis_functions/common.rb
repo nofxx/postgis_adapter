@@ -379,7 +379,7 @@ module PostgisFunctions
   #
   # Returns Geometry ST_Polygonize(geometry set geomfield);
   #
-  def polygonize#(geom)
+  def polygonize
     postgis_calculate(:polygonize, self)
   end
 
@@ -437,8 +437,12 @@ module PostgisFunctions
   #
   # Return Geometry ST_Transform(geometry g1, integer srid);
   #
+  def transform!(new_srid)
+    self[get_column_name] = postgis_calculate("Transform", self, new_srid)
+  end
+
   def transform(new_srid)
-    postgis_calculate("Transform", self, new_srid)
+    dup.transform!(new_srid)
   end
 
   #
@@ -454,18 +458,51 @@ module PostgisFunctions
   end
 
   #
+  # Returns the instance`s geom srid
+  #
+  def srid
+    self[get_column_name].srid
+  end
+
+  #
   # Return UTM Zone for a geom
   #
   # Return Integer
   def utm_zone
-    geomgeog = postgis_calculate("Transform", self, 4326)
-    geom = geomgeog.respond_to?(:x) ? geomgeog : geomgeog.first.first
+    if srid == 4326
+      geom = centroid
+    else
+      geomdup = transform(4326)
+      mezzo = geomdup.length / 2
+      geom = case geomdup
+             when Point      then  geomdup
+             when LineString then  geomdup[mezzo]
+             else
+               geomgeog[mezzo][geomgeo[mezzo]/2]
+             end
+
+    end
+
     pref = geom.y > 0 ? 32700 : 32600
     zone = ((geom.x + 180) / 6 + 1).to_i
     zone + pref
   end
 
+  #
+  # Returns the Geometry in its UTM Zone
+  #
+  # Return Geometry
+  def to_utm!(utm=nil)
+    utm ||= utm_zone
+    self[get_column_name] = transform(utm)
+  end
 
+  def to_utm
+    dup.to_utm!
+  end
+
+  #
+  #
   #
   # LINESTRING
   #
@@ -636,14 +673,23 @@ module PostgisFunctions
   end
 
 
-  ####
-  ###
-  ##
+  #
+  #
+  #
   #
   # POINT
   #
   #
+  #
+  #
   module PointFunctions
+
+    #
+    #  Some nice getters
+    #
+    def x;     @x ||= self[get_column_name].x;    end
+    def y;     @y ||= self[get_column_name].y;    end
+    def z;     @z ||= self[get_column_name].z;    end
 
     #
     # Returns a float between 0 and 1 representing the location of the closest point
@@ -723,10 +769,13 @@ module PostgisFunctions
 
   end
 
-  ###
-  ##
+  #
+  #
+  #
   #
   # Polygon
+  #
+  #
   #
   #
   module PolygonFunctions

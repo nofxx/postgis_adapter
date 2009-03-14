@@ -72,6 +72,22 @@ describe "Common Functions" do
       @p2.where_on_line(@s2).should be_close(0.3333, 0.1)
     end
 
+    it "should have a srid getter" do
+      @p1.srid.should eql(29101)
+    end
+
+    it "should calculate the UTM srid" do
+      @p2.utm_zone.should eql(32731)
+    end
+
+    it "should convert to utm zone" do
+      lambda { @p2.to_utm! }.should change(@p2, :srid)
+    end
+
+    it { @p3.x.should be_close(8.0, 0.1) }
+    it { @p3.y.should be_close(8.0, 0.1) }
+    it { @p3.z.should be_close(0.0, 0.1) }
+
   end
 
   describe "Polygon" do
@@ -162,7 +178,7 @@ describe "Common Functions" do
     # end
 
     it "should find the UTM zone" do
-      @c2.utm_zone.should eql(32734)
+      @c2.utm_zone.should eql(32737)
     end
 
   end
@@ -294,6 +310,15 @@ describe "Common Functions" do
 
     it "should acts as jack" do
       @s2.segmentize(0.1).should be_instance_of(LineString)
+    end
+
+    it "should find the UTM zone" do
+      @s2.utm_zone.should eql(32731)
+    end
+
+    it "should find the UTM zone" do
+      @s2.transform!(29101)
+      @s2.utm_zone.should eql(32732)
     end
 
   end

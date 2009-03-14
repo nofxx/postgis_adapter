@@ -5,6 +5,7 @@ in a transparent way (that is like the other base data type columns).
 It also provides a way to manage these columns in migrations.
 
 This fork adds handy methods to make geometrical calculations on postgis.
+Based on http://georuby.rubyforge.org Spatial Adapter
 
 Postgis Manual - http://postgis.refractions.net/documentation/manual-svn
 
@@ -322,5 +323,5 @@ Project Tracker http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
 
 === SpatialAdapter
 
-
+http://georuby.rubyforge.org
 guilhem.vellut+georuby@gmail.com.

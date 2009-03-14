@@ -14,10 +14,10 @@
 # PostGis Manual - http://postgis.refractions.net/documentation/manual-svn/ch07.html
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
-#
+
 module PostgisFunctions
+  # WGS84 Spheroid
   EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'" # SRID => 4326
-  #EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'" # SRID =>
 
   def postgis_calculate(operation, subjects, options = {})
     subjects = [subjects] unless subjects.respond_to?(:map)
@@ -29,15 +29,15 @@ module PostgisFunctions
   private
 
   def get_column_name
-    @geo_column ||= postgis_geoms[:columns].first
+    @geo_column ||= postgis_geoms[:columns]
   end
 
   #
-  # Construct the postgis sql query
+  # Construct the PostGIS SQL query
   #
-  # Area return in square feet
-  # Distance/DWithin/Length/Perimeter —  in projected units.
-  # DistanceSphere/Spheroid —  in meters.
+  # Returns:
+  # Area/Distance/DWithin/Length/Perimeter  =>  projected units
+  # DistanceSphere/Spheroid  =>  meters
   #
   def construct_geometric_sql(type,geoms,options)
 
@@ -56,7 +56,7 @@ module PostgisFunctions
     fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }     # W1.geom
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5
-    tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                        # streets W1
+    tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                         # streets W1
 
     #
     # Data  =>  SELECT Func(A,B)
@@ -149,7 +149,7 @@ end
 #ST_AsGML
 #ST_AsKML
 #ST_AsSVG
-#
+#  #EARTH_SPHEROID = "'SPHEROID[\"IERS_2003\",6378136.6,298.25642]'" # SRID =>
 #  def distance_convert(value, unit, from = nil)
 #    factor = case unit
 #    when :km, :kilo     then  1

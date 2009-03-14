@@ -1,8 +1,9 @@
-# #
+#
 # PostGIS Adapter
 #
-# Spatial Adapter PostGIS Adapter for ActiveRecord
 #
+# Code from
+# http://georuby.rubyforge.org Spatial Adapter
 #
 require 'activerecord'
 require 'active_record/connection_adapters/postgresql_adapter'
@@ -18,7 +19,7 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 module PostgisAdapter
-  VERSION = '0.3.2'
+  VERSION = '0.3.3'
 end
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns
@@ -383,6 +384,10 @@ module ActiveRecord
 
       def self.create_simplified(name,default,null = true)
         new(name,default,"geometry",null,nil,nil,nil)
+      end
+
+      def as_kml
+
       end
 
     end

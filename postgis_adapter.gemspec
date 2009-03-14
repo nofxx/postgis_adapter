@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{postgis_adapter}
-  s.version = "0.3.1"
+  s.version = "0.3.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
-  s.date = %q{2009-03-10}
+  s.date = %q{2009-03-14}
   s.description = %q{Postgis Adapter for Activer Record}
   s.email = ["x@nofxx.com"]
   s.extra_rdoc_files = ["History.txt", "Manifest.txt", "README.rdoc"]
