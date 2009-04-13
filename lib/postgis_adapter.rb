@@ -386,10 +386,6 @@ module ActiveRecord
         new(name,default,"geometry",null,nil,nil,nil)
       end
 
-      def as_kml
-
-      end
-
     end
   end
 end

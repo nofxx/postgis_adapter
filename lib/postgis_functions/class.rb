@@ -1,31 +1,30 @@
 module PostgisFunctions
-  
-  
-    ###
-    ##
+
     #
     # Class Methods
-    #
-    # Falling back to AR here.
     #
     module ClassMethods
 
       #
-      # Returns the closest record 
-      #
-      def closest_to(p, srid=4326)
-        find(:first, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
-      end
-
-      def close_to(p, srid=4326)
-        find(:all, :order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))" )
+      # Returns the closest record
+      def closest_to(p, opts = {})
+        srid = opts.delete(:srid) || 4326
+        opts.merge!(:order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))")
+        find(:first, opts)
       end
 
       #
-      #
-      #
-      def by_length sort='asc'
-        find(:all, :order => "ST_length(geom) #{sort}" )
+      # Order by distance
+      def close_to(p, opts = {})
+        srid = opts.delete(:srid) || 4326
+        opts.merge!(:order => "ST_Distance(geom, GeomFromText('POINT(#{p.x} #{p.y})', #{srid}))")
+        find(:all, opts)
+      end
+
+      def by_length opts = {}
+        sort = opts.delete(:sort) || 'asc'
+        opts.merge!(:order => "ST_length(geom) #{sort}")
+        find(:all, opts)
       end
 
       def longest
@@ -58,7 +57,7 @@ module PostgisFunctions
       end
 
     end
-  
-  
-  
+
+
+
 end

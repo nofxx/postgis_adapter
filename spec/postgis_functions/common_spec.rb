@@ -20,11 +20,11 @@ describe "Common Functions" do
   describe "Point" do
 
     it "should find the closest other point" do
-      Position.close_to(@p1.geom,4326)[0].data.should == @p1.data
+      Position.close_to(@p1.geom)[0].data.should == @p1.data
     end
 
     it "should find the closest other point" do
-      Position.closest_to(@p1.geom,4326).data.should == @p1.data
+      Position.closest_to(@p1.geom).data.should == @p1.data
     end
 
     it { @p1.distance_to(@s2).should be_close(4.24264068711928, 0.0001) }

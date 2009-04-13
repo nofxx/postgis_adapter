@@ -20,7 +20,7 @@ describe "PostgisFunctions" do
     end
 
      it "should calculate distance point to line" do
-      @p1.geom.as_kml.should be_close(0.248069469178417, 0.00000001)
+      @p1.geom.as_kml.should eql("<Point>\n<coordinates>-43,-22</coordinates>\n</Point>\n")
     end
 
     it "should calculate inside a city" do
@@ -36,31 +36,6 @@ describe "PostgisFunctions" do
     it { @s1.length.should be_close(8.06225774829855, 0.001) }
 
     it { @s1.length_spheroid.should be_close(891883.597963462,0.0001) }
-
-  end
-
-  #TODO is sorted rspec helper
-  describe "Class methods" do
-
-    it "should find all dwithin one" do
-      Position.all_within(@s1.geom).should be_instance_of(Array)
-    end
-
-    it "should find all dwithin one" do
-      City.by_perimeter.should be_instance_of(Array)
-    end
-
-    it "should sort by polygon area" do
-      City.by_area.should be_instance_of(Array)
-    end
-
-    it "should sort by all within" do
-      City.all_within(@s1.geom).should be_instance_of(Array)
-    end
-
-    it "should sort by all within" do
-      City.by_boundaries.should be_instance_of(Array)
-    end
 
   end
 
