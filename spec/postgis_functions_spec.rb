@@ -2,7 +2,6 @@ require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe "PostgisFunctions" do
   before(:all) do
-    #load_schema
     @c1 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[12,45],[45,42],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[-43,-20],[-42,-28]],4326))
     @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(-43,-22,4326))

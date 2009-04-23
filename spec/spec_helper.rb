@@ -6,15 +6,10 @@ require 'rspec_spinner'
 
 gem 'activerecord', "=2.3.2"
 
-$:.unshift(File.dirname(__FILE__) + '/../lib')
+$:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
+require 'postgis_adapter'
+
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database_postgis.yml')
 ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
 ActiveRecord::Base.establish_connection(config)
-
-require File.dirname(__FILE__) + '/../init.rb'
 require File.dirname(__FILE__) + '/db/models_postgis.rb'
-
-def load_schema
-  load(File.dirname(__FILE__) + "/db/schema_postgis.rb")
-end
-

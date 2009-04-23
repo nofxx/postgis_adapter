@@ -18,10 +18,6 @@ require 'postgis_adapter/acts_as_geom'
 include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
-module PostgisAdapter
-  VERSION = '0.3.5'
-end
-
 #tables to ignore in migration : relative to PostGIS management of geometric columns
 ActiveRecord::SchemaDumper.ignore_tables << "spatial_ref_sys" << "geometry_columns"
 
