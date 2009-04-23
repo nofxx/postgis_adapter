@@ -33,6 +33,7 @@ describe "PostgisAdapter" do
       pt.geom.should == Point.from_x_y_m(-1.6,2.8,-3.4)
       pt.geom.m.should eql(-3.4)
     end
+
     it "should est_4d_points" do
       pt = Table4dPoint.create!(:geom => Point.from_x_y_z_m(-1.6,2.8,-3.4,15))
       pt = Table4dPoint.find(:first)
@@ -62,19 +63,18 @@ describe "PostgisAdapter" do
     end
 
     it "should find" do
-     find = TableLineString.find(:first)
-     find.geom.should be_instance_of(LineString)
-     find.geom.points.first.y.should eql(2.5)
-   end
-
-   it "should test_srid_line_string" do
-    ls = TableSridLineString.create!(:geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326))
-    ls = TableSridLineString.find(:first)
-    ls_e = LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326)
-    ls.geom.should be_instance_of(LineString)
-    ls.geom.srid.should eql(4326)
+      find = TableLineString.find(:first)
+      find.geom.should be_instance_of(LineString)
+      find.geom.points.first.y.should eql(2.5)
     end
 
+    it "should test_srid_line_string" do
+      ls = TableSridLineString.create!(:geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326))
+      ls = TableSridLineString.find(:first)
+      ls_e = LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326)
+      ls.geom.should be_instance_of(LineString)
+      ls.geom.srid.should eql(4326)
+    end
 
     it "hsould test_multi_line_string" do
       ml = TableMultiLineString.create!(:geom => MultiLineString.from_line_strings([LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012]]),LineString.from_coordinates([[1.5,45.2],[-54.432612,-0.012],[45.4326,4326.3]])]))
@@ -92,8 +92,7 @@ describe "PostgisAdapter" do
 
     it "should get it back" do
       pg = TablePolygon.find(:first)
-      pg.geom.should be_instance_of(Polygon)
-      #assert_equal(Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]]),pg.geom)
+      pg.geom.should == Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]])
     end
 
     it "should test_multi_polygon" do
@@ -112,7 +111,6 @@ describe "PostgisAdapter" do
   end
 
   describe "Geometry" do
-
 
     it "should test_geometry" do
       gm = TableGeometry.create!(:geom => LineString.from_coordinates([[12.4,-45.3],[45.4,41.6],[4.456,1.0698]]))

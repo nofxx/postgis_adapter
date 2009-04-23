@@ -40,6 +40,11 @@ describe "Common Functions" do
     it { @p1.distance_spheroid_to(@p2).should be_close(627129.502639041, 0.000001) }
     it { @p1.distance_spheroid_to(@p3).should be_close(1096324.48117672, 0.000001) }
 
+    it "should find the distance from a unsaved point" do
+       @p1.distance_to(@p2).should be_close(5.65685424949238,0.001)
+       @p1.distance_to(Point.from_x_y(5,5,4326)).should be_close(5.65685424949238,0.001)
+    end
+
     it { @p1.should_not be_inside(@c1) }
     it { @p1.should be_outside(@c1) }
     it { @p1.should be_inside_circle(2.0,2.0,20.0) }

@@ -40,8 +40,9 @@ module PostgisFunctions
   # DistanceSphere/Spheroid  =>  meters
   #
   def construct_geometric_sql(type,geoms,options)
+    not_db, on_db = geoms.partition { |g| g.is_a? Geometry }
 
-    tables = geoms.map do |t| {
+    tables = on_db.map do |t| {
       :name => t.class.table_name,
       :uid =>  unique_identifier,
       :id => t[:id] }
@@ -54,6 +55,7 @@ module PostgisFunctions
     end
 
     fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }     # W1.geom
+    fields << not_db.map { |g| "'#{g.as_hex_ewkb}'::geometry"} unless not_db.empty?
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5
     tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                         # streets W1

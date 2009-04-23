@@ -26,6 +26,10 @@ describe "PostgisFunctions" do
       @p1.should_not be_inside(@c1)
     end
 
+    it "should find the distance from a unsaved point" do
+       @p1.distance_to(Point.from_x_y(5,5,4326)).should be_close(55.0726792520575, 0.001)
+    end
+
     it { @c1.area(32640).should be_close(9165235788987.37, 0.01) }
 
     it { @c1.area.should be_close(720.0, 0.1) }
