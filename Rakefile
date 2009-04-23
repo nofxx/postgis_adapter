@@ -5,11 +5,12 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "postgis_adapter"
-    gem.summary = %Q{TODO}
+    gem.summary = "PostGIS Adapter for Active Record"
+    gem.description = "Execute PostGIS functions on Active Record"
     gem.email = "x@nofxx.com"
     gem.homepage = "http://github.com/nofxx/postgis_adapter"
     gem.authors = ["Marcos Augusto"]
-
+    gem.rubyforge_project = "postgis_adapter"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError
