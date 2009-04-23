@@ -169,6 +169,11 @@ describe "PostgisAdapter" do
       pts[1].data.should match /Point/
     end
 
+    it "should not mess with rails finder" do
+      pts = Park.find_all_by_data "Point1"
+      pts.should have(1).park
+    end
+
   end
 
 end

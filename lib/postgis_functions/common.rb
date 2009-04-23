@@ -685,13 +685,6 @@ module PostgisFunctions
   module PointFunctions
 
     #
-    #  Some nice getters
-    #
-    def x;     @x ||= self[get_column_name].x;    end
-    def y;     @y ||= self[get_column_name].y;    end
-    def z;     @z ||= self[get_column_name].z;    end
-
-    #
     # Returns a float between 0 and 1 representing the location of the closest point
     # on LineString to the given Point, as a fraction of total 2d line length.
     #

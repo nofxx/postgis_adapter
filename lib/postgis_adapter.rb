@@ -19,7 +19,7 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 module PostgisAdapter
-  VERSION = '0.3.4'
+  VERSION = '0.3.5'
 end
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns
@@ -51,11 +51,7 @@ ActiveRecord::Base.class_eval do
             "#{table_name}.#{column_name} && ? "
           end
         else
-          begin
-            "#{table_name}.#{attribute_condition(column_name, value)}"
-          rescue ArgumentError
-            "#{table_name}.#{column_name} #{attribute_condition(value)}"
-          end
+          "#{table_name}.#{attribute_condition(column_name, value)}"
         end
       end.join(' AND ')
     end

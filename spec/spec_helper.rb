@@ -1,15 +1,10 @@
-begin
-  require 'spec'
-  require 'postgres'
+require 'rubygems'
+require 'spec'
+require 'postgres'
 require 'activerecord'
-rescue LoadError
-  require 'rubygems'
-  gem 'rspec'
-  require 'spec'
-  require 'postgres'
-require 'activerecord'
-end
-  require 'rspec_spinner'
+require 'rspec_spinner'
+
+gem 'activerecord', "=2.3.2"
 
 $:.unshift(File.dirname(__FILE__) + '/../lib')
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database_postgis.yml')

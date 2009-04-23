@@ -84,9 +84,9 @@ describe "Common Functions" do
       lambda { @p2.to_utm! }.should change(@p2, :srid)
     end
 
-    it { @p3.x.should be_close(8.0, 0.1) }
-    it { @p3.y.should be_close(8.0, 0.1) }
-    it { @p3.z.should be_close(0.0, 0.1) }
+   #  it { @p3.x.should be_close(8.0, 0.1) }
+   #  it { @p3.y.should be_close(8.0, 0.1) }
+   #  it { @p3.z.should be_close(0.0, 0.1) }
 
   end
 
@@ -184,15 +184,6 @@ describe "Common Functions" do
   end
 
   describe "LineString" do
-
-    it "should sort by size" do
-      Street.by_length.first.data.should == "Street1"
-      Street.by_length.last.data.should == "Street3"
-    end
-
-    it "largest" do
-      Street.longest.data.should == "Street3"
-    end
 
     describe "Length" do
       it { @s1.length.should be_close(1.4142135623731, 0.000001) }

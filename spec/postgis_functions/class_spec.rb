@@ -2,9 +2,11 @@ require File.dirname(__FILE__) + '/../spec_helper.rb'
 
 describe "Class Functions" do
   before(:all) do
-    @c1 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
-    @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[1,1],[88,88]],4326))
-    @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(1,1,4326))
+    @c1 ||= City.create!(:data => "CityClass", :geom => Polygon.from_coordinates([[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
+    @s1 ||= Street.create!(:data => "StreetClass", :geom => LineString.from_coordinates([[1,1],[99,88]],4326))
+    @s2 ||= Street.create!(:data => "StreetClassTiny", :geom => LineString.from_coordinates([[1,1],[1.1,1.1]],4326))
+    @p1 ||= Position.create!(:data => "PointClass", :geom => Point.from_x_y(99,99,4326))
+    @p2 ||= Position.create!(:data => "PointClassClose", :geom => Point.from_x_y(99.9,99.9,4326))
   end
 
   it "should find the closest other point" do
@@ -17,6 +19,15 @@ describe "Class Functions" do
 
   it "should find the closest other point" do
     Position.closest_to(@p1.geom).data.should == @p1.data
+  end
+
+  it "should sort by size" do
+    Street.by_length.first.data.should == "StreetClassTiny"
+    Street.by_length.last.data.should == "StreetClass"
+  end
+
+  it "largest" do
+    Street.longest.data.should == "StreetClass"
   end
 
   it "should sort by linestring length" do
