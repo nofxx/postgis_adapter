@@ -29,7 +29,6 @@ Gem::Specification.new do |s|
     "spec/db/database_postgis.yml",
     "spec/db/models_postgis.rb",
     "spec/db/schema_postgis.rb",
-    "spec/debug.log",
     "spec/postgis_adapter/acts_as_geom_spec.rb",
     "spec/postgis_adapter/common_spatial_adapter_spec.rb",
     "spec/postgis_adapter_spec.rb",
@@ -67,5 +66,6 @@ Gem::Specification.new do |s|
     if Gem::Version.new(Gem::RubyGemsVersion) >= Gem::Version.new('1.2.0') then
     else
     end
+  else
   end
 end
