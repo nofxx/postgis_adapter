@@ -39,7 +39,7 @@ ActiveRecord::Base.class_eval do
         if columns_hash[attr].is_a?(SpatialColumn)
           if value.is_a?(Array)
             attrs[attr.to_sym]= "BOX3D(" + value[0].join(" ") + "," + value[1].join(" ") + ")"
-            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value[2] || DEFAULT_SRID} ) "
+            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value[2] || @@default_srid || DEFAULT_SRID} ) "
           elsif value.is_a?(Envelope)
             attrs[attr.to_sym]= "BOX3D(" + value.lower_corner.text_representation + "," + value.upper_corner.text_representation + ")"
             "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value.srid} ) "

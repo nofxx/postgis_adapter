@@ -1,4 +1,3 @@
-require File.dirname(__FILE__) + '/../spec_helper.rb'
 
 #add some postgis specific tables
 ActiveRecord::Schema.define() do
@@ -62,25 +61,25 @@ ActiveRecord::Schema.define() do
     t.polygon "geom", :with_m => true, :with_z => true, :srid => 4326
   end
 
-  create_table :cities do |t|
+  create_table :cities, :force => true do |t|
     t.string :data, :limit => 100
     t.integer :value
     t.polygon  :geom,:null=>false,:srid=>4326
   end
 
-  create_table :positions do |t|
+  create_table :positions, :force => true do |t|
     t.string :data, :limit => 100
     t.integer :value
     t.point  :geom,:null=>false,:srid=>4326
   end
 
-  create_table :streets do |t|
+  create_table :streets, :force => true do |t|
     t.string :data, :limit => 100
     t.integer :value
     t.line_string  :geom,:null=>false,:srid=>4326
   end
 
-  create_table :common_geos do |t|
+  create_table :common_geos, :force => true do |t|
     t.string :data, :limit => 100
     t.integer :value
     t.point  :geom,:null=>false,:srid=>4326

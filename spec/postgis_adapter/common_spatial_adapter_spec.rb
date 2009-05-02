@@ -13,7 +13,7 @@ describe "CommonSpatialAdapter" do
         create_table "parks", :force => true do |t|
           t.string "data",  :limit => 100
           t.integer "value"
-          t.polygon "geom", :null=>false, :srid => 555 , :with_z => true,:with_m => true
+          t.polygon "geom", :null=>false, :srid => 4326 , :with_z => true,:with_m => true
         end
       end
     end
@@ -29,7 +29,7 @@ describe "CommonSpatialAdapter" do
           col.geometry_type.should eql(:polygon)
           col.type.should eql(:geometry)
           col.null.should be_false
-          col.srid.should eql(555)
+          col.srid.should eql(4326)
           col.with_z.should be_true
           col.with_m.should be_true
         end
@@ -125,7 +125,7 @@ describe "CommonSpatialAdapter" do
         t.string "data", :limit => 100
         t.integer "value"
         #location is a postgreSQL keyword and is surrounded by double-quotes ("") when appearing in constraint descriptions ; tests a bug corrected in version 39
-        t.point "location", :null=>false,:srid => 0, :with_m => true, :with_z => true
+        t.point "location", :null=>false,:srid => -1, :with_m => true, :with_z => true
       end
     end
 
@@ -190,7 +190,7 @@ describe "CommonSpatialAdapter" do
         create_table "parks", :force => true do |t|
           t.string "data" , :limit => 100
           t.integer "value"
-          t.multi_polygon "geom", :null=>false,:srid => 0, :with_m => true, :with_z => true
+          t.multi_polygon "geom", :null=>false,:srid => -1, :with_m => true, :with_z => true
         end
       add_index "parks","geom",:spatial=>true,:name => "example_spatial_index"
       end
@@ -217,7 +217,7 @@ describe "CommonSpatialAdapter" do
             col.geometry_type.should eql(:multi_polygon)
             col.type.should eql(:geometry)
             col.null.should be_false
-            col.srid.should eql(0)
+            col.srid.should eql(-1)
             col.with_z.should be_true
             col.with_m.should be_true
           end

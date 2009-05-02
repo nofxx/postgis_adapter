@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{postgis_adapter}
-  s.version = "0.3.8"
+  s.version = "0.3.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Augusto"]
-  s.date = %q{2009-04-23}
+  s.date = %q{2009-05-02}
   s.description = %q{Execute PostGIS functions on Active Record}
   s.email = %q{x@nofxx.com}
   s.extra_rdoc_files = [
@@ -49,14 +49,14 @@ Gem::Specification.new do |s|
   s.test_files = [
     "spec/db/models_postgis.rb",
     "spec/db/schema_postgis.rb",
+    "spec/postgis_functions/class_spec.rb",
+    "spec/postgis_functions/bbox_spec.rb",
+    "spec/postgis_functions/common_spec.rb",
+    "spec/postgis_functions_spec.rb",
+    "spec/postgis_adapter_spec.rb",
     "spec/postgis_adapter/acts_as_geom_spec.rb",
     "spec/postgis_adapter/common_spatial_adapter_spec.rb",
-    "spec/postgis_functions_spec.rb",
-    "spec/spec_helper.rb",
-    "spec/postgis_adapter_spec.rb",
-    "spec/postgis_functions/class_spec.rb",
-    "spec/postgis_functions/common_spec.rb",
-    "spec/postgis_functions/bbox_spec.rb"
+    "spec/spec_helper.rb"
   ]
 
   if s.respond_to? :specification_version then
