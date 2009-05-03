@@ -8,7 +8,7 @@ gem 'activerecord', "=2.3.2"
 
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'postgis_adapter'
-GeoRuby::Base.srid = -1
+GeoRuby::SimpleFeatures.srid = -1
 config = YAML.load_file(File.dirname(__FILE__) + '/db/database_postgis.yml')
 # ActiveRecord::Base.logger = Logger.new(File.dirname(__FILE__) + "/debug.log")
 ActiveRecord::Base.establish_connection(config)
