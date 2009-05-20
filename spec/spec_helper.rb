@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'spec'
-require 'postgres'
+require 'pg'
 require 'activerecord'
 require 'rspec_spinner'
 

@@ -127,17 +127,17 @@ describe "PostgisAdapter" do
   end
 
   describe "Find" do
-    before(:all) do
-      ActiveRecord::Schema.define() do
-        create_table "parks", :force => true do |t|
-          t.column "data" , :string, :limit => 100
-          t.column "value", :integer
-          t.column "geom", :point,:null=>false,:srid=>4326
-        end
-        add_index "parks","geom",:spatial=>true,:name => "example_spatial_index"
+
+    ActiveRecord::Schema.define() do
+      create_table "parks", :force => true do |t|
+        t.column "data" , :string, :limit => 100
+        t.column "value", :integer
+        t.column "geom", :point,:null=>false,:srid=>4326
       end
-      class Park < ActiveRecord::Base
-      end
+      add_index "parks","geom",:spatial=>true,:name => "example_spatial_index"
+    end
+
+    class Park < ActiveRecord::Base
     end
 
     it "should create some points" do

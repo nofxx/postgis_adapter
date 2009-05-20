@@ -1,6 +1,6 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
-describe "Class Functions" do
+describe "ClassMethods" do
   before(:all) do
     @c1 ||= City.create!(:data => "CityClass", :geom => Polygon.from_coordinates([[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
     @s1 ||= Street.create!(:data => "StreetClass", :geom => LineString.from_coordinates([[1,1],[99,88]],4326))
@@ -10,15 +10,15 @@ describe "Class Functions" do
   end
 
   it "should find the closest other point" do
-    Position.close_to(@p1.geom, :srid => 4326)[0].data.should == @p1.data
+    Position.close_to(Point.from_x_y(99,99,4326), :srid => 4326)[0].data.should == @p1.data
   end
 
   it "should find the closest other point and limit" do
-    Position.close_to(@p1.geom, :limit => 10).should have(10).positions
+    Position.close_to(Point.from_x_y(99,99,4326), :limit => 2).should have(2).positions
   end
 
   it "should find the closest other point" do
-    Position.closest_to(@p1.geom).data.should == @p1.data
+    Position.closest_to(Point.from_x_y(99,99,4326)).data.should == @p1.data
   end
 
   it "should sort by size" do
@@ -35,11 +35,11 @@ describe "Class Functions" do
   end
 
   it "should sort by linestring length" do
-    Street.by_length(:limit => 10).should have(10).streets
+    Street.by_length(:limit => 2).should have(2).streets
   end
 
   it "should find the longest" do
-    Street.longest.should be_instance_of(Street)
+    Street.longest.should == @s1
   end
 
   it "should find all dwithin one" do

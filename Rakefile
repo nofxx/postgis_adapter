@@ -11,6 +11,7 @@ begin
     gem.homepage = "http://github.com/nofxx/postgis_adapter"
     gem.authors = ["Marcos Augusto"]
     gem.rubyforge_project = "postgis_adapter"
+    gem.add_dependency 'geo_ruby'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError
@@ -28,22 +29,15 @@ Spec::Rake::SpecTask.new(:rcov) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
 end
-
-
 task :default => :spec
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  if File.exist?('VERSION.yml')
-    config = YAML.load(File.read('VERSION.yml'))
-    version = "#{config[:major]}.#{config[:minor]}.#{config[:patch]}"
-  else
-    version = ""
-  end
+  config = YAML.load(File.read('VERSION.yml'))
+  version = "#{config[:major]}.#{config[:minor]}.#{config[:patch]}"
 
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "postgis_adapter #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
-

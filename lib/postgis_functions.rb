@@ -29,7 +29,7 @@ module PostgisFunctions
   private
 
   def get_column_name
-    @geo_column ||= postgis_geoms[:columns]
+    @geo_column ||= postgis_geoms[:columns][0]
   end
 
   #
