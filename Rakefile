@@ -11,7 +11,8 @@ begin
     gem.homepage = "http://github.com/nofxx/postgis_adapter"
     gem.authors = ["Marcos Augusto"]
     gem.rubyforge_project = "postgis_adapter"
-    gem.add_dependency 'geo_ruby'
+    # TODO: better way for this.....
+    #    gem.add_dependency 'geo_ruby'
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
 rescue LoadError
