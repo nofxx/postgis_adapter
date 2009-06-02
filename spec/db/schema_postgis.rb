@@ -1,4 +1,3 @@
-
 #add some postgis specific tables
 ActiveRecord::Schema.define() do
 

@@ -129,25 +129,25 @@ describe "PostgisAdapter" do
   describe "Find" do
 
     ActiveRecord::Schema.define() do
-      create_table "parks", :force => true do |t|
-        t.column "data" , :string, :limit => 100
-        t.column "value", :integer
-        t.column "geom", :point,:null=>false,:srid=>4326
+      create_table :areas, :force => true do |t|
+        t.string :data, :limit => 100
+        t.integer :value
+        t.point :geom, :null => false, :srid => 4326
       end
-      add_index "parks","geom",:spatial=>true,:name => "example_spatial_index"
+      add_index :areas, :geom, :spatial => true, :name => "areas_spatial_index"
     end
 
-    class Park < ActiveRecord::Base
+    class Area < ActiveRecord::Base
     end
 
     it "should create some points" do
-      Park.create!(:data => "Point1", :geom => Point.from_x_y(1.2,0.75,4326))
-      Park.create!(:data => "Point2",:geom => Point.from_x_y(0.6,1.3,4326))
-      Park.create!(:data => "Point3", :geom => Point.from_x_y(2.5,2,4326))
+      Area.create!(:data => "Point1", :geom => Point.from_x_y(1.2,0.75,4326))
+      Area.create!(:data => "Point2",:geom => Point.from_x_y(0.6,1.3,4326))
+      Area.create!(:data => "Point3", :geom => Point.from_x_y(2.5,2,4326))
     end
 
     it "should find by geom" do
-      pts = Park.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
+      pts = Area.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match /Point/
@@ -155,12 +155,12 @@ describe "PostgisAdapter" do
     end
 
     it "should find by geom again" do
-      pts = Park.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
+      pts = Area.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
       pts[0].data.should eql("Point3")
     end
 
     it "should find by geom column bbox condition" do
-      pts = Park.find_all_by_geom([[0,0],[2,2],4326])
+      pts = Area.find_all_by_geom([[0,0],[2,2],4326])
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match /Point/
@@ -168,7 +168,7 @@ describe "PostgisAdapter" do
     end
 
     it "should not mess with rails finder" do
-      pts = Park.find_all_by_data "Point1"
+      pts = Area.find_all_by_data "Point1"
       pts.should have(1).park
     end
 

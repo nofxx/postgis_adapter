@@ -31,13 +31,13 @@ end
 class Table3dmPoint < ActiveRecord::Base
 end
 
-class  Table4dPoint < ActiveRecord::Base
+class Table4dPoint < ActiveRecord::Base
 end
 
-class  TableSridLineString < ActiveRecord::Base
+class TableSridLineString < ActiveRecord::Base
 end
 
-class  TableSrid4dPolygon < ActiveRecord::Base
+class TableSrid4dPolygon < ActiveRecord::Base
 end
 
 class City < ActiveRecord::Base

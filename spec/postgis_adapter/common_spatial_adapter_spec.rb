@@ -13,7 +13,7 @@ describe "CommonSpatialAdapter" do
         create_table "parks", :force => true do |t|
           t.string "data",  :limit => 100
           t.integer "value"
-          t.polygon "geom", :null=>false, :srid => 4326 , :with_z => true,:with_m => true
+          t.polygon "geom", :null => false, :srid => 4326 , :with_z => true, :with_m => true
         end
       end
     end
@@ -180,8 +180,8 @@ describe "CommonSpatialAdapter" do
 
     after(:all) do
       ActiveRecord::Base.connection.execute('DROP VIEW viewparks')
-    end  end
-
+    end
+  end
 
   describe "Dump" do
     before(:all) do

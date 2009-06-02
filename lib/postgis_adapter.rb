@@ -145,14 +145,12 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   # <table_name>_<column_name>_spatial_index unless
   # the key :name is present in the options hash, in which case its
   # value is taken as the name of the index.
-  def add_index(table_name,column_name,options = {})
+  def add_index(table_name, column_name, options = {})
     index_name = options[:name] || index_name(table_name,:column => Array(column_name))
     if options[:spatial]
       execute "CREATE INDEX #{index_name} ON #{table_name} USING GIST (#{Array(column_name).join(", ")} GIST_GEOMETRY_OPS)"
     else
-      index_type = options[:unique] ? "UNIQUE" : ""
-      #all together
-      execute "CREATE #{index_type} INDEX #{index_name} ON #{table_name} (#{Array(column_name).join(", ")})"
+      super
     end
   end
 
