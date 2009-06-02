@@ -237,14 +237,27 @@ geometric column in PostGIS, along with the addition of a spatial
 index on the column :
 
     ActiveRecord::Schema.define do
-          create_table :places do |t|
-        t.string :name
-        t.point  :geom, :srid => 123, :with_z => true, :null => false
+      create_table :places do |t|
+        t.string   :name
+        t.point    :geom, :srid => 4326, :with_z => true, :null => false
 
         t.timestamps
       end
-          add_index :table_points, :geom, :spatial=>true
+
+      add_index :places, :geom, :spatial => true
     end
+
+
+Types:
+
+    point
+    polygon
+    line_string
+    multi_point
+    multi_polygon
+    multi_line_string
+    geometry
+    geometry_collection
 
 
 === Fixtures
