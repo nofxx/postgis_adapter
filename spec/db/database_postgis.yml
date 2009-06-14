@@ -1,4 +1,0 @@
-adapter: postgresql
-database: postgis_plugin
-username: postgres
-password:

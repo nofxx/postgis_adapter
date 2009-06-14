@@ -235,7 +235,7 @@ module PostgisFunctions
 
   def simplify!(tolerance=0.1)
     #FIXME: not good..
-    self.update_attribute(get_column_name, simplify)
+    self.update_attribute(geo_columns.first, simplify)
   end
 
   #
@@ -438,7 +438,7 @@ module PostgisFunctions
   # Return Geometry ST_Transform(geometry g1, integer srid);
   #
   def transform!(new_srid)
-    self[get_column_name] = postgis_calculate("Transform", self, new_srid)
+    self[geo_columns.first] = postgis_calculate("Transform", self, new_srid)
   end
 
   def transform(new_srid)
@@ -461,7 +461,7 @@ module PostgisFunctions
   # Returns the instance`s geom srid
   #
   def srid
-    self[get_column_name].srid
+    self[geo_columns.first].srid
   end
 
   #
@@ -494,7 +494,7 @@ module PostgisFunctions
   # Return Geometry
   def to_utm!(utm=nil)
     utm ||= utm_zone
-    self[get_column_name] = transform(utm)
+    self[geo_columns.first] = transform(utm)
   end
 
   def to_utm
@@ -519,7 +519,7 @@ module PostgisFunctions
     # Returns Float
     #
     def length
-      dis = postgis_calculate(:length, self).to_f
+      postgis_calculate(:length, self).to_f
     end
 
     #
@@ -530,7 +530,7 @@ module PostgisFunctions
     # Returns Float
     #
     def length_3d
-      dis = postgis_calculate(:length3d, self).to_f
+      postgis_calculate(:length3d, self).to_f
     end
 
     #
@@ -551,7 +551,7 @@ module PostgisFunctions
     # Returns Float length_spheroid(geometry linestring, spheroid);
     #
     def length_spheroid(spheroid = EARTH_SPHEROID)
-      dis = postgis_calculate(:length_spheroid, self, spheroid).to_f
+      postgis_calculate(:length_spheroid, self, spheroid).to_f
     end
 
     #
@@ -709,7 +709,7 @@ module PostgisFunctions
     # Returns Float ST_Distance_Sphere(geometry pointlonlatA, geometry pointlonlatB);
     #
     def distance_sphere_to(other)
-      dis = postgis_calculate(:distance_sphere, [self, other]).to_f
+      postgis_calculate(:distance_sphere, [self, other]).to_f
     end
 
     #

@@ -61,27 +61,32 @@ ActiveRecord::Schema.define() do
   end
 
   create_table :cities, :force => true do |t|
-    t.string :data, :limit => 100
-    t.integer :value
-    t.polygon  :geom,:null=>false,:srid=>4326
+    t.string        :data, :limit => 100
+    t.integer       :value
+    t.polygon       :geom, :null => false, :srid => 4326
   end
 
   create_table :positions, :force => true do |t|
-    t.string :data, :limit => 100
-    t.integer :value
-    t.point  :geom,:null=>false,:srid=>4326
+    t.string        :data, :limit => 100
+    t.integer       :value
+    t.point         :geom, :null => false, :srid => 4326
   end
 
   create_table :streets, :force => true do |t|
-    t.string :data, :limit => 100
-    t.integer :value
-    t.line_string  :geom,:null=>false,:srid=>4326
+    t.string        :data, :limit => 100
+    t.integer       :value
+    t.line_string   :geom, :null => false, :srid => 4326
   end
 
   create_table :common_geos, :force => true do |t|
-    t.string :data, :limit => 100
-    t.integer :value
-    t.point  :geom,:null=>false,:srid=>4326
+    t.string        :data, :limit => 100
+    t.integer       :value
+    t.point         :geom, :null => false, :srid => 4326
+  end
+
+  create_table :diff_names, :force => true do |t|
+    t.string        :data
+    t.point         :the_geom, :null => false, :srid => 4326
   end
 
 end

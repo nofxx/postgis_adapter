@@ -6,6 +6,7 @@ describe "PostgisFunctions" do
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[-43,-20],[-42,-28]],4326))
     @p1 ||= Position.create!(:data => "Point1", :geom => Point.from_x_y(-43,-22,4326))
     @cg ||= CommonGeo.create!(:data => "Point1", :geom => Point.from_x_y(-43,-22,4326))
+    @px = DiffName.create!(:data => "Hey", :the_geom => Point.from_x_y(10,20, 4326))
   end
 
   describe "Common Mix" do
@@ -40,6 +41,13 @@ describe "PostgisFunctions" do
 
     it { @s1.length_spheroid.should be_close(891883.597963462,0.0001) }
 
-  end
+    it "should work with a diff column name" do
+      px2 = DiffName.create!(:data => "Hey 2", :the_geom => Point.from_x_y(20,20, 4326))
+      @px.distance_to(px2).should be_close(10.0, 0.1)
+    end
 
+    it "should work with mixed column names" do
+      @px.distance_to(@s1).should be_close(66.4,1)
+    end
+  end
 end

@@ -26,11 +26,11 @@ module PostgisFunctions
     raise StandardError, "#{e}"
   end
 
-  private
-
-  def get_column_name
-    @geo_column ||= postgis_geoms[:columns][0]
+  def geo_columns
+    @geo_columns ||= postgis_geoms[:columns]
   end
+
+  private
 
   #
   # Construct the PostGIS SQL query
@@ -44,6 +44,7 @@ module PostgisFunctions
 
     tables = on_db.map do |t| {
       :name => t.class.table_name,
+      :column => t.geo_columns.first,
       :uid =>  unique_identifier,
       :id => t[:id] }
     end
@@ -54,7 +55,7 @@ module PostgisFunctions
       options = nil
     end
 
-    fields      = tables.map { |f| "#{f[:uid]}.#{get_column_name}" }     # W1.geom
+    fields      = tables.map { |f| "#{f[:uid]}.#{f[:column]}" }     # W1.geom
     fields << not_db.map { |g| "'#{g.as_hex_ewkb}'::geometry"} unless not_db.empty?
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5

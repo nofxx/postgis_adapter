@@ -1,5 +1,4 @@
 --colour
---format RspecSpinner::Spinner
---timeout
-20
+--format profile
+--timeout 20
 --diff

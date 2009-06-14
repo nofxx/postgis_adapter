@@ -55,3 +55,7 @@ end
 class CommonGeo < ActiveRecord::Base
   acts_as_geom :geom
 end
+
+class DiffName < ActiveRecord::Base
+  acts_as_geom :the_geom
+end
