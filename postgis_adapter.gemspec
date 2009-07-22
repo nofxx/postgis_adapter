@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{postgis_adapter}
-  s.version = "0.5.5"
+  s.version = "0.5.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Augusto"]
-  s.date = %q{2009-06-14}
+  s.date = %q{2009-07-22}
   s.description = %q{Execute PostGIS functions on Active Record}
   s.email = %q{x@nofxx.com}
   s.extra_rdoc_files = [
@@ -18,7 +18,7 @@ Gem::Specification.new do |s|
      "MIT-LICENSE",
      "README.rdoc",
      "Rakefile",
-     "VERSION.yml",
+     "VERSION",
      "init.rb",
      "lib/postgis_adapter.rb",
      "lib/postgis_adapter/acts_as_geom.rb",

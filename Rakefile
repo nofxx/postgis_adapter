@@ -34,9 +34,7 @@ task :default => :spec
 
 require 'rake/rdoctask'
 Rake::RDocTask.new do |rdoc|
-  config = YAML.load(File.read('VERSION.yml'))
-  version = "#{config[:major]}.#{config[:minor]}.#{config[:patch]}"
-
+  version = File.exist?('VERSION') ? File.read('VERSION').chomp : ""
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "postgis_adapter #{version}"
   rdoc.rdoc_files.include('README*')

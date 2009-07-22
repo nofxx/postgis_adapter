@@ -29,35 +29,73 @@ GeoRuby::SimpleFeatures::Geometry.class_eval do
 end
 
 ActiveRecord::Base.class_eval do
-  require 'active_record/version'
 
-    #Vit Ondruch & Tilmann Singer 's patch
-    def self.get_conditions(attrs)
-      attrs.map do |attr, value|
-        attr = attr.to_s
-        column_name = connection.quote_column_name(attr)
-        if columns_hash[attr].is_a?(SpatialColumn)
-          if value.is_a?(Array)
-            attrs[attr.to_sym]= "BOX3D(" + value[0].join(" ") + "," + value[1].join(" ") + ")"
-            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value[2] || @@default_srid || DEFAULT_SRID} ) "
-          elsif value.is_a?(Envelope)
-            attrs[attr.to_sym]= "BOX3D(" + value.lower_corner.text_representation + "," + value.upper_corner.text_representation + ")"
-            "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value.srid} ) "
-          else
-            "#{table_name}.#{column_name} && ? "
-          end
+  #Vit Ondruch & Tilmann Singer 's patch
+  def self.get_conditions(attrs)
+    attrs.map do |attr, value|
+      attr = attr.to_s
+      column_name = connection.quote_column_name(attr)
+      if columns_hash[attr].is_a?(SpatialColumn)
+        if value.is_a?(Array)
+          attrs[attr.to_sym]= "BOX3D(" + value[0].join(" ") + "," + value[1].join(" ") + ")"
+          "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value[2] || @@default_srid || DEFAULT_SRID} ) "
+        elsif value.is_a?(Envelope)
+          attrs[attr.to_sym]= "BOX3D(" + value.lower_corner.text_representation + "," + value.upper_corner.text_representation + ")"
+          "#{table_name}.#{column_name} && SetSRID(?::box3d, #{value.srid} ) "
         else
-          "#{table_name}.#{attribute_condition(column_name, value)}"
+          "#{table_name}.#{column_name} && ? "
         end
-      end.join(' AND ')
-    end
+      else
+        attribute_condition("#{table_name}.#{column_name}", value)
+      end
+    end.join(' AND ')
+  end
 
-    #For Rails >= 2
+  #For Rails >= 2
+  if method(:sanitize_sql_hash_for_conditions).arity == 1
+    # Before Rails 2.3.3, the method had only one argument
     def self.sanitize_sql_hash_for_conditions(attrs)
       conditions = get_conditions(attrs)
       replace_bind_variables(conditions, expand_range_bind_variables(attrs.values))
     end
+  elsif method(:sanitize_sql_hash_for_conditions).arity == -2
+    # After Rails 2.3.3, the method had only two args, the last one optional
+    def self.sanitize_sql_hash_for_conditions(attrs, table_name = quoted_table_name)
+      attrs = expand_hash_conditions_for_aggregates(attrs)
 
+      conditions = attrs.map do |attr, value|
+        unless value.is_a?(Hash)
+          attr = attr.to_s
+
+          # Extract table name from qualified attribute names.
+          if attr.include?('.')
+            table_name, attr = attr.split('.', 2)
+            table_name = connection.quote_table_name(table_name)
+          end
+
+          if columns_hash[attr].is_a?(SpatialColumn)
+            if value.is_a?(Array)
+              attrs[attr.to_sym]= "BOX3D(" + value[0].join(" ") + "," + value[1].join(" ") + ")"
+              "#{table_name}.#{connection.quote_column_name(attr)} && SetSRID(?::box3d, #{value[2] || DEFAULT_SRID} ) "
+            elsif value.is_a?(Envelope)
+              attrs[attr.to_sym]= "BOX3D(" + value.lower_corner.text_representation + "," + value.upper_corner.text_representation + ")"
+              "#{table_name}.#{connection.quote_column_name(attr)} && SetSRID(?::box3d, #{value.srid} ) "
+            else
+              "#{table_name}.#{connection.quote_column_name(attr)} && ? "
+            end
+          else
+            attribute_condition("#{table_name}.#{connection.quote_column_name(attr)}", value)
+          end
+        else
+          sanitize_sql_hash_for_conditions(value, connection.quote_table_name(attr.to_s))
+        end
+      end.join(' AND ')
+
+      replace_bind_variables(conditions, expand_range_bind_variables(attrs.values))
+    end
+  else
+    raise "Spatial Adapter will not work with this version of Rails"
+  end
 end
 
 ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
@@ -81,11 +119,15 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
 
   alias :original_tables :tables
   def tables(name = nil) #:nodoc:
+    original_tables(name) + views(name)
+  end
+
+  def views(name = nil) #:nodoc:
     schemas = schema_search_path.split(/,/).map { |p| quote(p.strip) }.join(',')
-    original_tables(name) + query(<<-SQL, name).map { |row| row[0] }
+    query(<<-SQL, name).map { |row| row[0] }
       SELECT viewname
-        FROM pg_views
-        WHERE schemaname IN (#{schemas})
+      FROM pg_views
+      WHERE schemaname IN (#{schemas})
     SQL
   end
 
