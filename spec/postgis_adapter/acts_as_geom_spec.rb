@@ -11,7 +11,7 @@ end
 describe "ActsAsGeom" do
 
   it "should get the geom type" do
-    p City.connection.columns("cities").select { |c| c.name == "geom" }[0]
+    City.connection.columns("cities").select { |c| c.name == "geom" }[0]
     City.get_geom_type(:geom).should eql(:polygon)
   end
 

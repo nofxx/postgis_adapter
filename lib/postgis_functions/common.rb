@@ -438,7 +438,7 @@ module PostgisFunctions
   # Return Geometry ST_Transform(geometry g1, integer srid);
   #
   def transform!(new_srid)
-    self[geo_columns.first] = postgis_calculate("Transform", self, new_srid)
+    self[geo_columns.first] = postgis_calculate("Transform", self.new_record? ? self.geom : self, new_srid)
   end
 
   def transform(new_srid)

@@ -75,10 +75,10 @@ module PostgisFunctions
       fields = fields.join(" #{options} ")
     end
 
-    sql =   "SELECT #{opcode}(#{fields}) "
-    sql <<  "FROM #{tables.join(",")} "           if tables
-    sql <<  "WHERE #{conditions.join(" AND ")}"   if conditions
-    #p sql; sql
+    sql =  "SELECT #{opcode}(#{fields}) "
+    sql << "FROM #{tables.join(",")} "         unless tables.empty?
+    sql << "WHERE #{conditions.join(" AND ")}" unless conditions.empty?
+    sql
   end
 
   #
