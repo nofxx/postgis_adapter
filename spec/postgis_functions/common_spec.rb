@@ -3,7 +3,8 @@ require File.dirname(__FILE__) + '/../spec_helper.rb'
 describe "Common Functions" do
 
   before(:all) do
-    @c1 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]],4326))
+    @poly = Polygon.from_coordinates([[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]], 4326)
+    @c1 ||= City.create!(:data => "City1", :geom => @poly)
     @c2 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[22,66],[65,65],[20,10],[22,66]],[[10,15],[15,11],[34,14],[10,15]]],4326))
     @c3 ||= City.create!(:data => "City3", :geom => Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],4326))
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[1,1],[2,2]],4326))
@@ -189,6 +190,14 @@ describe "Common Functions" do
     # it  do
     #   @c1.disjoint?(@p2).should be_true
     # end
+
+    it "should check overlaps" do
+      @c2.contains?(@c1).should be_false
+    end
+
+    it "should check overlaps non saved" do
+      @c2.contains?(@poly).should be_false
+    end
 
     it "should find the UTM zone" do
       @c2.utm_zone.should eql(32737)

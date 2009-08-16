@@ -22,8 +22,8 @@ module PostgisFunctions
   def postgis_calculate(operation, subjects, options = {})
     subjects = [subjects] unless subjects.respond_to?(:map)
     return execute_geometrical_calculation(operation, subjects, options)
-    rescue Exception => e
-    raise StandardError, "#{e}"
+    #rescue Exception => e
+    #raise StandardError, "#{e}"
   end
 
   def geo_columns
@@ -44,7 +44,7 @@ module PostgisFunctions
 
     tables = on_db.map do |t| {
       :name => t.class.table_name,
-      :column => t.geo_columns.first,
+      :column => t.postgis_geoms.keys[0],
       :uid =>  unique_identifier,
       :id => t[:id] }
     end

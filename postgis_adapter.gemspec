@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{postgis_adapter}
-  s.version = "0.5.7"
+  s.version = "0.7.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Augusto"]
-  s.date = %q{2009-08-14}
+  s.date = %q{2009-08-16}
   s.description = %q{Execute PostGIS functions on Active Record}
   s.email = %q{x@nofxx.com}
   s.extra_rdoc_files = [

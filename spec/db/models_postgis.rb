@@ -41,21 +41,21 @@ class TableSrid4dPolygon < ActiveRecord::Base
 end
 
 class City < ActiveRecord::Base
-  acts_as_geom :geom
+  acts_as_geom :geom => :polygon
 end
 
 class Position < ActiveRecord::Base
-  acts_as_geom :geom
+  acts_as_geom :geom => :point
 end
 
 class Street < ActiveRecord::Base
-  acts_as_geom :geom
+  acts_as_geom :geom => :line_string
 end
 
 class CommonGeo < ActiveRecord::Base
-  acts_as_geom :geom
+  acts_as_geom :geom => :point
 end
 
 class DiffName < ActiveRecord::Base
-  acts_as_geom :the_geom
+  acts_as_geom :the_geom => :point
 end

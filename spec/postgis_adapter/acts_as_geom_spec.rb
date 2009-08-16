@@ -1,7 +1,7 @@
 require File.dirname(__FILE__) + '/../spec_helper.rb'
 
 class DiffColumn < ActiveRecord::Base
-  acts_as_geom :ponto
+  acts_as_geom :ponto => :point
 end
 
 class NotInDb < ActiveRecord::Base

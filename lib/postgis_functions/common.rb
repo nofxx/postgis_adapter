@@ -438,7 +438,7 @@ module PostgisFunctions
   # Return Geometry ST_Transform(geometry g1, integer srid);
   #
   def transform!(new_srid)
-    self[geo_columns.first] = postgis_calculate("Transform", self.new_record? ? self.geom : self, new_srid)
+    self[postgis_geoms.keys[0]] = postgis_calculate("Transform", self.new_record? ? self.geom : self, new_srid)
   end
 
   def transform(new_srid)
@@ -461,7 +461,7 @@ module PostgisFunctions
   # Returns the instance`s geom srid
   #
   def srid
-    self[geo_columns.first].srid
+    self[postgis_geoms.keys.first].srid
   end
 
   #
@@ -494,7 +494,7 @@ module PostgisFunctions
   # Return Geometry
   def to_utm!(utm=nil)
     utm ||= utm_zone
-    self[geo_columns.first] = transform(utm)
+    self[postgis_geoms.keys.first] = transform(utm)
   end
 
   def to_utm
@@ -792,7 +792,7 @@ module PostgisFunctions
     # use 'length'. Measurements are in the units of the spatial reference system of
     # the geometry.
     #
-    # Accepts optional parameter, the srid to transform to.
+    # Accepts optional parameter, the sridto transform to.
     #
     # Returns Float ST_Perimeter(geometry g1);
     #
