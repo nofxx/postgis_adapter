@@ -21,9 +21,7 @@ module PostgisFunctions
 
   def postgis_calculate(operation, subjects, options = {})
     subjects = [subjects] unless subjects.respond_to?(:map)
-    return execute_geometrical_calculation(operation, subjects, options)
-    #rescue Exception => e
-    #raise StandardError, "#{e}"
+    execute_geometrical_calculation(operation, subjects, options)
   end
 
   def geo_columns
@@ -98,6 +96,8 @@ module PostgisFunctions
     else
       GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value
     end
+    rescue Exception => e
+    raise StandardError, "#{e}"
   end
 
   # Get a unique ID for tables
