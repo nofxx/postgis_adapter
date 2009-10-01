@@ -502,6 +502,15 @@ module PostgisFunctions
   end
 
   #
+  # Returns Geometry as GeoJSON
+  #
+  # http://geojson.org/
+  #
+  def as_geo_json
+    postgis_calculate(:AsGeoJSON, self)
+  end
+
+
   #
   #
   # LINESTRING
@@ -592,6 +601,14 @@ module PostgisFunctions
     #
     def crosses? other
       postgis_calculate(:crosses, [self, other])
+    end
+
+    #
+    # Warning: PostGIS 1.4+
+    #
+    # Return crossing direction
+    def line_crossing_direction(other)
+      postgis_calculate(:lineCrossingDirection, [self, other])
     end
 
     #

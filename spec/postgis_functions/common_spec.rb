@@ -98,6 +98,11 @@ describe "Common Functions" do
       lambda { @p2.to_utm! }.should change(@p2, :srid)
     end
 
+    it "should export as GeoJSON" do
+      @p1.as_geo_json.should eql("{\"type\":\"Point\",\"coordinates\":[1,1]}")
+    end
+
+
    #  it { @p3.x.should be_close(8.0, 0.1) }
    #  it { @p3.y.should be_close(8.0, 0.1) }
    #  it { @p3.z.should be_close(0.0, 0.1) }
@@ -203,6 +208,11 @@ describe "Common Functions" do
       @c2.utm_zone.should eql(32737)
     end
 
+    it "should export as GeoJSON" do
+      @c1.as_geo_json.should eql("{\"type\":\"Polygon\",\"coordinates\":[[[12,45],[45,41],[4,1],[12,45]],[[2,5],[5,1],[14,1],[2,5]]]}")
+    end
+
+
   end
 
   describe "LineString" do
@@ -219,6 +229,10 @@ describe "Common Functions" do
     it { @s4.crosses?(@s3).should be_true }
     it { @s1.touches?(@s2).should be_false }
     it { @s4.touches?(@s3).should be_false }
+
+    it "should calculate crossing direction" do
+      @s4.line_crossing_direction(@s3).should eql("1")
+    end
 
     it "should intersect with linestring" do
       @s4.intersects?(@s3).should be_true
@@ -267,6 +281,10 @@ describe "Common Functions" do
 
       it { @s1.should_not be_envelopes_intersect(@s2) }
       it { @s1.boundary.should be_instance_of(MultiPoint) }
+
+      it "should export as GeoJSON" do
+        @s1.as_geo_json.should eql("{\"type\":\"LineString\",\"coordinates\":[[1,1],[2,2]]}")
+      end
 
     end
 

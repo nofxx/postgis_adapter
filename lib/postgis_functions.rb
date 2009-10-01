@@ -91,8 +91,11 @@ module PostgisFunctions
   def execute_geometrical_calculation(operation, subject, options) #:nodoc:
     value = connection.select_value(construct_geometric_sql(operation, subject, options))
     return nil unless value
-    if value =~ /t|f/
+    # TODO: bench case vs if here
+    if value =~ /^[tf]$/
       {"f" => false, "t" => true}[value]
+    elsif value =~ /^\{/
+       value
     else
       GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value
     end
