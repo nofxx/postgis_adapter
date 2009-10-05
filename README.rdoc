@@ -7,6 +7,7 @@ It also provides a way to manage these columns in migrations.
 This fork adds handy methods to make geometrical calculations on postgis.
 Based on http://georuby.rubyforge.org Spatial Adapter
 
+RDocs - http://docs.github.com/nofxx/postgis_adapter
 Postgis Manual - http://postgis.refractions.net/documentation/manual-svn
 
 *PostGIS and Rails 2+ only*.
@@ -31,6 +32,7 @@ If you are using Spatial Adapter, *remove it first*.
 Rails:
 
     config.gem "postgis_adapter"
+
 
 Github version:
 
@@ -77,6 +79,14 @@ model and the table defined above :
 
 Here are this fork additions. To use it:
 
+    acts_as_geom [column_name] => [geom_type]
+
+
+Examples:
+
+    class POI < ActiveRecord::Base
+      acts_as_geom :geom => :point
+    end
 
     class Street < ActiveRecord::Base
       acts_as_geom :line => :line_string
@@ -84,12 +94,13 @@ Here are this fork additions. To use it:
 
     ...
 
-    @place  =   Poi.new(    :data  =>   **Point**      )
-    @park   =   Park.new(   :area  =>  **Polygon**     )
-    @street =   Street.new( :line  => **LineString**   )
 
 
 == Play!
+
+    @place  =   Poi.new(    :geom  =>  Point.from_x_y(10,20)    )
+    @park   =   Park.new(   :area  =>  **Polygon**     )
+    @street =   Street.new( :line  => **LineString**   )
 
     @place.inside?(@park)
     => true
@@ -98,10 +109,9 @@ Here are this fork additions. To use it:
     => false
 
     @place.outside?(@park)
-
     @street.crosses?(@park)
-
     @area.contains?(@place)
+    ...
 
 
 === Polygons:
@@ -121,16 +131,13 @@ Supports transform (useful to transform SRID to UTM for area in Km^2)
     => Area with new SRID
 
 
-=== Line Strings:
+=== LineStrings:
 
     @street_east.intersects?(@street_west)
     => false
 
     @street_central.length
     => 4508.53636
-
-    @street_central.length(:miles)
-    => 2.81798593
 
     @street.length_spheroid
     => 4.40853636
@@ -147,7 +154,7 @@ Supports transform (useful to transform SRID to UTM for area in Km^2)
     Country.contain(@point)
     => The Conutry that contains the point
 
-    Areas.contains(@point)
+    Area.contains(@point)
     => [Array of areas contains the point...
 
 
@@ -183,7 +190,6 @@ Or use a (almost) PostGIS like notation:
     @area.bbox "@",  @park
 
 
-
 === Warning
 
 *To be fixed:*
@@ -192,12 +198,6 @@ This only supports one geom column per model. Still looking for the best way to
 implement a multi geom.
 
 http://nofxx.lighthouseapp.com/projects/20712/tickets/3-multiple-geoms-in-model
-
-
-=== Wiki
-
-Check out the wiki pages (http://github.com/nofxx/postgis_adapter/wikis).
-For all functions.
 
 
 === Find_by
@@ -331,7 +331,7 @@ Any questions, enhancement proposals, bug notifications or corrections:
 
 === PostgisAdapter
 
-Project Tracker http://nofxx.lighthouseapp.com/projects/20712-postgis_adapter
+http://github.com/nofxx/postgis_adapter/issues
 
 
 === SpatialAdapter

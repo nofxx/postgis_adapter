@@ -5,8 +5,8 @@
 # Hope you enjoy this plugin.
 #
 #
-# Post any bugs/suggestions to the lighthouse tracker:
-# http://nofxx.lighthouseapp.com/projects/20712-postgisadapter
+# Post any bugs/suggestions to GitHub issues tracker:
+# http://github.com/nofxx/postgis_adapter/issues
 #
 #
 # Some links:
