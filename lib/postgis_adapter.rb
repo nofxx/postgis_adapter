@@ -238,12 +238,12 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
       if type =~ /geometry/i
         raw_geom_info = raw_geom_infos[name]
         if raw_geom_info.nil?
-          ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.create_simplified(name,default,notnull == "f")
+          ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.create_simplified(name, default, notnull == "f")
         else
           ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.new(name, default,raw_geom_info.type, notnull == "f", raw_geom_info.srid, raw_geom_info.with_z, raw_geom_info.with_m)
         end
       else
-        ActiveRecord::ConnectionAdapters::Column.new(name, ActiveRecord::ConnectionAdapters::PostgreSQLColumn.extract_value_from_default( default), type,notnull == "f")
+        ActiveRecord::ConnectionAdapters::PostgreSQLColumn.new(name, ActiveRecord::ConnectionAdapters::PostgreSQLColumn.extract_value_from_default( default), type, notnull == "f")
       end
     end
   end
