@@ -243,7 +243,7 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
           ActiveRecord::ConnectionAdapters::SpatialPostgreSQLColumn.new(name, default,raw_geom_info.type, notnull == "f", raw_geom_info.srid, raw_geom_info.with_z, raw_geom_info.with_m)
         end
       else
-        ActiveRecord::ConnectionAdapters::PostgreSQLColumn.new(name, ActiveRecord::ConnectionAdapters::PostgreSQLColumn.extract_value_from_default( default), type, notnull == "f")
+        ActiveRecord::ConnectionAdapters::PostgreSQLColumn.new(name, default, type, notnull == "f")
       end
     end
   end

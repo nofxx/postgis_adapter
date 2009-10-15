@@ -4,6 +4,7 @@ require 'pg'
 require 'activerecord'
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
 gem 'activerecord', "=2.3.4"
+gem 'nofxx-georuby'
 require 'postgis_adapter'
 
 # Monkey patch Schema.define logger

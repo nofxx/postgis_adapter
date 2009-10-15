@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require File.dirname(__FILE__) + '/spec_helper.rb'
 
 describe "PostgisAdapter" do
@@ -150,8 +151,8 @@ describe "PostgisAdapter" do
       pts = Area.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
-      pts[0].data.should match /Point/
-      pts[1].data.should match /Point/
+      pts[0].data.should match(/Point/)
+      pts[1].data.should match(/Point/)
     end
 
     it "should find by geom again" do
@@ -163,13 +164,59 @@ describe "PostgisAdapter" do
       pts = Area.find_all_by_geom([[0,0],[2,2],4326])
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
-      pts[0].data.should match /Point/
-      pts[1].data.should match /Point/
+      pts[0].data.should match(/Point/)
+      pts[1].data.should match(/Point/)
     end
 
     it "should not mess with rails finder" do
       pts = Area.find_all_by_data "Point1"
       pts.should have(1).park
+    end
+
+  end
+
+  describe "PostgreSQL-specific types and default values" do
+
+    # Verify that a non-NULL column with a default value is handled correctly.
+    # Additionally, if the database uses UTF8 encoding, set the binary (bytea)
+    # column value to an illegal UTF8 string; it should be stored as the
+    # specified binary string and not as a text string. (The binary data test
+    # cannot fail if the database uses SQL_ASCII or LATIN1 encoding.)
+
+    ActiveRecord::Schema.define() do
+      create_table :binary_defaults, :force => true do |t|
+        t.string :name, :null => false
+        t.string :data, :null => false, :default => ''
+        t.binary :value
+      end
+    end
+
+    class BinaryDefault < ActiveRecord::Base
+    end
+
+    it "should create some records" do
+      if BinaryDefault.connection.encoding == "UTF8"
+        BinaryDefault.create!(:name => "foo", :data => "baz",
+                              :value => "f\xf4o") # fôo as ISO-8859-1 (i.e., not valid UTF-8 data)
+        BinaryDefault.create!(:name => "bar",     # data value not specified, should use default
+                              :value => "b\xe5r") # bår as ISO-8859-1 (i.e., not valid UTF-8 data)
+      else
+        BinaryDefault.create!(:name => "foo", :data => "baz")
+        BinaryDefault.create!(:name => "bar")
+      end
+    end
+
+    it "should find the records" do
+      foo = BinaryDefault.find_by_name("foo")
+      bar = BinaryDefault.find_by_name("bar")
+
+      foo.data.should eql("baz")
+      bar.data.should eql("")
+
+      if BinaryDefault.connection.encoding == "UTF8"
+        foo.value.should eql("f\xf4o")
+        bar.value.should eql("b\xe5r")
+      end
     end
 
   end
