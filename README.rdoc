@@ -57,6 +57,13 @@ in ruby schema mode and loaded in migrations the same way as columns
 of basic types.
 
 
+=== Example App
+
+Simple rails app to demonstrate, check it out:
+
+http://github.com/nofxx/postgis_example
+
+
 === Model
 
     class TablePoint < ActiveRecord::Base

@@ -9,7 +9,7 @@ begin
     gem.description = "Execute PostGIS functions on Active Record"
     gem.email = "x@nofxx.com"
     gem.homepage = "http://github.com/nofxx/postgis_adapter"
-    gem.authors = ["Marcos Augusto"]
+    gem.authors = ["Marcos Piccinini"]
     gem.rubyforge_project = "postgis_adapter"
     # TODO: better way for this.....
     #    gem.add_dependency 'geo_ruby'
