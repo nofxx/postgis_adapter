@@ -506,8 +506,8 @@ module PostgisFunctions
   #
   # http://geojson.org/
   #
-  def as_geo_json
-    postgis_calculate(:AsGeoJSON, self)
+  def as_geo_json(precision=15, bbox=0)
+    postgis_calculate(:AsGeoJSON, self,precision,bbox)
   end
 
 

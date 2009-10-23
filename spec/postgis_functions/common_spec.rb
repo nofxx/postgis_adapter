@@ -16,6 +16,7 @@ describe "Common Functions" do
     @p3 ||= Position.create!(:data => "Point3", :geom => Point.from_x_y(8,8,4326))
     @p4 ||= Position.create!(:data => "Point4", :geom => Point.from_x_y(18.1,18,4326))
     @p5 ||= Position.create!(:data => "Point5", :geom => Point.from_x_y(30,30,4326))
+    @p6 ||= Position.create!(:data => "Point6", :geom => Point.from_x_y(30.9999,30.9999,4326))
   end
 
   describe "Point" do
@@ -102,7 +103,16 @@ describe "Common Functions" do
       it "should export as GeoJSON" do
         @p1.as_geo_json.should eql("{\"type\":\"Point\",\"coordinates\":[1,1]}")
       end
+      
+      it "should export as GeoJSON with variable precision" do
+        @p6.as_geo_json(1).should eql("{\"type\":\"Point\",\"coordinates\":[31,31]}")
+      end
+      
+      it "should export as GeoJSON with variable precision and bounding box" do
+        @p6.as_geo_json(1,1).should eql("{\"type\":\"Point\",\"bbox\":[31.0,31.0,31.0,31.0],\"coordinates\":[31,31]}")
+      end      
     end
+    
 
 
    #  it { @p3.x.should be_close(8.0, 0.1) }
