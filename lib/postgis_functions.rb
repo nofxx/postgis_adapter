@@ -50,13 +50,18 @@ module PostgisFunctions
     # Implement a better way for options?
     if options.instance_of? Hash
       transform = options.delete(:transform)
+      stcollect = options.delete(:stcollect)
       options = nil
     end
 
     fields      = tables.map { |f| "#{f[:uid]}.#{f[:column]}" }     # W1.geom
     fields << not_db.map { |g| "'#{g.as_hex_ewkb}'::geometry"} unless not_db.empty?
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
-    conditions  = tables.map { |f| "#{f[:uid]}.id = #{f[:id]}" }         # W1.id = 5
+    fields.map! { |f| "ST_Union(#{f})" } if stcollect  # ST_Transform(W1.geom,x)
+    conditions  = tables.map do |f|
+      raise unless f[:uid]
+      "#{f[:uid]}.id = #{f[:id]}"
+    end         # W1.id = 5
     tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                         # streets W1
 
     #
@@ -72,6 +77,7 @@ module PostgisFunctions
     else
       fields = fields.join(" #{options} ")
     end
+
 
     sql =  "SELECT #{opcode}(#{fields}) "
     sql << "FROM #{tables.join(",")} "         unless tables.empty?

@@ -329,6 +329,9 @@ module PostgisFunctions
     postgis_calculate(:touches, [self, other])
   end
 
+  def st_collect(other=nil)
+    postgis_calculate(:collect, [self, other])
+  end
   #
   # The convex hull of a geometry represents the minimum closed geometry that
   # encloses all geometries within the set.
@@ -506,8 +509,8 @@ module PostgisFunctions
   #
   # http://geojson.org/
   #
-  def as_geo_json
-    postgis_calculate(:AsGeoJSON, self)
+  def as_geo_json(precision=15, bbox=0)
+    postgis_calculate(:AsGeoJSON, self, [precision, bbox])
   end
 
 
@@ -687,9 +690,6 @@ module PostgisFunctions
     # #float ST_Max_Distance(geometry g1, geometry g2);
     #  postgis_calculate(:max_distance, [self, other])
     #end
-  end
-
-  module MultiLineStringFunctions
 
     #
     # Returns a (set of) LineString(s) formed by sewing together a MULTILINESTRING.
@@ -699,7 +699,7 @@ module PostgisFunctions
     # Returns geometry ST_LineMerge(geometry amultilinestring);
     #
     def line_merge
-      postgis_calculate(:lineMerge, self)
+      postgis_calculate(:LineMerge, self, { :stcollect => self})
     end
 
   end

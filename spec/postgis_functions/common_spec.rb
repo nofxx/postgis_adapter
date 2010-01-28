@@ -19,6 +19,7 @@ describe "Common Functions" do
     @p5 ||= Position.create!(:data => "Point5", :geom => Point.from_x_y(30,30,4326))
     @m1 ||= Road.create(:data => "MG-050", :geom => MultiLineString.from_line_strings([@s1.geom, @sx.geom]))
     @m2 ||= Road.create(:data => "MG-050", :geom => MultiLineString.from_line_strings([@s3.geom, @s4.geom]))
+    @p6 ||= Position.create!(:data => "Point6", :geom => Point.from_x_y(30.9999,30.9999,4326))
   end
 
   describe "Point" do
@@ -105,7 +106,16 @@ describe "Common Functions" do
       it "should export as GeoJSON" do
         @p1.as_geo_json.should eql("{\"type\":\"Point\",\"coordinates\":[1,1]}")
       end
+
+      it "should export as GeoJSON with variable precision" do
+        @p6.as_geo_json(1).should eql("{\"type\":\"Point\",\"coordinates\":[31,31]}")
+      end
+
+      it "should export as GeoJSON with variable precision and bounding box" do
+        @p6.as_geo_json(1,1).should eql("{\"type\":\"Point\",\"bbox\":[31.0,31.0,31.0,31.0],\"coordinates\":[31,31]}")
+      end
     end
+
 
 
    #  it { @p3.x.should be_close(8.0, 0.1) }
@@ -386,11 +396,19 @@ describe "Common Functions" do
         @m1.geom.should have(2).geometries
       end
 
+      it "should have 2 points on the geometry" do
+        @m1.geom.geometries[0].length.should eql(2)
+      end
+
       it "should line merge!" do
         merged = @m1.line_merge
-        p merged, @m1.geom
         merged.should be_instance_of(LineString)
-        p merged.class
+        merged.length.should eql(3)
+      end
+
+      it "should line merge collect" do
+        co = @m2.line_merge
+        co.should be_instance_of(LineString)
       end
     end
   end
