@@ -10,14 +10,14 @@ module PostgisFunctions
 
   module ClassMethods
 
-    # acts_as_geom :db_field => :geom_type
+    # has_geom :db_field => :geom_type
     # Examples:
     #
-    # acts_as_geom :data => :point
-    # acts_as_geom :geom => :line_string
-    # acts_as_geom :geom => :polygon
+    # has_geom :data => :point
+    # has_geom :geom => :line_string
+    # has_geom :geom => :polygon
     #
-    def acts_as_geom(*geom)
+    def has_geom(*geom)
       cattr_accessor :postgis_geoms
       self.postgis_geoms = geom[0] # {:columns => column
       send :include, case geom[0].values[0]
@@ -26,6 +26,7 @@ module PostgisFunctions
         when :line_string then  LineStringFunctions
       end unless geom[0].kind_of? Symbol
     end
+    alias :acts_as_geom :has_geom
 
     def get_geom_type(column)
       self.postgis_geoms.values[0] rescue nil

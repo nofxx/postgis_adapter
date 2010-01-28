@@ -664,6 +664,10 @@ module PostgisFunctions
       postgis_calculate(:line_interpolate_point, self, fraction)
     end
 
+    def line_merge
+      postgis_calculate(:line_merge, self)
+    end
+
     #
     # Return a linestring being a substring of the input one starting and ending
     # at the given fractions of total 2d length. Second and third arguments are
