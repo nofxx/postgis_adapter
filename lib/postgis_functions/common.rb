@@ -664,10 +664,6 @@ module PostgisFunctions
       postgis_calculate(:line_interpolate_point, self, fraction)
     end
 
-    def line_merge
-      postgis_calculate(:line_merge, self)
-    end
-
     #
     # Return a linestring being a substring of the input one starting and ending
     # at the given fractions of total 2d length. Second and third arguments are
@@ -693,7 +689,20 @@ module PostgisFunctions
     #end
   end
 
+  module MultiLineStringFunctions
 
+    #
+    # Returns a (set of) LineString(s) formed by sewing together a MULTILINESTRING.
+    #
+    # Only use with MULTILINESTRING/LINESTRINGs. If you feed a polygon or geometry collection into this function, it will return an empty GEOMETRYCOLLECTION
+    #
+    # Returns geometry ST_LineMerge(geometry amultilinestring);
+    #
+    def line_merge
+      postgis_calculate(:lineMerge, self)
+    end
+
+  end
   #
   #
   #

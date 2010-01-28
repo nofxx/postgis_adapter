@@ -78,6 +78,12 @@ ActiveRecord::Schema.define() do
     t.line_string   :geom, :null => false, :srid => 4326
   end
 
+  create_table :roads, :force => true do |t|
+    t.string              :data, :limit => 100
+    t.integer             :value
+    t.multi_line_string   :geom, :null => false, :srid => 4326
+  end
+
   create_table :common_geos, :force => true do |t|
     t.string        :data, :limit => 100
     t.integer       :value

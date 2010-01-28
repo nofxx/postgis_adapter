@@ -8,6 +8,7 @@ describe "Common Functions" do
     @c2 ||= City.create!(:data => "City1", :geom => Polygon.from_coordinates([[[22,66],[65,65],[20,10],[22,66]],[[10,15],[15,11],[34,14],[10,15]]],4326))
     @c3 ||= City.create!(:data => "City3", :geom => Polygon.from_coordinates([[[12.4,-45.3],[45.4,41.6],[4.456,1.0698],[12.4,-45.3]],[[2.4,5.3],[5.4,1.4263],[14.46,1.06],[2.4,5.3]]],4326))
     @s1 ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[1,1],[2,2]],4326))
+    @sx ||= Street.create!(:data => "Street1", :geom => LineString.from_coordinates([[2,2],[4,4]],4326))
     @s2 ||= Street.create!(:data => "Street2", :geom => LineString.from_coordinates([[4,4],[7,7]],4326))
     @s3 ||= Street.create!(:data => "Street3", :geom => LineString.from_coordinates([[8,8],[18,18],[20,20],[25,25],[30,30],[38,38]],4326))
     @s4 ||= Street.create!(:data => "Street4", :geom => LineString.from_coordinates([[10,8],[15,18]],4326))
@@ -16,6 +17,8 @@ describe "Common Functions" do
     @p3 ||= Position.create!(:data => "Point3", :geom => Point.from_x_y(8,8,4326))
     @p4 ||= Position.create!(:data => "Point4", :geom => Point.from_x_y(18.1,18,4326))
     @p5 ||= Position.create!(:data => "Point5", :geom => Point.from_x_y(30,30,4326))
+    @m1 ||= Road.create(:data => "MG-050", :geom => MultiLineString.from_line_strings([@s1.geom, @sx.geom]))
+    @m2 ||= Road.create(:data => "MG-050", :geom => MultiLineString.from_line_strings([@s3.geom, @s4.geom]))
   end
 
   describe "Point" do
@@ -239,6 +242,10 @@ describe "Common Functions" do
       end
     end
 
+    it "should have 1 geometry" do
+      @s1.should_not respond_to(:geometries)
+    end
+
     it "should intersect with linestring" do
       @s4.intersects?(@s3).should be_true
     end
@@ -293,7 +300,6 @@ describe "Common Functions" do
           @s1.as_geo_json.should eql("{\"type\":\"LineString\",\"coordinates\":[[1,1],[2,2]]}")
         end
       end
-
     end
 
     describe "Distance" do
@@ -368,6 +374,24 @@ describe "Common Functions" do
       str.geom[0].y.should be_close(4,0.0000001)
       str.geom[1].x.should be_close(7,0.0000001)
       str.geom[1].y.should be_close(7,0.0000001)
+    end
+
+    describe "MultiLineString" do
+
+      it "should write nicely" do
+        @m1.geom.should be_instance_of(MultiLineString)
+      end
+
+      it "should have 2 geometries" do
+        @m1.geom.should have(2).geometries
+      end
+
+      it "should line merge!" do
+        merged = @m1.line_merge
+        p merged, @m1.geom
+        merged.should be_instance_of(LineString)
+        p merged.class
+      end
     end
   end
 
