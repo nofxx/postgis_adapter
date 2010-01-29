@@ -38,7 +38,8 @@ module PostgisFunctions
   # DistanceSphere/Spheroid  =>  meters
   #
   def construct_geometric_sql(type,geoms,options)
-    not_db, on_db = geoms.partition { |g| g.is_a? Geometry }
+    not_db, on_db = geoms.partition { |g| g.is_a?(Geometry) || g.new_record? }
+    not_db.map! {|o| o.respond_to?(:new_record?) ? o.geom : o }
 
     tables = on_db.map do |t| {
       :name => t.class.table_name,
@@ -58,10 +59,7 @@ module PostgisFunctions
     fields << not_db.map { |g| "'#{g.as_hex_ewkb}'::geometry"} unless not_db.empty?
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     fields.map! { |f| "ST_Union(#{f})" } if stcollect  # ST_Transform(W1.geom,x)
-    conditions  = tables.map do |f|
-      raise unless f[:uid]
-      "#{f[:uid]}.id = #{f[:id]}"
-    end         # W1.id = 5
+    conditions  = tables.map {|f| "#{f[:uid]}.id = #{f[:id]}" }   # W1.id = 5
     tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                         # streets W1
 
     #
@@ -106,7 +104,7 @@ module PostgisFunctions
       GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(value) rescue value
     end
     rescue Exception => e
-    raise StandardError, "#{e}"
+    raise StandardError, e.to_s #+ e.backtrace.inspect
   end
 
   # Get a unique ID for tables

@@ -400,6 +400,10 @@ describe "Common Functions" do
         @m1.geom.geometries[0].length.should eql(2)
       end
 
+      it "should calculate multi line string length" do
+        @m1.length_spheroid.should be_close(470464.54, 0.01)
+      end
+
       it "should line merge!" do
         merged = @m1.line_merge
         merged.should be_instance_of(LineString)
@@ -407,6 +411,7 @@ describe "Common Functions" do
       end
 
       it "should line merge collect" do
+        pending
         co = @m2.line_merge
         co.should be_instance_of(LineString)
       end
