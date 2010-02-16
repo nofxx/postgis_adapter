@@ -102,6 +102,17 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
 
   include SpatialAdapter
 
+  # SCHEMA STATEMENTS ========================================
+  
+  alias :original_recreate_database :recreate_database
+  def recreate_database(configuration, enc_option)
+    `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
+    `createdb #{enc_option} -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
+    `createlang -U "#{configuration["test"]["username"]}" plpgsql #{configuration["test"]["database"]}`
+    `psql -d #{configuration["test"]["database"]} -f db/spatial/lwpostgis.sql`
+    `psql -d #{configuration["test"]["database"]} -f db/spatial/spatial_ref_sys.sql`
+  end
+
   alias :original_native_database_types :native_database_types
   def native_database_types
     original_native_database_types.update(geometry_data_types)
