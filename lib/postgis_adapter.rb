@@ -106,11 +106,30 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   
   alias :original_recreate_database :recreate_database
   def recreate_database(configuration, enc_option)
+    puts "!!!postgis_adapter - recreate_database"
     `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
     `createdb #{enc_option} -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
     `createlang -U "#{configuration["test"]["username"]}" plpgsql #{configuration["test"]["database"]}`
-    `psql -d #{configuration["test"]["database"]} -f db/spatial/lwpostgis.sql`
+    `psql -d #{configuration["test"]["database"]} -f db/spatial/postgis.sql`
     `psql -d #{configuration["test"]["database"]} -f db/spatial/spatial_ref_sys.sql`
+  end
+  
+  alias :original_create_database :create_database
+  def create_database(name, options = {})
+    puts "!!!postgis_adapter - create_database - #{name}"
+    original_create_database(name, options = {})
+    # `createlang plpgsql #{name}`
+    # `psql -d #{name} -f db/spatial/postgis.sql`
+    # `psql -d #{name} -f db/spatial/spatial_ref_sys.sql`
+    createlang = "createlang plpgsql #{name}"
+    postgis = "psql -d #{name} -f db/spatial/postgis.sql"
+    spatial_ref_sys = "psql -d #{name} -f db/spatial/spatial_ref_sys.sql"
+    puts "!!!createlang=#{createlang}"
+    system createlang
+    puts "!!!postgis=#{postgis}"
+    system postgis
+    puts "!!!spatial_ref_sys=#{spatial_ref_sys}"
+    system spatial_ref_sys
   end
 
   alias :original_native_database_types :native_database_types
@@ -259,18 +278,18 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     end
   end
 
-#  # For version of Rails where exists disable_referential_integrity
-#  if self.instance_methods.include? "disable_referential_integrity"
-#    #Pete Deffendol's patch
-#    alias :original_disable_referential_integrity :disable_referential_integrity
-#    def disable_referential_integrity(&block) #:nodoc:
-#      ignore_tables = %w{ geometry_columns spatial_ref_sys }
-#      execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
-#      yield
-#    ensure
-#      execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
-#    end
-#  end
+ # For version of Rails where exists disable_referential_integrity
+ if self.instance_methods.include? "disable_referential_integrity"
+   #Pete Deffendol's patch
+   alias :original_disable_referential_integrity :disable_referential_integrity
+   def disable_referential_integrity(&block) #:nodoc:
+     ignore_tables = %w{ geometry_columns spatial_ref_sys geography_columns }
+     execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+     yield
+   ensure
+     execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+   end
+ end
 
   private
 
