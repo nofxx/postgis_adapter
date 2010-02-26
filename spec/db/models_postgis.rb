@@ -52,6 +52,10 @@ class Street < ActiveRecord::Base
   acts_as_geom :geom => :line_string
 end
 
+class Road < ActiveRecord::Base
+  acts_as_geom :geom => :multi_line_string
+end
+
 class CommonGeo < ActiveRecord::Base
   acts_as_geom :geom => :point
 end

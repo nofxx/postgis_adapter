@@ -31,11 +31,18 @@ describe "PostgisFunctions" do
        @p1.distance_to(Point.from_x_y(5,5,4326)).should be_close(55.0726792520575, 0.001)
     end
 
+    it "should work with unsaved objects" do
+      ss = Street.new(:data => "Street1", :geom => LineString.from_coordinates([[-44,-21],[-43,-29]],4326))
+      ss.length_spheroid.should be_close(891908.39, 0.01)
+    end
+
     it { @c1.area(32640).should be_close(9165235788987.37, 0.01) }
 
     it { @c1.area.should be_close(720.0, 0.1) }
 
-    it { @p1.should be_strictly_left_of(@c1) }
+    it "should be strictly left of city" do
+      @p1.should be_strictly_left_of(@c1)
+    end
 
     it { @s1.length.should be_close(8.06225774829855, 0.001) }
 
