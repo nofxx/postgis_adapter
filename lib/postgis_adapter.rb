@@ -249,17 +249,17 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   end
 
 #  # For version of Rails where exists disable_referential_integrity
-#  if self.instance_methods.include? "disable_referential_integrity"
-#    #Pete Deffendol's patch
-#    alias :original_disable_referential_integrity :disable_referential_integrity
-#    def disable_referential_integrity(&block) #:nodoc:
-#      ignore_tables = %w{ geometry_columns spatial_ref_sys }
-#      execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
-#      yield
-#    ensure
-#      execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
-#    end
-#  end
+ if self.instance_methods.include? "disable_referential_integrity"
+   #Pete Deffendol's patch
+   alias :original_disable_referential_integrity :disable_referential_integrity
+   def disable_referential_integrity(&block) #:nodoc:
+     ignore_tables = %w{ geometry_columns spatial_ref_sys }
+     execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+     yield
+   ensure
+     execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+   end
+ end
 
   private
 
@@ -399,7 +399,7 @@ module ActiveRecord
   end
 end
 
-#Would prefer creation of a PostgreSQLColumn type instead but I would
+# Would prefer creation of a PostgreSQLColumn type instead but I would
 # need to reimplement methods where Column objects are instantiated so
 # I leave it like this
 module ActiveRecord
@@ -408,7 +408,7 @@ module ActiveRecord
 
       include SpatialColumn
 
-      #Transforms a string to a geometry. PostGIS returns a HewEWKB string.
+      #Transforms a string to a geometry. PostGIS returns a HexEWKB string.
       def self.string_to_geometry(string)
         return string unless string.is_a?(String)
         GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(string) rescue nil
