@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{postgis_adapter}
-  s.version = "0.7.8"
+  s.version = "0.7.9"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Marcos Piccinini"]
-  s.date = %q{2010-02-26}
+  s.date = %q{2010-03-22}
   s.description = %q{Execute PostGIS functions on Active Record}
   s.email = %q{x@nofxx.com}
   s.extra_rdoc_files = [
@@ -48,7 +48,7 @@ Gem::Specification.new do |s|
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{postgis_adapter}
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{PostGIS Adapter for Active Record}
   s.test_files = [
     "spec/db/models_postgis.rb",

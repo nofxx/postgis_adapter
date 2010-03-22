@@ -5,7 +5,7 @@
 # Code from
 # http://georuby.rubyforge.org Spatial Adapter
 #
-require 'activerecord'
+require 'active_record'
 require 'active_record/connection_adapters/postgresql_adapter'
 require 'geo_ruby'
 require 'postgis_adapter/common_spatial_adapter'

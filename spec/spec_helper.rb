@@ -1,9 +1,9 @@
 require 'rubygems'
 require 'spec'
 require 'pg'
-require 'activerecord'
+require 'active_record'
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
-gem 'activerecord', "=2.3.5"
+gem 'active_record', "=2.3.5"
 gem 'nofxx-georuby'
 require 'postgis_adapter'
 # GeoRuby::SimpleFeatures::DEFAULT_SRID = -1
