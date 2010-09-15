@@ -24,6 +24,7 @@ module PostgisFunctions
         when :point       then  PointFunctions
         when :polygon     then PolygonFunctions
         when :line_string, :multi_line_string then  LineStringFunctions
+        when :multi_polygon then MultiPolygonFunctions
       end unless geom[0].kind_of? Symbol
     end
     alias :acts_as_geom :has_geom
