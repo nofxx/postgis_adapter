@@ -5,7 +5,7 @@
 # Code from
 # http://georuby.rubyforge.org Spatial Adapter
 #
-require 'activerecord'
+require 'active_record'
 require 'active_record/connection_adapters/postgresql_adapter'
 require 'geo_ruby'
 require 'postgis_adapter/common_spatial_adapter'
@@ -289,8 +289,8 @@ SELECT * FROM geometry_columns WHERE f_table_name = '#{table_name}'
     end
 
     raw_geom_infos
-    rescue => e
-      nil
+  rescue => e
+    nil
   end
 
 end
