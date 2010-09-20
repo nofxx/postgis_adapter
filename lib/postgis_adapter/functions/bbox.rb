@@ -4,7 +4,8 @@
 # BBox
 #
 #
-module PostgisFunctions
+module PostgisAdapter
+module Functions
 
   #
   # These operators utilize indexes. They compare geometries by bounding boxes.
@@ -125,4 +126,5 @@ module PostgisFunctions
   def same_as? other
     bbox("=", other)
   end
+end
 end

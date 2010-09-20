@@ -6,7 +6,8 @@
 # The methods here can be used by all geoms.
 #
 
-module PostgisFunctions
+module PostgisAdapter
+module Functions
 
   #
   # True if the given geometries represent the same geometry.
@@ -876,7 +877,7 @@ module PostgisFunctions
   end
 
 end
-
+end
 # NEW
 #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
 #boolean ST_OrderingEquals(g

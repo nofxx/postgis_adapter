@@ -3,7 +3,8 @@
 #
 # http://github.com/nofxx/postgis_adapter
 #
-module PostgisFunctions
+module PostgisAdapter
+module Functions
   def self.included(base)
     base.send :extend, ClassMethods
   end
@@ -36,5 +37,6 @@ module PostgisFunctions
     end
   end
 end
+end
 
-ActiveRecord::Base.send :include, PostgisFunctions
+ActiveRecord::Base.send :include, PostgisAdapter::Functions

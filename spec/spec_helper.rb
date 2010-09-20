@@ -1,11 +1,15 @@
 require 'rubygems'
 require 'spec'
 require 'pg'
-require 'active_record'
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
-gem 'active_record', "=2.3.5"
+if ENV["RAILS"]
+  gem 'activerecord', '=3.0.0.beta3'
+else
+  gem 'activerecord', "<=2.3.8"
+end
 gem 'nofxx-georuby'
 require 'postgis_adapter'
+require 'logger'
 # GeoRuby::SimpleFeatures::DEFAULT_SRID = -1
 
 # Monkey patch Schema.define logger
@@ -19,7 +23,7 @@ ActiveRecord::Base.establish_connection({ :adapter => "postgresql",
                                           :database => "postgis_adapter",
                                           :username => "postgres",
                                           :password => "" })
-
+ActiveRecord::Migration.verbose = false
 PG_VERSION = ActiveRecord::Base.connection.select_value("SELECT version()").scan(/PostgreSQL ([\d\.]*)/)[0][0]
 
 puts "Running against PostgreSQL #{PG_VERSION}"
