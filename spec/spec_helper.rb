@@ -1,12 +1,25 @@
+SPEC_DB = {
+  :adapter => "postgresql",
+  :database => "postgis_adapter",
+  :username => "postgres",
+  :password => ""
+}
+
 require 'rubygems'
-require 'spec'
 require 'pg'
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
-if ENV["RAILS"]
-  gem 'activerecord', '=3.0.0.beta3'
-else
-  gem 'activerecord', "<=2.3.8"
+
+def try_old_stuff(*stuff)
+  stuff.each do |s|
+    begin
+      require s[0]
+    rescue LoadError
+      require s[1]
+    end
+  end
 end
+try_old_stuff ['spec', 'rspec'], ['active_record', 'activerecord']
+
 gem 'nofxx-georuby'
 require 'postgis_adapter'
 require 'logger'
@@ -17,17 +30,24 @@ $logger = Logger.new(StringIO.new)
 def $logger.write(d); self.info(d); end
 # $stdout = $logger
 
-
 ActiveRecord::Base.logger = $logger
-ActiveRecord::Base.establish_connection({ :adapter => "postgresql",
-                                          :database => "postgis_adapter",
-                                          :username => "postgres",
-                                          :password => "" })
-ActiveRecord::Migration.verbose = false
-PG_VERSION = ActiveRecord::Base.connection.select_value("SELECT version()").scan(/PostgreSQL ([\d\.]*)/)[0][0]
 
-puts "Running against PostgreSQL #{PG_VERSION}"
+begin
+  ActiveRecord::Base.establish_connection(SPEC_DB)
+  ActiveRecord::Migration.verbose = false
+  PG_VERSION = ActiveRecord::Base.connection.select_value("SELECT version()").scan(/PostgreSQL ([\d\.]*)/)[0][0]
 
-require File.dirname(__FILE__) + '/db/schema_postgis.rb'
-require File.dirname(__FILE__) + '/db/models_postgis.rb'
+  puts "Running against PostgreSQL #{PG_VERSION}"
+
+  require File.dirname(__FILE__) + '/db/schema_postgis.rb'
+  require File.dirname(__FILE__) + '/db/models_postgis.rb'
+
+rescue PGError
+  puts "No db... creating"
+  `createdb -U #{SPEC_DB[:username]} #{SPEC_DB[:database]} -T template_postgis`
+  puts "Done. Please run spec again."
+  exit
+end
+
+
 
