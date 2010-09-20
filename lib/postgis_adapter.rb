@@ -254,10 +254,10 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
    alias :original_disable_referential_integrity :disable_referential_integrity
    def disable_referential_integrity(&block) #:nodoc:
      ignore_tables = %w{ geometry_columns spatial_ref_sys geography_columns }
-     execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+     execute(tables.select { |name| !ignore_tables.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
      yield
    ensure
-     execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+     execute(tables.select { |name| !ignore_tables.include?(name)}.map { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
    end
  end
 

@@ -9,6 +9,10 @@ describe "ClassMethods" do
     @p2 ||= Position.create!(:data => "PointClassClose", :geom => Point.from_x_y(99.9,99.9,4326))
   end
 
+  after(:all) do
+    [City, Street, Position].each { |m| m.delete_all }
+  end
+
   it "should find the closest other point" do
     Position.close_to(Point.from_x_y(99,99,4326), :srid => 4326)[0].data.should == @p1.data
   end

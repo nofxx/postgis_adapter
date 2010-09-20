@@ -49,7 +49,7 @@ ActiveRecord::SchemaDumper.class_eval do
 
       columns.each do |column|
 
-        raise StandardError, "Unknown type '#{column.sql_type}' for column '#{column.name}'" if @types[column.type].nil?
+        raise StandardError, "Unknown type '#{column.sql_type}' for column '#{column.name}' in table '#{table}'" if @types[column.type].nil?
         next if column.name == pk
         #need to use less_simplified_type  here or have each specific geometry type be simplified to a specific simplified type in Column and each one treated separately in the Column methods
         if column.is_a?(SpatialColumn)

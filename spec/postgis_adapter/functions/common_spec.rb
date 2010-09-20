@@ -126,6 +126,8 @@ describe "Common Functions" do
 
   describe "Polygon" do
 
+    it { City.first.data.should eql("City1") }
+
     it "sort by area size" do
       City.by_area.first.data.should == "City1" #[@c1, @c2, @c3]
     end
@@ -266,6 +268,10 @@ describe "Common Functions" do
 
     it "intersection with a point" do
       @s1.intersection(@p2).should be_instance_of(GeometryCollection)
+    end
+
+    it "have a point on surface" do
+      @s3.point_on_surface.should be_a GeoRuby::SimpleFeatures::Point
     end
 
     describe "Self" do
