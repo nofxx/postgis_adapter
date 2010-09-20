@@ -106,7 +106,6 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   
   alias :original_recreate_database :recreate_database
   def recreate_database(configuration, enc_option)
-    puts "!!!postgis_adapter - recreate_database"
     `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
     `createdb #{enc_option} -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
     `createlang -U "#{configuration["test"]["username"]}" plpgsql #{configuration["test"]["database"]}`
@@ -116,19 +115,12 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   
   alias :original_create_database :create_database
   def create_database(name, options = {})
-    puts "!!!postgis_adapter - create_database - #{name}"
     original_create_database(name, options = {})
-    # `createlang plpgsql #{name}`
-    # `psql -d #{name} -f db/spatial/postgis.sql`
-    # `psql -d #{name} -f db/spatial/spatial_ref_sys.sql`
     createlang = "createlang plpgsql #{name}"
     postgis = "psql -d #{name} -f db/spatial/postgis.sql"
     spatial_ref_sys = "psql -d #{name} -f db/spatial/spatial_ref_sys.sql"
-    puts "!!!createlang=#{createlang}"
     system createlang
-    puts "!!!postgis=#{postgis}"
     system postgis
-    puts "!!!spatial_ref_sys=#{spatial_ref_sys}"
     system spatial_ref_sys
   end
 
