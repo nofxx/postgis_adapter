@@ -875,6 +875,18 @@ module Functions
     end
 
   end
+  
+  #
+  #
+  #
+  #
+  # MultiPolygon
+  #
+  #
+  #
+  #
+  module MultiPolygonFunctions
+  end
 
 end
 end

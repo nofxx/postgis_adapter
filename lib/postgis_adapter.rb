@@ -289,8 +289,8 @@ SELECT * FROM geometry_columns WHERE f_table_name = '#{table_name}'
     end
 
     raw_geom_infos
-    rescue => e
-      nil
+  rescue => e
+    nil
   end
 
 end
