@@ -10,12 +10,12 @@ Based on http://georuby.rubyforge.org Spatial Adapter
 RDocs - http://docs.github.com/nofxx/postgis_adapter
 Postgis Manual - http://postgis.refractions.net/documentation/manual-svn
 
-*PostGIS and Rails 2+ only*.
-
 
 == Install
 
 If you are using Spatial Adapter, *remove it first*.
+
+    gem install postgis_adapter
 
 
 === Dependencies
@@ -25,28 +25,17 @@ If you are using Spatial Adapter, *remove it first*.
 - postgis  1.3+
 
 
-=== As gem:
+=== Rails 3+
 
-    sudo gem install postgis-adapter
-
-Rails:
 
     config.gem "postgis_adapter"
 
 
-Github version:
+=== Rails 2
 
 
-    sudo gem install nofxx-postgis_adapter --source http://gems.github.com
+    gem install postgis_adapter -v 0.7.8
 
-Rails:
-
-    config.gem "nofxx-postgis_adapter", :lib => "postgis_adapter", :source => "http://gems.github.com"
-
-
-=== As plugin:
-
-    script/plugin install git://github.com/nofxx/postgis_adapter.git
 
 
 == How to Use
@@ -321,6 +310,16 @@ something like this :
        the_geom = place.the_geom
        the_geom.y=123456.7
        place.the_geom = the_geom
+
+
+== Postgis Adapter
+
+Marcos Piccinini (nofxx)
+Ying Tsen Hong (tsenying)
+Simon Tokumine (tokumine)
+Fernando Blat (ferblape)
+
+(in order of appearance)
 
 
 == License
