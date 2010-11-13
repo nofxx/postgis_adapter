@@ -26,10 +26,10 @@ Gem::Specification.new do |s|
      "lib/postgis_adapter.rb",
      "lib/postgis_adapter/acts_as_geom.rb",
      "lib/postgis_adapter/common_spatial_adapter.rb",
-     "lib/postgis_functions.rb",
-     "lib/postgis_functions/bbox.rb",
-     "lib/postgis_functions/class.rb",
-     "lib/postgis_functions/common.rb",
+     "lib/postgis_adapter/functions.rb",
+     "lib/postgis_adapter/functions/bbox.rb",
+     "lib/postgis_adapter/functions/class.rb",
+     "lib/postgis_adapter/functions/common.rb",
      "postgis_adapter.gemspec",
      "rails/init.rb",
      "spec/db/models_postgis.rb",
@@ -37,11 +37,10 @@ Gem::Specification.new do |s|
      "spec/postgis_adapter/acts_as_geom_spec.rb",
      "spec/postgis_adapter/common_spatial_adapter_spec.rb",
      "spec/postgis_adapter_spec.rb",
-     "spec/postgis_functions/bbox_spec.rb",
-     "spec/postgis_functions/class_spec.rb",
-     "spec/postgis_functions/common_spec.rb",
-     "spec/postgis_functions_spec.rb",
-     "spec/spec.opts",
+     "spec/postgis_adapter/functions/bbox_spec.rb",
+     "spec/postgis_adapter/functions/class_spec.rb",
+     "spec/postgis_adapter/functions/common_spec.rb",
+     "spec/postgis_adapter/functions_spec.rb",
      "spec/spec_helper.rb"
   ]
   s.homepage = %q{http://github.com/nofxx/postgis_adapter}
@@ -55,12 +54,12 @@ Gem::Specification.new do |s|
      "spec/db/schema_postgis.rb",
      "spec/postgis_adapter/acts_as_geom_spec.rb",
      "spec/postgis_adapter/common_spatial_adapter_spec.rb",
-     "spec/postgis_functions_spec.rb",
+     "spec/postgis_adapter/functions_spec.rb",
      "spec/spec_helper.rb",
      "spec/postgis_adapter_spec.rb",
-     "spec/postgis_functions/class_spec.rb",
-     "spec/postgis_functions/common_spec.rb",
-     "spec/postgis_functions/bbox_spec.rb"
+     "spec/postgis_adapter/functions/class_spec.rb",
+     "spec/postgis_adapter/functions/common_spec.rb",
+     "spec/postgis_adapter/functions/bbox_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
