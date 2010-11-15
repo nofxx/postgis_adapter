@@ -11,11 +11,12 @@
 #
 # Some links:
 #
-# PostGis Manual - http://postgis.refractions.net/documentation/manual-svn/ch07.html
+# PostGis Manual - http://postgis.refractions.net/documentation/manual-svn
 # Earth Spheroid - http://en.wikipedia.org/wiki/Figure_of_the_Earth
 #
 
-module PostgisFunctions
+module PostgisAdapter
+module Functions
   # WGS84 Spheroid
   EARTH_SPHEROID = "'SPHEROID[\"GRS-80\",6378137,298.257222101]'" # SRID => 4326
 
@@ -114,7 +115,7 @@ module PostgisFunctions
   end
 
 end
-
+end
 #
 # POINT(0 0)
 # LINESTRING(0 0,1 1,1 2)

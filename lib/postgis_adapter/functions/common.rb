@@ -6,7 +6,15 @@
 # The methods here can be used by all geoms.
 #
 
-module PostgisFunctions
+module PostgisAdapter
+module Functions
+
+  #
+  # Test if a geometry is well formed.
+  #
+  def valid_geom?
+    postgis_calculate(:isvalid, self)
+  end
 
   #
   # True if the given geometries represent the same geometry.
@@ -232,10 +240,15 @@ module PostgisFunctions
     postgis_calculate(:simplify, self, tolerance)
   end
 
-
   def simplify!(tolerance=0.1)
     #FIXME: not good..
     self.update_attribute(geo_columns.first, simplify)
+  end
+
+  #
+  #
+  def buffer(width=0.1)
+    postgis_calculate(:buffer, self, width)
   end
 
   #
@@ -509,10 +522,18 @@ module PostgisFunctions
   #
   # http://geojson.org/
   #
-  def as_geo_json(precision=15, bbox=0)
+  def as_geo_json(precision=15, bbox = 0)
     postgis_calculate(:AsGeoJSON, self, [precision, bbox])
   end
 
+  #
+  # ST_PointOnSurface — Returns a POINT guaranteed to lie on the surface.
+  #
+  # geometry ST_PointOnSurface(geometry g1);eometry A, geometry B);
+  #
+  def point_on_surface
+    postgis_calculate(:pointonsurface, self)
+  end
 
   #
   #
@@ -875,8 +896,20 @@ module PostgisFunctions
 
   end
 
-end
+  #
+  #
+  #
+  #
+  # MultiPolygon
+  #
+  #
+  #
+  #
+  module MultiPolygonFunctions
+  end
 
+end
+end
 # NEW
 #ST_OrderingEquals — Returns true if the given geometries represent the same geometry and points are in the same directional order.
 #boolean ST_OrderingEquals(g

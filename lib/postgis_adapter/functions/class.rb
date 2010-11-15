@@ -1,4 +1,5 @@
-module PostgisFunctions
+module PostgisAdapter
+module Functions
 
     #
     # Class Methods
@@ -60,4 +61,5 @@ module PostgisFunctions
 
 
 
+end
 end

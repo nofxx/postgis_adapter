@@ -22,7 +22,8 @@ describe "PostgisAdapter" do
     end
 
     it "should est_3dz_points" do
-      pt = Table3dzPoint.create!(:data => "Hello!",:geom => Point.from_x_y_z(-1.6,2.8,-3.4))
+      pt = Table3dzPoint.create!(:data => "Hello!",
+                                 :geom => Point.from_x_y_z(-1.6,2.8,-3.4))
       pt = Table3dzPoint.find(:first)
       pt.geom.should be_instance_of(Point)
       pt.geom.z.should eql(-3.4)
@@ -36,7 +37,7 @@ describe "PostgisAdapter" do
     end
 
     it "should est_4d_points" do
-      pt = Table4dPoint.create!(:geom => Point.from_x_y_z_m(-1.6,2.8,-3.4,15))
+      pt = Table4dPoint.create!(:geom => Point.from_x_y_z_m(-1,2.8,-3.4,15))
       pt = Table4dPoint.find(:first)
       pt.geom.should be_instance_of(Point)
       pt.geom.z.should eql(-3.4)
@@ -59,7 +60,8 @@ describe "PostgisAdapter" do
 
   describe "LineString" do
     it "should record a linestring nicely" do
-      @ls = TableLineString.new(:value => 3, :geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]]))
+      @ls = TableLineString.new(:value => 3,
+            :geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]]))
       @ls.save.should be_true
     end
 
@@ -70,7 +72,8 @@ describe "PostgisAdapter" do
     end
 
     it "should test_srid_line_string" do
-      ls = TableSridLineString.create!(:geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326))
+      ls = TableSridLineString.create!(
+           :geom => LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326))
       ls = TableSridLineString.find(:first)
       ls_e = LineString.from_coordinates([[1.4,2.5],[1.5,6.7]],4326)
       ls.geom.should be_instance_of(LineString)
@@ -143,12 +146,13 @@ describe "PostgisAdapter" do
 
     it "should create some points" do
       Area.create!(:data => "Point1", :geom => Point.from_x_y(1.2,0.75,4326))
-      Area.create!(:data => "Point2",:geom => Point.from_x_y(0.6,1.3,4326))
+      Area.create!(:data => "Point2", :geom => Point.from_x_y(0.6,1.3,4326))
       Area.create!(:data => "Point3", :geom => Point.from_x_y(2.5,2,4326))
     end
 
     it "should find by geom" do
-      pts = Area.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
+      pts = Area.find_all_by_geom(LineString.
+                                  from_coordinates([[0,0],[2,2]],4326))
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match(/Point/)
@@ -156,7 +160,8 @@ describe "PostgisAdapter" do
     end
 
     it "should find by geom again" do
-      pts = Area.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
+      pts = Area.find_all_by_geom(LineString.
+                          from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
       pts[0].data.should eql("Point3")
     end
 
@@ -175,13 +180,11 @@ describe "PostgisAdapter" do
 
   end
 
+  # Verify that a non-NULL column with a default value is handled correctly.   # Additionally, if the database uses UTF8, set the binary (bytea)
+  # column value to an illegal UTF8 string; it should be stored as the
+  # specified binary string and not as a text string. (The binary data test
+  # cannot fail if the database uses SQL_ASCII or LATIN1 encoding.)
   describe "PostgreSQL-specific types and default values" do
-
-    # Verify that a non-NULL column with a default value is handled correctly.
-    # Additionally, if the database uses UTF8 encoding, set the binary (bytea)
-    # column value to an illegal UTF8 string; it should be stored as the
-    # specified binary string and not as a text string. (The binary data test
-    # cannot fail if the database uses SQL_ASCII or LATIN1 encoding.)
 
     ActiveRecord::Schema.define() do
       create_table :binary_defaults, :force => true do |t|
@@ -196,10 +199,13 @@ describe "PostgisAdapter" do
 
     it "should create some records" do
       if BinaryDefault.connection.encoding == "UTF8"
+        # fôo as ISO-8859-1 (i.e., not valid UTF-8 data)
         BinaryDefault.create!(:name => "foo", :data => "baz",
-                              :value => "f\xf4o") # fôo as ISO-8859-1 (i.e., not valid UTF-8 data)
-        BinaryDefault.create!(:name => "bar",     # data value not specified, should use default
-                              :value => "b\xe5r") # bår as ISO-8859-1 (i.e., not valid UTF-8 data)
+                              :value => "f\xf4o")
+        # data value not specified, should use default
+        # bår as ISO-8859-1 (i.e., not valid UTF-8 data)
+        BinaryDefault.create!(:name => "bar",
+                              :value => "b\xe5r")
       else
         BinaryDefault.create!(:name => "foo", :data => "baz")
         BinaryDefault.create!(:name => "bar")
@@ -219,6 +225,16 @@ describe "PostgisAdapter" do
       end
     end
 
+  end
+
+  describe "Extras" do
+    it "should disable referencial integrity" do
+      lambda do
+        Area.connection.disable_referential_integrity do
+          Area.delete_all
+        end
+      end.should_not raise_error
+    end
   end
 
 end

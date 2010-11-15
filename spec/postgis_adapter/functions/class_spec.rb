@@ -1,4 +1,4 @@
-require File.dirname(__FILE__) + '/../spec_helper.rb'
+require File.dirname(__FILE__) + '/../../spec_helper.rb'
 
 describe "ClassMethods" do
   before(:all) do
@@ -7,6 +7,10 @@ describe "ClassMethods" do
     @s2 ||= Street.create!(:data => "StreetClassTiny", :geom => LineString.from_coordinates([[1,1],[1.1,1.1]],4326))
     @p1 ||= Position.create!(:data => "PointClass", :geom => Point.from_x_y(99,99,4326))
     @p2 ||= Position.create!(:data => "PointClassClose", :geom => Point.from_x_y(99.9,99.9,4326))
+  end
+
+  after(:all) do
+    [City, Street, Position].each { |m| m.delete_all }
   end
 
   it "should find the closest other point" do

@@ -5,14 +5,14 @@
 # Code from
 # http://georuby.rubyforge.org Spatial Adapter
 #
-require 'activerecord'
+require 'active_record'
 require 'active_record/connection_adapters/postgresql_adapter'
 require 'geo_ruby'
 require 'postgis_adapter/common_spatial_adapter'
-require 'postgis_functions'
-require 'postgis_functions/common'
-require 'postgis_functions/class'
-require 'postgis_functions/bbox'
+require 'postgis_adapter/functions'
+require 'postgis_adapter/functions/common'
+require 'postgis_adapter/functions/class'
+require 'postgis_adapter/functions/bbox'
 require 'postgis_adapter/acts_as_geom'
 
 include GeoRuby::SimpleFeatures
@@ -116,12 +116,9 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   alias :original_create_database :create_database
   def create_database(name, options = {})
     original_create_database(name, options = {})
-    createlang = "createlang plpgsql #{name}"
-    postgis = "psql -d #{name} -f db/spatial/postgis.sql"
-    spatial_ref_sys = "psql -d #{name} -f db/spatial/spatial_ref_sys.sql"
-    system createlang
-    system postgis
-    system spatial_ref_sys
+    `createlang plpgsql #{name}`
+    `psql -d #{name} -f db/spatial/postgis.sql`
+    `psql -d #{name} -f db/spatial/spatial_ref_sys.sql`
   end
 
   alias :original_native_database_types :native_database_types
@@ -276,10 +273,10 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
    alias :original_disable_referential_integrity :disable_referential_integrity
    def disable_referential_integrity(&block) #:nodoc:
      ignore_tables = %w{ geometry_columns spatial_ref_sys geography_columns }
-     execute(tables.select { |name| !ignore_tables.include?(name) }.collect { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+     execute(tables.select { |name| !ignore_tables.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
      yield
    ensure
-     execute(tables.select { |name| !ignore_tables.include?(name)}.collect { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+     execute(tables.select { |name| !ignore_tables.include?(name)}.map { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
    end
  end
 
@@ -311,8 +308,8 @@ SELECT * FROM geometry_columns WHERE f_table_name = '#{table_name}'
     end
 
     raw_geom_infos
-    rescue => e
-      nil
+  rescue => e
+    nil
   end
 
 end
@@ -421,7 +418,7 @@ module ActiveRecord
   end
 end
 
-#Would prefer creation of a PostgreSQLColumn type instead but I would
+# Would prefer creation of a PostgreSQLColumn type instead but I would
 # need to reimplement methods where Column objects are instantiated so
 # I leave it like this
 module ActiveRecord
@@ -430,7 +427,7 @@ module ActiveRecord
 
       include SpatialColumn
 
-      #Transforms a string to a geometry. PostGIS returns a HewEWKB string.
+      #Transforms a string to a geometry. PostGIS returns a HexEWKB string.
       def self.string_to_geometry(string)
         return string unless string.is_a?(String)
         GeoRuby::SimpleFeatures::Geometry.from_hex_ewkb(string) rescue nil
