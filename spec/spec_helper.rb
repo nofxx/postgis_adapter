@@ -9,16 +9,8 @@ require 'rubygems'
 require 'pg'
 $:.unshift((File.join(File.dirname(__FILE__), '..', 'lib')))
 
-def try_old_stuff(*stuff)
-  stuff.each do |s|
-    begin
-      require s[0]
-    rescue LoadError
-      require s[1]
-    end
-  end
-end
-try_old_stuff ['spec', 'rspec'], ['active_record', 'activerecord']
+require "rspec"
+require "active_record"
 
 gem 'nofxx-georuby'
 require 'postgis_adapter'
@@ -43,7 +35,7 @@ begin
   require File.dirname(__FILE__) + '/db/models_postgis.rb'
 
 rescue PGError
-  puts "No db... creating"
+  puts "Test DB not found, creating one for you..."
   `createdb -U #{SPEC_DB[:username]} #{SPEC_DB[:database]} -T template_postgis`
   puts "Done. Please run spec again."
   exit

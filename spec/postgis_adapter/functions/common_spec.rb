@@ -158,7 +158,7 @@ describe "Common Functions" do
 
     it { @c1.covers?(@p1).should be_false }
     it { @c1.covers?(@p4).should be_true }
-    it { @c1.should_not be_within(@c2) }
+    it { @c1.within?(@c2).should be_false }
 
     it "city overlaps point?" do
       lambda { @c3.overlaps?(@c2) }.should raise_error # WHY??
