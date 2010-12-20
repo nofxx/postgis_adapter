@@ -19,7 +19,7 @@ include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
 #tables to ignore in migration : relative to PostGIS management of geometric columns
-ActiveRecord::SchemaDumper.ignore_tables << "spatial_ref_sys" << "geometry_columns" << "geography_columns"
+ActiveRecord::SchemaDumper.ignore_tables.concat %w{ spatial_ref_sys geometry_columns geography_columns }
 
 #add a method to_yaml to the Geometry class which will transform a geometry in a form suitable to be used in a YAML file (such as in a fixture)
 GeoRuby::SimpleFeatures::Geometry.class_eval do
@@ -103,7 +103,7 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   include SpatialAdapter
 
   # SCHEMA STATEMENTS ========================================
-  
+
   alias :original_recreate_database :recreate_database
   def recreate_database(configuration, enc_option)
     `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
@@ -112,7 +112,7 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     `psql -d #{configuration["test"]["database"]} -f db/spatial/postgis.sql`
     `psql -d #{configuration["test"]["database"]} -f db/spatial/spatial_ref_sys.sql`
   end
-  
+
   alias :original_create_database :create_database
   def create_database(name, options = {})
     original_create_database(name, options = {})
@@ -272,7 +272,7 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
    #Pete Deffendol's patch
    alias :original_disable_referential_integrity :disable_referential_integrity
    def disable_referential_integrity(&block) #:nodoc:
-     ignore_tables = %w{ geometry_columns spatial_ref_sys geography_columns }
+     ignore_tables = %w{ geometry_columns spatial_ref_sys } # geography_columns + views
      execute(tables.select { |name| !ignore_tables.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
      yield
    ensure
