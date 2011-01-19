@@ -12,11 +12,11 @@ describe "PostgisFunctions" do
   describe "Common Mix" do
 
     it "should calculate distance point to line" do
-      @p1.distance_to(@s1).should be_close(0.248069469178417, 0.00000001)
+      @p1.distance_to(@s1).should be_within(0.00000001).of(0.248069469178417)
     end
 
     it "should calculate distance point to line" do
-      @cg.distance_to(@s1).should be_close(0.248069469178417, 0.00000001)
+      @cg.distance_to(@s1).should be_within(0.00000001).of(0.248069469178417)
     end
 
      it "should calculate distance point to line" do
@@ -28,33 +28,33 @@ describe "PostgisFunctions" do
     end
 
     it "should find the distance from a unsaved point" do
-       @p1.distance_to(Point.from_x_y(5,5,4326)).should be_close(55.0726792520575, 0.001)
+       @p1.distance_to(Point.from_x_y(5,5,4326)).should be_within(0.00001).of(55.0726792520575)
     end
 
     it "should work with unsaved objects" do
       ss = Street.new(:data => "Street1", :geom => LineString.from_coordinates([[-44,-21],[-43,-29]],4326))
-      ss.length_spheroid.should be_close(891908.39, 0.01)
+      ss.length_spheroid.should be_within(0.01).of(891908.39)
     end
 
-    it { @c1.area(32640).should be_close(9165235788987.37, 0.01) }
+    it { @c1.area(32640).should be_within(0.01).of(9165235788987.37) }
 
-    it { @c1.area.should be_close(720.0, 0.1) }
+    it { @c1.area.should be_within(0.1).of(720.0) }
 
     it "should be strictly left of city" do
       @p1.should be_strictly_left_of(@c1)
     end
 
-    it { @s1.length.should be_close(8.06225774829855, 0.001) }
+    it { @s1.length.should be_within(0.0001).of(8.06225774829855) }
 
-    it { @s1.length_spheroid.should be_close(891883.597963462,0.0001) }
+    it { @s1.length_spheroid.should be_within(0.0001).of(891883.597963462) }
 
     it "should work with a diff column name" do
       px2 = DiffName.create!(:data => "Hey 2", :the_geom => Point.from_x_y(20,20, 4326))
-      @px.distance_to(px2).should be_close(10.0, 0.1)
+      @px.distance_to(px2).should be_within(0.01).of(10.0)
     end
 
     it "should work with mixed column names" do
-      @px.distance_to(@s1).should be_close(66.4,1)
+      @px.distance_to(@s1).should be_within(0.1).of(66.4)
     end
   end
 end
