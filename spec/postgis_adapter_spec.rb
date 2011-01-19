@@ -151,8 +151,7 @@ describe "PostgisAdapter" do
     end
 
     it "should find by geom" do
-      pts = Area.find_all_by_geom(LineString.
-                                  from_coordinates([[0,0],[2,2]],4326))
+      pts = Area.find_all_by_geom(LineString.from_coordinates([[0,0],[2,2]],4326))
       pts.should be_instance_of(Array)
       pts.length.should eql(2)
       pts[0].data.should match(/Point/)
@@ -160,8 +159,7 @@ describe "PostgisAdapter" do
     end
 
     it "should find by geom again" do
-      pts = Area.find_all_by_geom(LineString.
-                          from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
+      pts = Area.find_all_by_geom(LineString.from_coordinates([[2.49,1.99],[2.51,2.01]],4326))
       pts[0].data.should eql("Point3")
     end
 
@@ -220,8 +218,8 @@ describe "PostgisAdapter" do
       bar.data.should eql("")
 
       if BinaryDefault.connection.encoding == "UTF8"
-        foo.value.should eql("f\xf4o")
-        bar.value.should eql("b\xe5r")
+        foo.value.encode("UTF-8", "ISO-8859-1").should eql("fôo")
+        bar.value.encode("UTF-8", "ISO-8859-1").should eql("bår")
       end
     end
 

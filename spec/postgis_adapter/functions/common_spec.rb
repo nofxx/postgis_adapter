@@ -77,7 +77,7 @@ describe "Common Functions" do
     it "should transform non saved srid geoms" do
       pt = Point.from_x_y(11121381.4586196,10161852.0494475, 29101)
       pos = Position.new(:geom => pt)
-      pos.transform(4326)
+      pos.transform!(4326)
       pos.geom.x.should be_close(1.00000000000005, 0.00001)
       pos.geom.y.should be_close(1.00000000000005, 0.00001)
     end
@@ -386,7 +386,7 @@ describe "Common Functions" do
     it "should transform non saved" do
       ls = LineString.from_coordinates([[11435579.3992231,10669620.8116516],[11721337.4281638,11210714.9524106]],29101)
       str = Street.new(:geom => ls)
-      str.transform(4326)
+      str.transform!(4326)
       str.geom[0].x.should be_close(4,0.0000001)
       str.geom[0].y.should be_close(4,0.0000001)
       str.geom[1].x.should be_close(7,0.0000001)
