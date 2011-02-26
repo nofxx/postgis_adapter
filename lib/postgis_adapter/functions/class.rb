@@ -48,9 +48,13 @@ module Functions
         find(:all, :order => "ST_Perimeter(geom) #{sort}" )
       end
 
-      def all_within(other, margin=1)
-  #      find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKB(E'#{other.as_ewkt}'), #{margin})")
+      def all_dwithin(other, margin=1)
+        # find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKB(E'#{other.as_ewkt}'), #{margin})")
         find(:all, :conditions => "ST_DWithin(geom, ST_GeomFromEWKT(E'#{other.as_hex_ewkb}'), #{margin})")
+      end
+
+      def all_within(other)
+        find(:all, :conditions => "ST_Within(geom, ST_GeomFromEWKT(E'#{other.as_hex_ewkb}'))")
       end
 
       def by_boundaries sort='asc'
@@ -58,8 +62,6 @@ module Functions
       end
 
     end
-
-
 
 end
 end
