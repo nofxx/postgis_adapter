@@ -28,8 +28,9 @@ If you are using Spatial Adapter, *remove it first*.
 
 === Rails 3+
 
+Add dependency to Gemfile:
 
-    config.gem "postgis_adapter"
+    gem "postgis_adapter", :git => 'git://github.com/nofxx/postgis_adapter.git'
 
 
 === Rails 2
