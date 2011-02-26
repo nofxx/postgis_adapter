@@ -21,7 +21,7 @@ If you are using Spatial Adapter, *remove it first*.
 
 === Dependencies
 
-- georuby
+- georuby gem
 - postgres 8.3+
 - postgis  1.3+
 
@@ -30,22 +30,17 @@ If you are using Spatial Adapter, *remove it first*.
 
 Add dependency to Gemfile:
 
+    gem "postgis_adapter"
+
+
+Or, to use latest from repository:
+
     gem "postgis_adapter", :git => 'git://github.com/nofxx/postgis_adapter.git'
 
 
 === Rails 2
 
-
     gem install postgis_adapter -v 0.7.8
-
-====== PostGIS SQL Scripts
-This is only for PostgreSQL databases:
-
-Place the following scripts in a folder named 'spatial' under the 'db' folder; For example:
-  RAILS_ROOT/db/spatial/lwpostgis.sql
-  RAILS_ROOT/db/spatial/spatial_ref_sys
-
-These will be used when creating the Test database when running the Rake Test tasks. These scripts should have been installed when the PostGIS libraries were installed. Online reference: http://postgis.refractions.net/
 
 
 == How to Use
@@ -268,6 +263,7 @@ Types:
 
 === PostGIS Helper Scripts
 
+Optional, this will create postgis enabled database automatically for you.
 
 Helpers to create postgis template database. At time of writing,
 postgis.sql and spatial_ref_sys.sql are used.
@@ -281,17 +277,16 @@ Find where your OS put those sql files and:
     rake postgis:template path/to/sqls/folder
 
 
-==== From project
+==== Vendorize
 
+Place the following scripts in a folder named 'spatial' under the 'db' folder; For example:
 
-Place the files in a folder named 'spatial' under the 'db' folder:
+  RAILS_ROOT/db/spatial/lwpostgis.sql
+  RAILS_ROOT/db/spatial/spatial_ref_sys
 
-    RAILS_ROOT/db/spatial/postgis.sql
-    RAILS_ROOT/db/spatial/spatial_ref_sys.sql
-
-These will be used when creating the Test database when running the
-Rake Test tasks. These scripts should have been installed when the
-PostGIS libraries were installed.
+These will be used when creating the Test database when running the Rake Test tasks.
+These scripts should have been installed when the PostGIS libraries were installed.
+Online reference: http://postgis.refractions.net/
 
 
 === Fixtures
@@ -369,7 +364,7 @@ Postgis Adapter is released under the MIT license.
 
 == Support
 
-Tested using rails 2.2.2/2.3.3 / postgresql 8.3.7 / postgis 1.3.3 / linux / osx
+Tested using activerecord 3+ / postgresql 8.5+ / postgis 1.5+ / linux / osx
 
 Any questions, enhancement proposals, bug notifications or corrections:
 
