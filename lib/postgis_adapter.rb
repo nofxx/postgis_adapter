@@ -103,23 +103,25 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   include SpatialAdapter
 
   # SCHEMA STATEMENTS ========================================
+  #
+  # Use :template on database.yml seems a better practice.
+  #
+  # alias :original_recreate_database :recreate_database
+  # def recreate_database(configuration, enc_option)
+  #   `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
+  #   `createdb #{enc_option} -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
+  #   `createlang -U "#{configuration["test"]["username"]}" plpgsql #{configuration["test"]["database"]}`
+  #   `psql -d #{configuration["test"]["database"]} -f db/spatial/postgis.sql`
+  #   `psql -d #{configuration["test"]["database"]} -f db/spatial/spatial_ref_sys.sql`
+  # end
 
-  alias :original_recreate_database :recreate_database
-  def recreate_database(configuration, enc_option)
-    `dropdb -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
-    `createdb #{enc_option} -U "#{configuration["test"]["username"]}" #{configuration["test"]["database"]}`
-    `createlang -U "#{configuration["test"]["username"]}" plpgsql #{configuration["test"]["database"]}`
-    `psql -d #{configuration["test"]["database"]} -f db/spatial/postgis.sql`
-    `psql -d #{configuration["test"]["database"]} -f db/spatial/spatial_ref_sys.sql`
-  end
-
-  alias :original_create_database :create_database
-  def create_database(name, options = {})
-    original_create_database(name, options = {})
-    `createlang plpgsql #{name}`
-    `psql -d #{name} -f db/spatial/postgis.sql`
-    `psql -d #{name} -f db/spatial/spatial_ref_sys.sql`
-  end
+  # alias :original_create_database :create_database
+  # def create_database(name, options = {})
+  #   original_create_database(name, options = {})
+  #   `createlang plpgsql #{name}`
+  #   `psql -d #{name} -f db/spatial/postgis.sql`
+  #   `psql -d #{name} -f db/spatial/spatial_ref_sys.sql`
+  # end
 
   alias :original_native_database_types :native_database_types
   def native_database_types
