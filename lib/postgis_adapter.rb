@@ -18,8 +18,11 @@ require 'postgis_adapter/acts_as_geom'
 include GeoRuby::SimpleFeatures
 include SpatialAdapter
 
+module PostgisAdapter
+  IGNORE_TABLES = %w{ spatial_ref_sys geometry_columns geography_columns }
+end
 #tables to ignore in migration : relative to PostGIS management of geometric columns
-ActiveRecord::SchemaDumper.ignore_tables.concat %w{ spatial_ref_sys geometry_columns geography_columns }
+ActiveRecord::SchemaDumper.ignore_tables.concat PostgisAdapter::IGNORE_TABLES
 
 #add a method to_yaml to the Geometry class which will transform a geometry in a form suitable to be used in a YAML file (such as in a fixture)
 GeoRuby::SimpleFeatures::Geometry.class_eval do
@@ -270,15 +273,14 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
   end
 
  # For version of Rails where exists disable_referential_integrity
- if self.instance_methods.include? "disable_referential_integrity"
+ if self.instance_methods.include? :disable_referential_integrity
    #Pete Deffendol's patch
    alias :original_disable_referential_integrity :disable_referential_integrity
    def disable_referential_integrity(&block) #:nodoc:
-     ignore_tables = %w{ geometry_columns spatial_ref_sys } # geography_columns + views
-     execute(tables.select { |name| !ignore_tables.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
+     execute(tables.reject { |name| PostgisAdapter::IGNORE_TABLES.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} DISABLE TRIGGER ALL" }.join(";"))
      yield
    ensure
-     execute(tables.select { |name| !ignore_tables.include?(name)}.map { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
+     execute(tables.reject { |name| PostgisAdapter::IGNORE_TABLES.include?(name) }.map { |name| "ALTER TABLE #{quote_table_name(name)} ENABLE TRIGGER ALL" }.join(";"))
    end
  end
 

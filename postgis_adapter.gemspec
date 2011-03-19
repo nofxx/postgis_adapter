@@ -1,6 +1,6 @@
 Gem::Specification.new do |spec|
   spec.name     = 'postgis_adapter'
-  spec.version  = '0.8.0'
+  spec.version  = '0.8.1'
   spec.authors  = ['Marcos Piccinini']
   spec.summary  = 'PostGIS Adapter for Active Record'
   spec.email    = 'x@nofxx.com'
