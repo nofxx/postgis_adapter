@@ -131,6 +131,13 @@ ActiveRecord::ConnectionAdapters::PostgreSQLAdapter.class_eval do
     original_native_database_types.update(geometry_data_types)
   end
 
+  # Hack to make it works with Rails 3.1
+  alias :original_type_cast :type_cast rescue nil
+  def type_cast(value, column)
+    return value.as_hex_ewkb if value.is_a?(GeoRuby::SimpleFeatures::Geometry)
+    original_type_cast(value,column)
+  end
+
   alias :original_quote :quote
   #Redefines the quote method to add behaviour for when a Geometry is encountered
   def quote(value, column = nil)
