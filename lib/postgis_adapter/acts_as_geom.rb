@@ -26,6 +26,7 @@ module Functions
         when :polygon     then PolygonFunctions
         when :line_string, :multi_line_string then  LineStringFunctions
         when :multi_polygon then MultiPolygonFunctions
+        when :geometry    then GeometryFunctions
       end unless geom[0].kind_of? Symbol
     end
     alias :acts_as_geom :has_geom
