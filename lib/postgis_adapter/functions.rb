@@ -46,6 +46,7 @@ module Functions
       :name => t.class.table_name,
       :column => t.postgis_geoms.keys[0],
       :uid =>  unique_identifier,
+      :primary_key => t.class.primary_key,
       :id => t[:id] }
     end
 
@@ -60,7 +61,8 @@ module Functions
     fields << not_db.map { |g| "'#{g.as_hex_ewkb}'::geometry"} unless not_db.empty?
     fields.map! { |f| "ST_Transform(#{f}, #{transform})" } if transform  # ST_Transform(W1.geom,x)
     fields.map! { |f| "ST_Union(#{f})" } if stcollect  # ST_Transform(W1.geom,x)
-    conditions  = tables.map {|f| "#{f[:uid]}.id = #{f[:id]}" }   # W1.id = 5
+    conditions  = tables.map {|f| "#{f[:uid]}.#{f[:primary_key]} = #{f[:id]}" } # W1.id = 5
+
     tables.map! { |f| "#{f[:name]} #{f[:uid]}" }                         # streets W1
 
     #

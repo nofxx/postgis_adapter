@@ -907,7 +907,12 @@ module Functions
   #
   module MultiPolygonFunctions
   end
-
+  
+  #
+  # Generic Geometry
+  #
+  module GeometryFunctions
+  end
 end
 end
 # NEW
