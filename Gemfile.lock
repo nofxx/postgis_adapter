@@ -2,9 +2,22 @@ GEM
   remote: http://rubygems.org/
   specs:
     ZenTest (4.5.0)
+    activemodel (3.0.11)
+      activesupport (= 3.0.11)
+      builder (~> 2.1.2)
+      i18n (~> 0.5.0)
+    activerecord (3.0.11)
+      activemodel (= 3.0.11)
+      activesupport (= 3.0.11)
+      arel (~> 2.0.10)
+      tzinfo (~> 0.3.23)
+    activesupport (3.0.11)
+    arel (2.0.10)
     autotest (4.4.6)
       ZenTest (>= 4.4.1)
+    builder (2.1.2)
     diff-lcs (1.1.2)
+    i18n (0.5.0)
     json_pure (1.4.6)
     nofxx-georuby (1.9.0)
       json_pure (>= 1.4.6)
@@ -18,11 +31,13 @@ GEM
     rspec-expectations (2.3.0)
       diff-lcs (~> 1.1.2)
     rspec-mocks (2.3.0)
+    tzinfo (0.3.31)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
+  activerecord (~> 3.0.0)
   autotest
   bundler (~> 1.0.0)
   nofxx-georuby
