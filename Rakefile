@@ -1,7 +1,7 @@
 require 'rubygems'
 require 'rake'
 require 'rake/clean'
-require 'rake/rdoctask'
+require 'rake/task'
 #require 'spec/rake/spectask'
 
 CLEAN.include('**/*.gem')
@@ -31,7 +31,7 @@ end
 #   spec.rcov = true
 # end
 
-Rake::RDocTask.new do |rdoc|
+Rake::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION').chomp : ""
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "postgis_adapter #{version}"
