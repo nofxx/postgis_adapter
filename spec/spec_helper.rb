@@ -40,6 +40,3 @@ rescue PGError
   puts "Done. Please run spec again."
   exit
 end
-
-
-
