@@ -1,5 +1,19 @@
 = PostgisAdapter
 
+*WARN*
+
+I no longer maintain this lib. Please find a fork, or:
+
+Stay with PostGIS:
+
+https://github.com/dazuma/activerecord-postgis-adapter
+
+Go with MongoDB:
+
+https://github.com/nofxx/mongoid_adapter
+
+
+
 A plugin for ActiveRecord which manages the PostGIS geometric columns
 in a transparent way (that is like the other base data type columns).
 It also provides a way to manage these columns in migrations.
