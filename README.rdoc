@@ -10,7 +10,7 @@ https://github.com/dazuma/activerecord-postgis-adapter
 
 Go with MongoDB:
 
-https://github.com/nofxx/mongoid_adapter
+https://github.com/nofxx/mongoid-geospatial
 
 
 
