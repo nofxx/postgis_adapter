@@ -9,6 +9,9 @@ describe "ClassMethods" do
     @p1 ||= Position.create!(:data => "PointClass", :geom => Point.from_x_y(99,99,4326))
     @p2 ||= Position.create!(:data => "PointClassClose", :geom => Point.from_x_y(99.9,99.9,4326))
     @p3 ||= Position.create!(:data => "PointInsideCity", :geom => Point.from_x_y(15.0,15.0,4326))
+
+    # covered by @c2
+    @p4 ||= Position.create!(:data => "PointInsideCity", :geom => Point.from_x_y(11.0,49.0,4326))
   end
 
   after(:all) do
@@ -74,6 +77,10 @@ describe "ClassMethods" do
 
   it "should sort by all within" do
     City.by_boundaries.should be_instance_of(Array)
+  end
+
+  it "should find all covered by" do
+    Position.covered_by(@p4.geom).should eql([@c2])#Array)
   end
 
 end
